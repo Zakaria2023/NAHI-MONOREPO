@@ -8,17 +8,26 @@ type StatusPillProps = {
 };
 
 const TONE_CLASSES: Record<PillTone, string> = {
-  neutral: "border-hairline bg-hover text-secondary",
-  info: "border-primary-tint-border bg-primary-tint text-primary",
-  success: "border-success-tint bg-success-tint text-success",
-  warning: "border-warning-tint bg-warning-tint text-warning",
-  danger: "border-danger-tint bg-danger-tint text-danger",
+  neutral: "bg-hover text-secondary ring-hairline",
+  info: "bg-primary-tint text-primary ring-primary/20",
+  success: "bg-success-tint text-success ring-success/20",
+  warning: "bg-warning-tint text-warning ring-warning/25",
+  danger: "bg-danger-tint text-danger ring-danger/20",
+};
+
+const DOT_CLASSES: Record<PillTone, string> = {
+  neutral: "bg-faint",
+  info: "bg-primary",
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-danger",
 };
 
 export const StatusPill = ({ tone = "neutral", children }: StatusPillProps) => (
   <span
-    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${TONE_CLASSES[tone]}`}
+    className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset ${TONE_CLASSES[tone]}`}
   >
+    <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_CLASSES[tone]}`} />
     {children}
   </span>
 );

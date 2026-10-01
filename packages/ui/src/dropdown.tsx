@@ -15,6 +15,8 @@ type DropdownProps = {
   required?: boolean;
   error?: string;
   disabled?: boolean;
+  /** Fixed text on the trigger, for a menu that is an action rather than a value ("Switch user"). */
+  triggerLabel?: string;
 };
 
 /** The one select control in the system — never a native `<select>`. Searchable past eight options. */
@@ -27,6 +29,7 @@ export const Dropdown = ({
   required,
   error,
   disabled,
+  triggerLabel,
 }: DropdownProps) => {
   const listboxId = useId();
   const { isOpen, query, setQuery, rows, selected, activeIndex, containerRef, toggle, choose, onKeyDown } =
@@ -46,7 +49,7 @@ export const Dropdown = ({
           aria-controls={isOpen ? listboxId : undefined}
           className={`flex w-full items-center justify-between gap-2 rounded-control border bg-surface px-3 py-2 text-start text-sm outline-none transition-colors focus:border-primary disabled:opacity-60 ${error ? "border-danger" : "border-search-border"}`}
         >
-          <span className={selected ? "text-ink" : "text-faint"}>{selected?.label ?? placeholder}</span>
+          <span className={selected || triggerLabel ? "text-ink" : "text-faint"}>{triggerLabel ?? selected?.label ?? placeholder}</span>
           <ChevronDown size={16} className="shrink-0 text-muted" />
         </button>
 

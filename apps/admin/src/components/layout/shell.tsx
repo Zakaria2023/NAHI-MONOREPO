@@ -12,12 +12,13 @@ type ShellProps = {
   children: ReactNode;
 };
 
+/** Sidebar, top bar, and a work area that uses the whole width of the window. */
 export const Shell = ({ groups, current, users, urgentAlerts, children }: ShellProps) => (
   <div className="min-h-screen">
-    <DashboardSidebar brand="Projects ERP" brandIcon={BRAND_ICON} groups={groups} />
+    <DashboardSidebar brand="Projects ERP" tagline="Mobily · STC" brandIcon={BRAND_ICON} groups={groups} />
     <div className="flex min-h-screen flex-col ps-64">
       <Navbar current={current} users={users} urgentAlerts={urgentAlerts} />
-      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-6 py-6">{children}</main>
+      <main className="flex w-full flex-1 flex-col gap-6 px-6 py-6 2xl:px-10">{children}</main>
     </div>
   </div>
 );

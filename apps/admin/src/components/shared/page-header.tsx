@@ -23,7 +23,7 @@ export const PageHeader = ({ title, description, action, back, meta }: PageHeade
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl text-ink">{title}</h1>
+          <h1 className="text-2xl font-medium tracking-tight text-ink">{title}</h1>
           {meta}
         </div>
         {description && <p className="max-w-3xl text-sm text-muted">{description}</p>}

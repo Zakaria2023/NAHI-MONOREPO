@@ -14,12 +14,12 @@ export const Card = ({ title, description, action, children, className = "" }: C
     {(title || action) && (
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline-soft px-5 py-4">
         <div className="flex flex-col gap-0.5">
-          {title && <h2 className="text-base font-medium text-ink">{title}</h2>}
+          {title && <h2 className="text-base font-medium tracking-tight text-ink">{title}</h2>}
           {description && <p className="text-sm text-muted">{description}</p>}
         </div>
         {action}
       </header>
     )}
-    <div className="px-5 py-4">{children}</div>
+    <div className="p-5">{children}</div>
   </section>
 );

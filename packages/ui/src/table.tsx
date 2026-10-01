@@ -24,7 +24,7 @@ export const Table = <T,>({ columns, data, rowKey, emptyMessage = "Nothing here 
           {columns.map((column) => (
             <th
               key={column.key}
-              className={`px-4 py-3 text-xs font-medium tracking-wide whitespace-nowrap text-muted uppercase ${column.align === "end" ? "text-end" : "text-start"}`}
+              className={`px-5 py-3 text-xs font-medium tracking-wider whitespace-nowrap text-muted uppercase ${column.align === "end" ? "text-end" : "text-start"}`}
             >
               {column.header}
             </th>
@@ -34,11 +34,11 @@ export const Table = <T,>({ columns, data, rowKey, emptyMessage = "Nothing here 
       {data.length > 0 && (
         <tbody className="divide-y divide-hairline-soft">
           {data.map((row) => (
-            <tr key={rowKey(row)} className="relative transition-colors hover:bg-hover">
+            <tr key={rowKey(row)} className="relative transition-colors hover:bg-primary-tint/40">
               {columns.map((column) => (
                 <td
                   key={column.key}
-                  className={`px-4 py-3 align-top text-sm text-ink ${column.align === "end" ? "text-end" : "text-start"}`}
+                  className={`px-5 py-3.5 align-top text-sm text-ink ${column.align === "end" ? "text-end tabular-nums" : "text-start"}`}
                 >
                   {column.render(row)}
                 </td>
@@ -48,6 +48,6 @@ export const Table = <T,>({ columns, data, rowKey, emptyMessage = "Nothing here 
         </tbody>
       )}
     </table>
-    {data.length === 0 && <div className="px-5 py-12 text-center text-sm text-muted">{emptyMessage}</div>}
+    {data.length === 0 && <div className="px-5 py-14 text-center text-sm text-muted">{emptyMessage}</div>}
   </div>
 );
