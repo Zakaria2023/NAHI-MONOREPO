@@ -22,3 +22,4 @@ export * from "./stc";
 export * from "./subcontractors";
 export * from "./suppliers";
 export * from "./warehouse";
+export * from "./types";

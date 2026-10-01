@@ -1,0 +1,23 @@
+import { Metadata } from "next";
+import { ReactNode } from "react";
+import "./globals.css";
+
+type Props = {
+  children: ReactNode;
+};
+
+export const metadata: Metadata = {
+  title: "Projects ERP — Admin",
+  description: "Mobily and STC project workflows, procurement, warehouse, custody and finance",
+};
+
+// Always render against the live store — never a build-time snapshot.
+export const dynamic = "force-dynamic";
+
+const RootLayout = ({ children }: Props) => (
+  <html lang="en" className="h-full antialiased">
+    <body className="flex min-h-full flex-col font-sans text-ink">{children}</body>
+  </html>
+);
+
+export default RootLayout;

@@ -13,3 +13,7 @@ export const formatNumber = (value: number): string =>
 
 export const formatPercent = (ratio: number): string =>
   `${(ratio * 100).toLocaleString("en-US", { maximumFractionDigits: 1 })}%`;
+
+/** "SAR 736K", "SAR 1.2M" — for stat tiles, where a full figure would wrap. */
+export const formatCompactMoney = (amount: number, currency: string = "SAR"): string =>
+  `${currency} ${amount.toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 1 })}`;
