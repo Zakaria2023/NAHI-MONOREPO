@@ -165,6 +165,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      utils:
+        specifier: workspace:*
+        version: link:packages/utils
     devDependencies:
       '@types/node':
         specifier: ^20
