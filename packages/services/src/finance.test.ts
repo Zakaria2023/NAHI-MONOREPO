@@ -145,3 +145,11 @@ describe("dashboard", () => {
     expect((await listPendingApprovals("finance_manager")).map((p) => p.number)).toContain("AP-0001");
   });
 });
+
+describe("system admin inbox", () => {
+  it("sees every role's queue, each item naming who it waits for", async () => {
+    const all = await listPendingApprovals("system_admin");
+    expect(all.find((p) => p.number === "PR-0001")?.waitingFor).toBe("direct_manager");
+    expect(all.some((p) => p.waitingFor === "finance_manager")).toBe(true);
+  });
+});

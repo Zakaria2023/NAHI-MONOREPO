@@ -8,7 +8,7 @@ export const ApprovalsBoard = async () => {
   const actor = await getCurrentStaff();
   const items = await listPendingApprovals(actor.role);
   return (
-    <Card title={`${items.length} waiting for ${STAFF_ROLE_LABELS[actor.role]}`}>
+    <Card title={actor.role === "system_admin" ? `${items.length} waiting across every role` : `${items.length} waiting for ${STAFF_ROLE_LABELS[actor.role]}`}>
       <ApprovalList items={items} />
     </Card>
   );

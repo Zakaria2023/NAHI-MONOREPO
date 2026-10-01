@@ -1,5 +1,7 @@
 import { addDays, addHours, generateUuid, round2 } from "utils";
 import { BudgetCategory, StaffRole, StcDocumentKey, StcParty } from "./enum";
+import { deriveActivity } from "./seed-activity";
+import { addMoreDemoData } from "./seed-more";
 import {
   Approval,
   Item,
@@ -992,6 +994,8 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
     },
   ];
 
+  addMoreDemoData(store, now);
+
   store.Activity = [
     {
       uuid: generateUuid(),
@@ -1002,6 +1006,7 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
       entityLabel: "Demo data",
       action: "Demo data loaded",
     },
+    ...deriveActivity(store),
   ];
 
   return store;

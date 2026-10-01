@@ -1,6 +1,6 @@
 import { nowIso, round2, sumBy } from "utils";
 import { readStore } from "../../../db";
-import { EntityKind, Operator, StaffRole } from "../../../db/enum";
+import { EntityKind, Operator, StaffRole, staffRoles } from "../../../db/enum";
 import { Store } from "../../../db/types";
 import { chainState } from "./core/approvals";
 import { budgetUsage } from "./budgets";
@@ -27,6 +27,8 @@ export type PendingApproval = {
   title: string;
   /** Approval chains, and the work that is a role's own job (procurement review, finance approval). */
   step: string;
+  /** The role the step waits for — shown when the system admin sees every queue. */
+  waitingFor: StaffRole;
 };
 
 export type DashboardSummary = {
@@ -44,7 +46,7 @@ const pending = (
   role: StaffRole,
 ): PendingApproval[] => {
   const items: PendingApproval[] = [];
-  const push = (item: PendingApproval) => items.push(item);
+  const push = (item: Omit<PendingApproval, "waitingFor">) => items.push({ ...item, waitingFor: role });
   for (const pr of store.PurchaseRequests) {
     if (pr.status === "pending_manager" && chainState(PR_CHAIN, pr.approvals).nextRole === role) {
       push({ kind: "purchase_request", uuid: pr.uuid, number: pr.number, title: pr.department, step: "Direct manager approval" });
@@ -101,8 +103,17 @@ const pending = (
   return items;
 };
 
+/**
+ * What is waiting for `role`. The system admin is in no chain, so it sees every
+ * role's queue at once, each item saying who it waits for.
+ */
+const pendingFor = (store: Store, role: StaffRole): PendingApproval[] =>
+  role === "system_admin"
+    ? staffRoles.filter((r) => r !== "system_admin").flatMap((r) => pending(store, r))
+    : pending(store, role);
+
 export const listPendingApprovals = async (role: StaffRole): Promise<PendingApproval[]> =>
-  pending(readStore(), role);
+  pendingFor(readStore(), role);
 
 export const getDashboardSummary = async (role: StaffRole): Promise<DashboardSummary> => {
   const store = readStore();
@@ -132,6 +143,6 @@ export const getDashboardSummary = async (role: StaffRole): Promise<DashboardSum
         .filter((l) => l.planned > 0 && l.remaining < 0)
         .map((l) => ({ projectCode: p.code, category: l.category, remaining: l.remaining })),
     ),
-    pendingTotal: pending(store, role).length,
+    pendingTotal: pendingFor(store, role).length,
   };
 };

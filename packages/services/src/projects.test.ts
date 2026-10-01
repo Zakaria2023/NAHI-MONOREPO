@@ -49,7 +49,7 @@ describe("projects", () => {
       poValue: 1000,
       projectManagerName: "PM",
     });
-    expect(project.code).toBe("STC-005");
+    expect(project.code).toBe("STC-007");
     expect(readStore().Activity[0].action).toBe("Project created");
   });
 

@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { PendingApproval } from "services";
 import { EmptyState, StatusPill } from "ui";
-import { ENTITY_KIND_LABELS } from "@/db/label";
+import { ENTITY_KIND_LABELS, STAFF_ROLE_LABELS } from "@/db/label";
 import { entityHref } from "@/lib/entity-href";
 
 type ApprovalListProps = {
@@ -23,7 +23,9 @@ export const ApprovalList = ({ items }: ApprovalListProps) =>
               </Link>
               <StatusPill>{ENTITY_KIND_LABELS[item.kind]}</StatusPill>
             </div>
-            <span className="text-xs text-muted">{item.step} · {item.title}</span>
+            <span className="text-xs text-muted">
+              {item.step} · {item.title} · waiting for <span className="text-secondary">{STAFF_ROLE_LABELS[item.waitingFor]}</span>
+            </span>
           </div>
           <ChevronRight size={16} className="text-faint rtl:-scale-x-100" />
         </li>
