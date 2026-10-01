@@ -22,7 +22,7 @@ This is a pnpm + Turborepo monorepo built on Next.js 16.
 **Apps**
 
 - `apps/admin` — Next.js app for internal staff (the ERP): projects, procurement, warehouse, custody, finance. Runs on `localhost:3001`.
-- `apps/client` — Next.js portal for external parties: the customer's representatives (Mobily, STC) follow their sites, certificates and invoices; subcontractors submit extracts and read their statement. Runs on `localhost:3000`.
+- `apps/client` — a placeholder Next.js app on the same packages and theme, with no screens yet. The four specifications describe an internal system only, so every workflow lives in `apps/admin`; the client app is kept so a later phase (a customer or subcontractor portal) has its home. Runs on `localhost:3000`. Do not add business screens to it unless asked.
 
 **Packages**
 
@@ -41,14 +41,14 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
 
 **Data store (MVP — stands in for MySQL + Drizzle)**
 
-- `db/types.ts` is the schema: one exported type per table. `db/index.ts` keeps every table in one JSON file, `.data/store.json` at the repo root (gitignored), created from `db/seed.ts` the first time it is read. Both apps read the same file, so a change made in the admin shows in the portal.
+- `db/types.ts` is the schema: one exported type per table. `db/index.ts` keeps every table in one JSON file, `.data/store.json` at the repo root (gitignored), created from `db/seed.ts` the first time it is read. Every process that reads it sees the same data.
 - Read with `readStore()`; write only through `transact((store) => …)`, which re-reads the file, applies the change and writes it back atomically. Never hold a store object across an `await` and write it later.
 - `pnpm db:reset` (or Settings → Reset demo data in the admin) rebuilds the file from the seed.
 - Tests run against an in-memory store (`ERP_DATA_FILE=:memory:`), set in `vitest.config.ts`.
 
 **Auth (MVP — stands in for Clerk)**
 
-- There is no sign-in. The admin reads the acting staff member from the `erp_user` cookie, set by the user switcher in the navbar; the portal reads the account from the `portal_account` cookie, set on its sign-in page. Both resolve through `src/lib/server/auth.ts` in each app — the one file Clerk will replace.
+- There is no sign-in. The admin reads the acting staff member from the `erp_user` cookie, set by the user switcher in the navbar, through `apps/admin/src/lib/server/auth.ts` — the one file Clerk will replace.
 - Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user in the navbar is how a demo walks a request through its chain.
 
 **Hard rules**
@@ -532,8 +532,7 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
 
 ## Auth Checks
 
-- Never resolve the caller from a `page.tsx`. A page is layout — it decides what the screen looks like, not who may see it. The caller is resolved where the data is reached: the Server Action (`requireStaff()` in the admin, `requirePortalAccount()` in the portal), which passes the actor into the service. Services check roles against that actor; an action never decides by itself whether a role may do something.
-- `proxy.ts` in the portal sends a request without a `portal_account` cookie to `/sign-in`, so a page never has to.
+- Never resolve the caller from a `page.tsx`. A page is layout — it decides what the screen looks like, not who may see it. The caller is resolved where the data is reached: the Server Action (through `runAction`, which calls `requireStaff()`), which passes the actor into the service. Services check roles against that actor; an action never decides by itself whether a role may do something.
 
 ## Dynamic Route Params
 
