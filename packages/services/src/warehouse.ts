@@ -13,6 +13,7 @@ import { readStore, transact } from "../../../db";
 import { InventoryFrequency, StaffRole } from "../../../db/enum";
 import {
   ASSET_CUSTODY_STATUS_LABELS,
+  ITEM_KIND_LABELS,
   WRITE_OFF_DECISION_LABELS,
   WRITE_OFF_REASON_LABELS,
 } from "../../../db/label";
@@ -115,6 +116,9 @@ export type AssetCustodyRow = AssetCustody & {
   countOverdue: boolean;
 };
 
+/** Who records the periodic custody count. */
+const CUSTODY_COUNTERS: StaffRole[] = [...WAREHOUSE_EDITORS, "region_project_manager"];
+
 const COUNT_INTERVAL_DAYS: Record<InventoryFrequency, number> = {
   weekly: 7,
   monthly: 30,
@@ -166,6 +170,13 @@ const decideWarehouseDoc = <D extends { approvals: Approval[]; status: string }>
 export const listWarehouses = async (): Promise<Warehouse[]> => readStore().Warehouses;
 
 export const listItems = async (): Promise<Item[]> => readStore().Items;
+
+/** Pickers for the warehouse forms. */
+export const listWarehouseOptions = async (): Promise<{ value: string; label: string; hint?: string }[]> =>
+  readStore().Warehouses.map((w) => ({ value: w.uuid, label: `${w.code} — ${w.name}`, hint: w.city }));
+
+export const listItemOptions = async (): Promise<{ value: string; label: string; hint?: string }[]> =>
+  readStore().Items.map((i) => ({ value: i.uuid, label: `${i.code} — ${i.name}`, hint: `${ITEM_KIND_LABELS[i.kind]} · ${i.unit}` }));
 
 export const createItem = async (actor: Actor, input: ItemInput): Promise<Item> => {
   assertRole(actor.role, [...WAREHOUSE_EDITORS, "procurement"], "add items");
@@ -385,6 +396,24 @@ export const issueStock = async (actor: Actor, uuid: string, input: IssueStockIn
   });
 };
 
+/** Why `actor` cannot issue the stock of this request now, or null — the hint beside the issue note. */
+export const issueStockBlocker = (actor: Actor, detail: IssueRequestDetail): string | null => {
+  if (detail.request.status !== "approved") {
+    return "Stock is issued against an approved request";
+  }
+  if (!WAREHOUSE_EDITORS.includes(actor.role)) {
+    return "Only the storekeeper issues stock — switch to the warehouse keeper";
+  }
+  const short = detail.lines.find((l) => l.available < l.qty);
+  return short ? `Only ${short.available} ${short.item.unit} of ${short.item.name} left in ${detail.warehouse.code}` : null;
+};
+
+/** Why `actor` cannot count or close asset custody, or null for each. */
+export const assetCustodyBlockers = (actor: Actor): { count: string | null; close: string | null } => ({
+  count: CUSTODY_COUNTERS.includes(actor.role) ? null : "Counted by the storekeeper or the region project manager",
+  close: WAREHOUSE_EDITORS.includes(actor.role) ? null : "Only the storekeeper closes custody",
+});
+
 export const listAssetCustodies = async (): Promise<AssetCustodyRow[]> => {
   const store = readStore();
   const now = nowIso();
@@ -403,7 +432,7 @@ export const listAssetCustodies = async (): Promise<AssetCustodyRow[]> => {
 
 /** The periodic custody count: what is with the employee matches the record. */
 export const countAssetCustody = async (actor: Actor, uuid: string): Promise<void> => {
-  assertRole(actor.role, [...WAREHOUSE_EDITORS, "region_project_manager"], "count custody");
+  assertRole(actor.role, CUSTODY_COUNTERS, "count custody");
   transact((store) => {
     const custody = findOrThrow(store.AssetCustodies, uuid, "Custody");
     if (custody.status !== "with_employee") {

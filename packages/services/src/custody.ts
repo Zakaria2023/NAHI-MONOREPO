@@ -42,6 +42,9 @@ export type EmployeeCustodySummary = {
 /** Open custody is overdue for settlement after this many days (report: overdue custody). */
 export const CUSTODY_SETTLEMENT_DAYS = 30;
 
+/** Who approves an employee's clearance. */
+const CLEARANCE_APPROVERS: Actor["role"][] = ["system_admin", "finance_manager", "region_accountant"];
+
 const OPEN_STATUSES: CashCustody["status"][] = ["pending_approval", "approved", "disbursed"];
 
 const log = (store: Store, actor: Actor, custody: CashCustody, action: string, detail?: string) =>
@@ -82,6 +85,14 @@ export const clearanceBlockers = (store: Store, employeeName: string): string[] 
   ).map((c) => `${findOrThrow(store.Items, c.itemUuid, "Item").name} is still in their custody`);
   return [...cash, ...assets];
 };
+
+/** Why `actor` cannot disburse or settle custody, or null — finance pays it out and settles it. */
+export const custodyFinanceBlocker = (actor: Actor): string | null =>
+  FINANCE_EDITORS.includes(actor.role) ? null : "Disbursed and settled by finance — switch to an accountant";
+
+/** Why `actor` cannot approve clearances, or null. */
+export const clearanceApproverBlocker = (actor: Actor): string | null =>
+  CLEARANCE_APPROVERS.includes(actor.role) ? null : "Clearance is approved by finance or the region accountant";
 
 export const listCashCustodies = async (): Promise<CashCustodyRow[]> => {
   const store = readStore();
@@ -219,7 +230,7 @@ export const settleCashCustody = async (actor: Actor, uuid: string, input: Settl
 };
 
 export const approveClearance = async (actor: Actor, input: ClearanceInput): Promise<void> => {
-  assertRole(actor.role, ["system_admin", "finance_manager", "region_accountant"], "approve clearances");
+  assertRole(actor.role, CLEARANCE_APPROVERS, "approve clearances");
   transact((store) => {
     const blockers = clearanceBlockers(store, input.employeeName);
     if (blockers.length > 0) {
