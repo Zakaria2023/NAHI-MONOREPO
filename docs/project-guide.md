@@ -5,10 +5,6 @@ business functions it calls, and which section of the four specification
 documents it implements. Read section 1 once; after that, jump to the module you
 are working on.
 
-> **The same map is inside the app** at **Project guide** (`/guide`, in the sidebar
-> under System): its table of contents and every page name are links, and each
-> detail page opens a real example record. Its content lives in
-> `apps/admin/src/lib/guide.ts` — update it with this file.
 
 **Contents**
 
@@ -180,7 +176,6 @@ STC-006 M5 · STC-003 on the dashboard.
 | Route | What it does | Page → main components | Actions | Services | Spec |
 | --- | --- | --- | --- | --- | --- |
 | `/activity` | The audit log of every change: when, which record, what happened, who. Searchable. | `activity/page.tsx` → `components/activity/activity-list.tsx`, `activity-table.tsx` | — | `activity.ts` (`listActivity`) | Every document's "log" requirement |
-| `/guide` | This map, inside the app: a clickable table of contents, every page with its files and spec section, each detail page opening a real record, and the rules index. | `guide/page.tsx` → `components/guide/guide-body.tsx`, `guide-contents.tsx`, `guide-section.tsx`, `guide-layers.tsx`, `guide-rules.tsx`; content `lib/guide.ts`; examples `lib/server/guide-examples.ts` | — | the list reads of each module | — |
 | `/settings` | *Reset demo data* (system admin) and the staff directory behind the user switcher. | `settings/page.tsx` → `components/settings/staff-directory.tsx`, `shared/action-button.tsx` | `settings/actions.ts` (`resetDemoDataAction`) | `activity.ts` (`resetDemoData`), `staff.ts` | — |
 
 ## 5. Every business rule, and its test

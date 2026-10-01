@@ -1,7 +1,6 @@
 import {
   Activity,
   BadgeCheck,
-  BookOpen,
   Bell,
   Boxes,
   Building2,
@@ -86,7 +85,6 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
   {
     title: "System",
     links: [
-      { icon: <BookOpen size={ICON} />, label: "Project guide", href: "/guide" },
       { icon: <Activity size={ICON} />, label: "Activity log", href: "/activity" },
       { icon: <Settings size={ICON} />, label: "Settings", href: "/settings" },
     ],
