@@ -32,7 +32,7 @@ const SPAN: Record<NonNullable<LineColumn["span"]>, string> = {
 
 /** Any form's repeatable lines — items with quantities, priced lines, extract quantities. */
 export const LinesField = ({ name, label, columns, emptyRow, fixed }: LinesFieldProps) => {
-  const { control, register, getFieldState, formState } = useFormContext();
+  const { control, register, getFieldState, getValues, formState } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
   const rootError = getFieldState(name, formState).error;
 
@@ -65,6 +65,7 @@ export const LinesField = ({ name, label, columns, emptyRow, fixed }: LinesField
                     <>
                       <input
                         {...register(path)}
+                        defaultValue={String(getValues(path) ?? "")}
                         type={column.type}
                         step={column.type === "number" ? "any" : undefined}
                         aria-label={column.label}

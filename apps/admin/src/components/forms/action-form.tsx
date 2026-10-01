@@ -14,6 +14,9 @@ type ActionFormProps<TIn extends FieldValues, TOut extends FieldValues> = {
   children: ReactNode;
   /** Grid columns for the fields on wide screens. */
   columns?: 1 | 2 | 3;
+  /** "inline" puts the fields and the button on one row — a step's date and Record. */
+  layout?: "stack" | "inline";
+  submitVariant?: "primary" | "outline" | "success";
 };
 
 const COLUMN_CLASSES = {
@@ -30,17 +33,31 @@ export const ActionForm = <TIn extends FieldValues, TOut extends FieldValues>({
   submitLabel,
   children,
   columns = 1,
+  layout = "stack",
+  submitVariant = "primary",
 }: ActionFormProps<TIn, TOut>) => (
   <FormProvider {...form}>
-    <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <div className={`grid gap-4 ${COLUMN_CLASSES[columns]}`}>{children}</div>
-      <FormError message={state.error} />
-      {state.success && !state.error && <p className="text-sm text-success">{state.success}</p>}
-      <div>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving…" : submitLabel}
-        </Button>
-      </div>
-    </form>
+    {layout === "inline" ? (
+      <form onSubmit={onSubmit} className="flex flex-col gap-1.5" noValidate>
+        <div className="flex flex-wrap items-end gap-2">
+          {children}
+          <Button type="submit" size="sm" variant={submitVariant} disabled={isPending} className="mb-0.5 h-9">
+            {isPending ? "Saving…" : submitLabel}
+          </Button>
+        </div>
+        <FormError message={state.error} />
+      </form>
+    ) : (
+      <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+        <div className={`grid gap-4 ${COLUMN_CLASSES[columns]}`}>{children}</div>
+        <FormError message={state.error} />
+        {state.success && !state.error && <p className="text-sm text-success">{state.success}</p>}
+        <div>
+          <Button type="submit" variant={submitVariant} disabled={isPending}>
+            {isPending ? "Saving…" : submitLabel}
+          </Button>
+        </div>
+      </form>
+    )}
   </FormProvider>
 );

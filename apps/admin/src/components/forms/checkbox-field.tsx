@@ -9,6 +9,6 @@ type CheckboxFieldProps = {
 };
 
 export const CheckboxField = ({ name, label }: CheckboxFieldProps) => {
-  const { register } = useFormContext();
-  return <Checkbox {...register(name)} label={label} />;
+  const { register, getValues } = useFormContext();
+  return <Checkbox {...register(name)} defaultChecked={Boolean(getValues(name))} label={label} />;
 };

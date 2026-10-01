@@ -75,3 +75,12 @@ export const periodOf = (iso: string): string => iso.slice(0, 7);
  */
 export const toIso = (value: string): string =>
   new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00.000Z` : value).toISOString();
+
+/** "16 Oct 2026 (in 15 days)" / "(3 days ago)"; a dash when there is no date. */
+export const formatRelativeDate = (iso: string | null | undefined, now: string = nowIso()): string => {
+  if (!iso) {
+    return "—";
+  }
+  const days = daysUntil(iso, now);
+  return `${formatDate(iso)} (${days < 0 ? `${-days} days ago` : days === 0 ? "today" : `in ${days} days`})`;
+};

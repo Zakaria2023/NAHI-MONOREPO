@@ -28,9 +28,12 @@ export const runAction = async <T>(
   }
   try {
     await call(actor, parsed.data);
+    return { success };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Something went wrong" };
+  } finally {
+    // Also after a refusal: some rules record their outcome before saying no
+    // (an STC Milestone rejected automatically), and the page must show it.
+    revalidatePath("/", "layout");
   }
-  revalidatePath("/", "layout");
-  return { success };
 };
