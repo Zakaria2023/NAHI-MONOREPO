@@ -2,6 +2,7 @@ export * from "./dates";
 export * from "./money";
 export * from "./nav";
 export * from "./numbering";
+export * from "./sort";
 
 /** "Nasser Al-Otaibi" → "NA", for an avatar. */
 export const initialsOf = (name: string): string =>
@@ -28,3 +29,6 @@ export const groupBy = <T>(
     (groups[k] ??= []).push(item);
     return groups;
   }, {});
+
+/** "Nasser Al-Otaibi" → "Nasser". */
+export const firstNameOf = (name: string): string => name.split(" ").filter(Boolean)[0] ?? name;

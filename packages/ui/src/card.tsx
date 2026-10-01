@@ -10,16 +10,16 @@ type CardProps = {
 };
 
 export const Card = ({ title, description, action, children, className = "" }: CardProps) => (
-  <section className={`rounded-card border border-hairline bg-surface ${className}`}>
+  <section className={`flex flex-col rounded-card border border-hairline bg-surface ${className}`}>
     {(title || action) && (
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-hairline-soft px-5 py-4">
-        <div className="flex flex-col gap-0.5">
+      <header className="flex items-start justify-between gap-4 px-6 pt-5">
+        <div className="flex flex-col gap-1">
           {title && <h2 className="text-base font-medium tracking-tight text-ink">{title}</h2>}
           {description && <p className="text-sm text-muted">{description}</p>}
         </div>
         {action}
       </header>
     )}
-    <div className="p-5">{children}</div>
+    <div className={title || action ? "px-6 pt-5 pb-6" : "p-6"}>{children}</div>
   </section>
 );

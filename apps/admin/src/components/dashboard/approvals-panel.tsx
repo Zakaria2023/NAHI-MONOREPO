@@ -12,7 +12,7 @@ export const ApprovalsPanel = async () => {
       title="Waiting for you"
       description="Each step stops at the role that has to act on it"
       action={
-        <Link href="/approvals" className="text-sm text-primary hover:underline">
+        <Link href="/approvals" className="flex h-8 shrink-0 items-center rounded-full border border-hairline px-3.5 text-xs font-medium text-ink transition-colors hover:border-search-border hover:bg-hover">
           View all
         </Link>
       }

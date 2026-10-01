@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { ReactNode } from "react";
 
-export type StatTone = "primary" | "success" | "warning" | "danger" | "sky" | "violet";
+export type StatTone = "primary" | "success" | "warning" | "danger" | "teal" | "violet";
 
 type StatTileProps = {
   label: string;
@@ -20,25 +20,27 @@ const CHIP_CLASSES: Record<StatTone, string> = {
   success: "bg-success-tint text-success",
   warning: "bg-warning-tint text-warning",
   danger: "bg-danger-tint text-danger",
-  sky: "bg-sky-tint text-sky",
+  teal: "bg-teal-tint text-teal",
   violet: "bg-violet-tint text-violet",
 };
 
+/** One cell of a stat strip: tiles sit edge to edge inside a `StatStrip`, split by hairlines. */
 export const StatTile = ({ label, value, hint, icon, tone = "primary", href }: StatTileProps) => (
-  <div
-    className={`group relative flex flex-col gap-3 rounded-card border border-hairline bg-surface p-5 transition-colors ${href ? "hover:border-primary-tint-border hover:bg-primary-tint/30" : ""}`}
-  >
-    {href && <Link href={href} aria-label={`Open ${label}`} className="absolute inset-0 rounded-card" />}
-    <div className="flex items-center justify-between gap-3">
-      <span className="text-sm text-muted">{label}</span>
-      {icon && <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-control ${CHIP_CLASSES[tone]}`}>{icon}</div>}
+  <div className={`group relative flex flex-col gap-4 bg-surface p-6 transition-colors ${href ? "hover:bg-hover" : ""}`}>
+    {href && <Link href={href} aria-label={`Open ${label}`} className="absolute inset-0" />}
+    {href && (
+      <ArrowUpRight
+        size={16}
+        className="absolute top-5 inset-e-5 text-faint opacity-0 transition-opacity group-hover:opacity-100"
+      />
+    )}
+    <div className="flex items-center gap-2.5">
+      {icon && <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${CHIP_CLASSES[tone]}`}>{icon}</span>}
+      <span className="text-sm text-secondary">{label}</span>
     </div>
     <div className="flex flex-col gap-1">
-      <span className="text-2xl font-medium tracking-tight whitespace-nowrap text-ink tabular-nums">{value}</span>
-      <span className="flex items-center justify-between gap-2">
-        {hint && <span className="line-clamp-1 text-xs text-muted">{hint}</span>}
-        {href && <ArrowUpRight size={14} className="shrink-0 text-faint transition-colors group-hover:text-primary" />}
-      </span>
+      <span className="text-3xl font-medium tracking-tight whitespace-nowrap text-ink tabular-nums">{value}</span>
+      {hint && <span className="text-xs text-muted">{hint}</span>}
     </div>
   </div>
 );

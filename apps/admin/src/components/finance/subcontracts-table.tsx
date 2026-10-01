@@ -24,7 +24,7 @@ export const SubcontractsTable = ({
     columns={[
       {
         key: "number",
-        header: "Subcontract",
+        header: "Subcontract", wrap: true,
         render: (s) => (
           <div className="flex flex-col gap-0.5">
             <span dir="ltr" className="font-medium">

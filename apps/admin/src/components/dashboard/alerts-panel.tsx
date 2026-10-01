@@ -10,7 +10,7 @@ export const AlertsPanel = async () => {
       title="Alerts"
       description="Permits, FAC, final clearance, deliveries, custody and invoices"
       action={
-        <Link href="/alerts" className="text-sm text-primary hover:underline">
+        <Link href="/alerts" className="flex h-8 shrink-0 items-center rounded-full border border-hairline px-3.5 text-xs font-medium text-ink transition-colors hover:border-search-border hover:bg-hover">
           View all
         </Link>
       }

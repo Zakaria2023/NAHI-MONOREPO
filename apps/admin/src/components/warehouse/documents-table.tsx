@@ -34,7 +34,7 @@ export const DocumentsTable = async ({ kind }: DocumentsTableProps) => {
           ),
         },
         { key: "kind", header: "Document", render: (r) => <span className="text-secondary">{ENTITY_KIND_LABELS[r.kind]}</span> },
-        { key: "summary", header: "Summary", render: (r) => <span className="line-clamp-2">{r.summary}</span> },
+        { key: "summary", header: "Summary", wrap: true, render: (r) => <span className="line-clamp-2">{r.summary}</span> },
         { key: "date", header: "Date", render: (r) => <span className="whitespace-nowrap">{r.createdAt ? formatDate(r.createdAt) : "—"}</span> },
         {
           key: "status",

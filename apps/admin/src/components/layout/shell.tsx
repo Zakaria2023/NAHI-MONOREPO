@@ -3,6 +3,7 @@ import { DashboardSidebar, NavGroup } from "ui";
 import { StaffRole } from "@/db/enum";
 import { BRAND_ICON } from "@/lib/nav";
 import { Navbar } from "./navbar";
+import { UserSwitcher } from "./user-switcher";
 
 type ShellProps = {
   groups: NavGroup[];
@@ -12,13 +13,24 @@ type ShellProps = {
   children: ReactNode;
 };
 
-/** Sidebar, top bar, and a work area that uses the whole width of the window. */
+/** The sidebar on a grey frame, and the work area as one white panel that uses the whole width beside it. */
 export const Shell = ({ groups, current, users, urgentAlerts, children }: ShellProps) => (
-  <div className="min-h-screen">
-    <DashboardSidebar brand="NAHI" tagline="Mobily · STC" brandIcon={BRAND_ICON} groups={groups} />
-    <div className="flex min-h-screen flex-col ps-64">
-      <Navbar current={current} users={users} urgentAlerts={urgentAlerts} />
-      <main className="flex w-full flex-1 flex-col gap-6 px-6 py-6 2xl:px-10">{children}</main>
+  <div className="min-h-screen bg-sidebar">
+    <DashboardSidebar
+      brand="NAHI"
+      tagline="Mobily · STC operations"
+      brandIcon={BRAND_ICON}
+      groups={groups}
+      footer={<UserSwitcher current={current} users={users} />}
+    />
+    <div className="flex min-h-screen flex-col py-2 pe-2 ps-64">
+      <div className="flex flex-1 flex-col rounded-2xl border border-hairline bg-surface">
+        <Navbar
+          crumbs={groups.flatMap((g) => g.links.map((l) => ({ group: g.title, label: l.label, href: l.href })))}
+          urgentAlerts={urgentAlerts}
+        />
+        <main className="flex w-full flex-1 flex-col gap-8 px-10 pt-8 pb-12">{children}</main>
+      </div>
     </div>
   </div>
 );

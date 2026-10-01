@@ -1,5 +1,5 @@
 import { subcontractorStatement } from "services";
-import { Card, StatTile } from "ui";
+import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, round2 } from "utils";
 import { FactList } from "@/components/shared/fact-list";
 import { PageHeader } from "@/components/shared/page-header";
@@ -32,14 +32,14 @@ export const SubcontractorStatement = async ({ subcontractorUuid }: Subcontracto
           ]}
         />
       </Card>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+      <StatStrip columns="sm:grid-cols-3 2xl:grid-cols-6">
         <StatTile label="Gross certified" value={formatMoney(totals.gross)} />
         <StatTile label="Retention held" value={formatMoney(totals.retention)} />
         <StatTile label="Materials deducted" value={formatMoney(totals.materials)} />
         <StatTile label="Net due" value={formatMoney(totals.net)} />
         <StatTile label="Paid" value={formatMoney(totals.paid)} />
         <StatTile label="Still to pay" value={formatMoney(round2(totals.net - totals.paid))} />
-      </div>
+      </StatStrip>
       <section className="flex flex-col gap-3">
         <SectionHeading title="Subcontracts" />
         <SubcontractsTable subcontracts={subcontracts} linkSubcontractor={false} emptyMessage="No subcontract with this subcontractor yet." />

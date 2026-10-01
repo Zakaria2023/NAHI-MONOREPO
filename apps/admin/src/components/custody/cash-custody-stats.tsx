@@ -1,6 +1,6 @@
 import { AlarmClock, Hourglass, Wallet } from "lucide-react";
 import { CUSTODY_SETTLEMENT_DAYS, listCashCustodies } from "services";
-import { StatTile } from "ui";
+import { StatStrip, StatTile } from "ui";
 import { formatCompactMoney, formatMoney, sumBy } from "utils";
 
 export const CashCustodyStats = async () => {
@@ -10,9 +10,9 @@ export const CashCustodyStats = async () => {
   const overdue = disbursed.filter((r) => (r.openDays ?? 0) > CUSTODY_SETTLEMENT_DAYS);
   const outstanding = sumBy(disbursed, (r) => r.amount);
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <StatStrip columns="sm:grid-cols-3">
       <StatTile
-        tone="sky" href="/custody?status=disbursed"
+        tone="teal" href="/custody?status=disbursed"
         label="With employees"
         value={formatCompactMoney(outstanding)}
         hint={`${formatMoney(outstanding)} in ${disbursed.length} disbursed custody`}
@@ -32,6 +32,6 @@ export const CashCustodyStats = async () => {
         hint={`Open more than ${CUSTODY_SETTLEMENT_DAYS} days`}
         icon={<AlarmClock size={18} />}
       />
-    </div>
+    </StatStrip>
   );
 };

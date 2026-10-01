@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { listSuppliers, supplierStatement } from "services";
-import { Card, StatTile, Table } from "ui";
+import { Card, StatStrip, StatTile, Table } from "ui";
 import { formatDate, formatMoney, round2, sumBy } from "utils";
 import { FactList } from "@/components/shared/fact-list";
 import { PageHeader } from "@/components/shared/page-header";
@@ -37,11 +37,11 @@ export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps
           ]}
         />
       </Card>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StatStrip columns="sm:grid-cols-3">
         <StatTile label="Invoiced" value={formatMoney(credits)} hint="Credited, VAT included" />
         <StatTile label="Paid and recovered" value={formatMoney(debits)} hint="Payments plus advances recovered" />
         <StatTile label="Balance owed" value={formatMoney(balance)} hint={balance > 0 ? "Still payable to the supplier" : "Nothing owed"} />
-      </div>
+      </StatStrip>
       <Table
         data={rows.map((r, index) => ({ ...r, key: String(index) }))}
         rowKey={(r) => r.key}
@@ -49,7 +49,7 @@ export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps
         columns={[
           { key: "at", header: "Date", render: (r) => <span className="whitespace-nowrap">{formatDate(r.at)}</span> },
           { key: "reference", header: "Reference", render: (r) => <span dir="ltr">{r.reference}</span> },
-          { key: "description", header: "Description", render: (r) => r.description },
+          { key: "description", header: "Description", wrap: true, render: (r) => r.description },
           { key: "debit", header: "Debit", align: "end", render: (r) => (r.debit > 0 ? formatMoney(r.debit) : <span className="text-muted">—</span>) },
           { key: "credit", header: "Credit", align: "end", render: (r) => (r.credit > 0 ? formatMoney(r.credit) : <span className="text-muted">—</span>) },
           { key: "balance", header: "Balance", align: "end", render: (r) => <span className="font-medium">{formatMoney(r.balance)}</span> },

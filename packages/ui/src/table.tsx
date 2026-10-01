@@ -1,9 +1,14 @@
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
+import { sortKeyOf } from "utils";
+import { DataTable } from "./data-table";
+import { textOf } from "./text-of";
 
 export type TableColumn<T> = {
   key: string;
   header: string;
   align?: "start" | "end";
+  /** Free text (a summary, a reason) that may wrap; every other cell stays on one line. */
+  wrap?: boolean;
   render: (row: T) => ReactNode;
 };
 
@@ -12,42 +17,23 @@ type TableProps<T> = {
   data: T[];
   rowKey: (row: T) => string;
   emptyMessage?: string;
+  /** Rows per page; a longer list gets a pager. */
+  pageSize?: number;
 };
 
-// A row that links somewhere puts a stretched `Link` (absolute inset-0) in one
-// of its cells; `relative` on the row is what it stretches over.
-export const Table = <T,>({ columns, data, rowKey, emptyMessage = "Nothing here yet." }: TableProps<T>) => (
-  <div className="overflow-x-auto rounded-card border border-hairline bg-surface">
-    <table className="w-full border-collapse">
-      <thead>
-        <tr className="border-b border-hairline bg-hover">
-          {columns.map((column) => (
-            <th
-              key={column.key}
-              className={`px-5 py-3 text-xs font-medium tracking-wider whitespace-nowrap text-muted uppercase ${column.align === "end" ? "text-end" : "text-start"}`}
-            >
-              {column.header}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      {data.length > 0 && (
-        <tbody className="divide-y divide-hairline-soft">
-          {data.map((row) => (
-            <tr key={rowKey(row)} className="relative transition-colors hover:bg-primary-tint/40">
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={`px-5 py-3.5 align-top text-sm text-ink ${column.align === "end" ? "text-end tabular-nums" : "text-start"}`}
-                >
-                  {column.render(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      )}
-    </table>
-    {data.length === 0 && <div className="px-5 py-14 text-center text-sm text-muted">{emptyMessage}</div>}
-  </div>
+/**
+ * Renders every cell where the data is (on the server, for a server page), then
+ * hands the finished rows to the interactive table, which sorts by each cell's
+ * visible text and pages through them in the browser.
+ */
+export const Table = <T,>({ columns, data, rowKey, emptyMessage = "Nothing here yet.", pageSize = 10 }: TableProps<T>) => (
+  <DataTable
+    headers={columns.map((column) => ({ key: column.key, label: column.header, align: column.align, wrap: column.wrap }))}
+    rows={data.map((row) => {
+      const cells = columns.map((column) => <Fragment key={column.key}>{column.render(row)}</Fragment>);
+      return { key: rowKey(row), cells, sortKeys: cells.map((cell) => sortKeyOf(textOf(cell))) };
+    })}
+    emptyMessage={emptyMessage}
+    pageSize={pageSize}
+  />
 );

@@ -1,5 +1,5 @@
 import { vatSummary } from "services";
-import { StatTile, StatusPill, Table } from "ui";
+import { StatStrip, StatTile, StatusPill, Table } from "ui";
 import { formatMoney, round2, sumBy } from "utils";
 
 /** Output VAT from customer invoices, input VAT from supplier invoices, by month. */
@@ -10,11 +10,11 @@ export const VatSummary = async () => {
   const net = round2(output - input);
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <StatStrip columns="sm:grid-cols-3">
         <StatTile label="Output VAT" value={formatMoney(output)} hint="Charged on customer invoices, all periods" />
         <StatTile label="Input VAT" value={formatMoney(input)} hint="Paid on supplier invoices, all periods" />
         <StatTile label={net >= 0 ? "Net payable" : "Net refundable"} value={formatMoney(Math.abs(net))} hint="Output less input" />
-      </div>
+      </StatStrip>
       <Table
         data={periods}
         rowKey={(p) => p.period}

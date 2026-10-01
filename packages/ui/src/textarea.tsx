@@ -24,7 +24,7 @@ export const Textarea = ({ label, error, id, required, className = "", ref, ...p
         ref={ref}
         id={inputId}
         rows={3}
-        className={`w-full rounded-control border bg-surface px-3 py-2 text-sm text-ink outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary-tint ${error ? "border-danger" : "border-search-border"} ${className}`}
+        className={`w-full rounded-control border bg-surface px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-primary focus:ring-4 focus:ring-primary/10 ${error ? "border-danger" : "border-search-border"} ${className}`}
         {...props}
       />
       <FormError message={error} />

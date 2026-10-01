@@ -13,7 +13,7 @@ import {
 } from "@/db/enum";
 
 // One colour per state, everywhere: green done, amber waiting on someone,
-// blue in progress, red refused or late, grey not started.
+// dark in progress, red refused or late, grey not started.
 
 export const PR_TONES: Record<PurchaseRequestStatus, PillTone> = {
   pending_manager: "warning",

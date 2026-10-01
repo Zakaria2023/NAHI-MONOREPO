@@ -18,11 +18,11 @@ const COLUMNS = {
 };
 
 export const FactList = ({ facts, columns = 2 }: FactListProps) => (
-  <dl className={`grid gap-x-6 gap-y-3 ${COLUMNS[columns]}`}>
+  <dl className={`grid gap-x-8 gap-y-4 ${COLUMNS[columns]}`}>
     {facts.map((fact) => (
       <div key={fact.label} className="flex flex-col gap-0.5">
         <dt className="text-xs text-muted">{fact.label}</dt>
-        <dd className="text-sm text-ink">{fact.value}</dd>
+        <dd className="text-sm font-medium text-ink">{fact.value}</dd>
       </div>
     ))}
   </dl>

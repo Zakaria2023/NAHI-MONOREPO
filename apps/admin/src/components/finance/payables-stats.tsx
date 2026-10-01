@@ -1,6 +1,6 @@
 import { AlarmClock, BadgeCheck, CircleDollarSign, FileClock } from "lucide-react";
 import { listSupplierInvoices } from "services";
-import { StatTile } from "ui";
+import { StatStrip, StatTile } from "ui";
 import { formatCompactMoney, formatMoney, sumBy } from "utils";
 
 export const PayablesStats = async () => {
@@ -10,7 +10,7 @@ export const PayablesStats = async () => {
   const overdue = invoices.filter((i) => i.overdue);
   const open = invoices.filter((i) => i.status !== "rejected" && i.outstanding > 0);
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <StatStrip columns="sm:grid-cols-2 xl:grid-cols-4">
       <StatTile
         tone="warning" href="/finance/payables?status=registered"
         label="Awaiting approval"
@@ -19,7 +19,7 @@ export const PayablesStats = async () => {
         icon={<FileClock size={18} />}
       />
       <StatTile
-        tone="sky" href="/finance/payables?status=approved"
+        tone="teal" href="/finance/payables?status=approved"
         label="Approved, unpaid"
         value={approved.length}
         hint={`${formatMoney(sumBy(approved, (i) => i.outstanding))} on the due schedule`}
@@ -39,6 +39,6 @@ export const PayablesStats = async () => {
         hint={`${open.length} invoice(s) not fully paid`}
         icon={<CircleDollarSign size={18} />}
       />
-    </div>
+    </StatStrip>
   );
 };

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 import { ReactNode } from "react";
 import "./globals.css";
 
@@ -8,10 +8,10 @@ type Props = {
 };
 
 // Self-hosted at build time: no request to a font host from the browser.
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
   weight: ["400", "500"],
-  variable: "--font-inter",
+  variable: "--font-geist",
   display: "swap",
 });
 
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const RootLayout = ({ children }: Props) => (
-  <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+  <html lang="en" className={`h-full antialiased ${geist.variable}`}>
     <body className="flex min-h-full flex-col font-sans text-ink">{children}</body>
   </html>
 );

@@ -1,6 +1,6 @@
 import { AlertTriangle, Boxes, Wallet } from "lucide-react";
 import { listStock } from "services";
-import { StatTile } from "ui";
+import { StatStrip, StatTile } from "ui";
 import { formatCompactMoney, formatMoney, sumBy } from "utils";
 
 export const StockStats = async () => {
@@ -8,7 +8,7 @@ export const StockStats = async () => {
   const value = sumBy(rows, (r) => r.value);
   const below = rows.filter((r) => r.belowReorder).length;
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <StatStrip columns="sm:grid-cols-3">
       <StatTile
         tone="primary" href="/warehouse/stock"
         label="Items"
@@ -24,6 +24,6 @@ export const StockStats = async () => {
         hint={below > 0 ? "Raise a purchase request for these items" : "Every item is above its reorder level"}
         icon={<AlertTriangle size={18} />}
       />
-    </div>
+    </StatStrip>
   );
 };

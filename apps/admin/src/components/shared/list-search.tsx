@@ -13,7 +13,7 @@ export const ListSearch = ({ placeholder, defaultValue }: ListSearchProps) => (
       name="search"
       defaultValue={defaultValue}
       placeholder={placeholder}
-      className="w-full rounded-control border border-search-border bg-surface py-2 ps-9 pe-3 text-sm outline-none focus:border-primary"
+      className="h-9 w-full rounded-full border border-hairline bg-surface ps-9 pe-4 text-sm outline-none transition-colors placeholder:text-faint focus:border-primary focus:ring-4 focus:ring-primary/10"
     />
   </form>
 );

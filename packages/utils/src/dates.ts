@@ -84,3 +84,17 @@ export const formatRelativeDate = (iso: string | null | undefined, now: string =
   const days = daysUntil(iso, now);
   return `${formatDate(iso)} (${days < 0 ? `${-days} days ago` : days === 0 ? "today" : `in ${days} days`})`;
 };
+
+/** "Good morning" / "Good afternoon" / "Good evening" for the hour in Riyadh. */
+export const greetingFor = (iso: string = nowIso()): string => {
+  const hour = Number(
+    new Date(iso).toLocaleString("en-GB", { hour: "numeric", hour12: false, timeZone: "Asia/Riyadh" }),
+  );
+  if (hour < 12) {
+    return "Good morning";
+  }
+  if (hour < 18) {
+    return "Good afternoon";
+  }
+  return "Good evening";
+};

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listProjects } from "services";
 import { Card, StatusPill } from "ui";
-import { OperatorPill } from "@/components/shared/operator-pill";
+import { OperatorMark } from "@/components/shared/operator-mark";
 import { ProgressBar } from "@/components/shared/progress-bar";
 
 /** Mobily §7 / STC §6: every project with its current stage and what is missing. */
@@ -12,25 +12,28 @@ export const ProjectPipeline = async () => {
       title="Project pipeline"
       description="Current stage and what is still missing, per PO"
       action={
-        <Link href="/projects" className="text-sm text-primary hover:underline">
+        <Link href="/projects" className="flex h-8 shrink-0 items-center rounded-full border border-hairline px-3.5 text-xs font-medium text-ink transition-colors hover:border-search-border hover:bg-hover">
           All projects
         </Link>
       }
     >
-      <ul className="flex flex-col divide-y divide-hairline-soft">
+      <ul className="-my-1 flex flex-col divide-y divide-hairline-soft">
         {projects.map((project) => (
-          <li key={project.uuid} className="relative grid grid-cols-1 items-center gap-3 py-3 first:pt-0 last:pb-0 md:grid-cols-12">
-            <div className="flex flex-col gap-1 md:col-span-4">
-              <div className="flex items-center gap-2">
+          <li key={project.uuid} className="relative grid grid-cols-1 items-center gap-x-6 gap-y-3 py-3.5 md:grid-cols-12">
+            <div className="flex items-center gap-3 md:col-span-4">
+              <OperatorMark operator={project.operator} />
+              <div className="flex flex-col gap-0.5">
                 <Link href={`/projects/${project.uuid}`} className="text-sm font-medium text-ink after:absolute after:inset-0 hover:text-primary">
                   {project.code}
                 </Link>
-                <OperatorPill operator={project.operator} />
+                <span className="line-clamp-1 text-xs text-muted">{project.name}</span>
               </div>
-              <span className="line-clamp-1 text-xs text-muted">{project.name}</span>
             </div>
             <div className="flex flex-col gap-1.5 md:col-span-4">
-              <span className="text-sm text-ink">{project.stageLabel}</span>
+              <span className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-ink">{project.stageLabel}</span>
+                <span className="text-xs text-muted tabular-nums">{Math.round(project.progress * 100)}%</span>
+              </span>
               <ProgressBar value={project.progress} />
             </div>
             <div className="md:col-span-4 md:text-end">

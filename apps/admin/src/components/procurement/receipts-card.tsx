@@ -60,7 +60,7 @@ export const ReceiptsCard = ({ detail, warehouses }: ReceiptsCardProps) => (
                   },
                   {
                     key: "reason",
-                    header: "Reason",
+                    header: "Reason", wrap: true,
                     render: (l) => (l.rejectionReason ? <span className="text-secondary">{l.rejectionReason}</span> : <span className="text-muted">—</span>),
                   },
                 ]}

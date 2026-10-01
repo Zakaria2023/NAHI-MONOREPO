@@ -66,7 +66,7 @@ export const ProjectsTable = async ({ operator, search }: ProjectsTableProps) =>
         },
         {
           key: "missing",
-          header: "Missing",
+          header: "Missing", wrap: true,
           render: (p) =>
             p.missing.length === 0 ? (
               <span className="text-muted">—</span>

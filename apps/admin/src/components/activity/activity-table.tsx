@@ -36,7 +36,7 @@ export const ActivityTable = ({ entries, showRecord = true }: ActivityTableProps
         : []),
       {
         key: "action",
-        header: "What happened",
+        header: "What happened", wrap: true,
         render: (e) => (
           <div className="flex flex-col">
             <span>{e.action}</span>

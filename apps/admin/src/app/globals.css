@@ -1,54 +1,53 @@
 @import "tailwindcss";
 @source "../../../../packages/ui/src";
 
-/* Inter comes from next/font (app/layout.tsx), self-hosted at build time. */
+/* Geist comes from next/font (app/layout.tsx), self-hosted at build time. */
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Arial, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, "Segoe UI", Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
 }
 
-/* Flat colour only — no gradients anywhere (CLAUDE.md, Tailwind CSS). One
-   indigo for action and selection, four status hues, and a dark sidebar that
-   frames a light, quiet work area. */
+/* Flat colour only — no gradients anywhere (CLAUDE.md, Tailwind CSS), and no
+   blue. Violet for action and selection, neutral greys, five status hues. The
+   sidebar sits on a grey frame; the work area is one white panel inside it. */
 @theme {
-  --color-primary: #4f46e5;
-  --color-primary-hover: #4338ca;
-  --color-primary-tint: #eef2ff;
-  --color-primary-tint-border: #c7d2fe;
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-primary-tint: #f5f3ff;
+  --color-primary-tint-border: #ddd6fe;
 
-  --color-ink: #0f172a;
-  --color-scrim: rgba(15, 23, 42, 0.55);
-  --color-secondary: #475569;
-  --color-muted: #64748b;
-  --color-faint: #94a3b8;
+  --color-ink: #18181b;
+  --color-scrim: rgba(24, 24, 27, 0.5);
+  --color-secondary: #52525b;
+  --color-muted: #71717a;
+  --color-faint: #a1a1aa;
 
-  --color-page: #f3f5f9;
+  --color-page: #f4f4f5;
   --color-surface: #ffffff;
   --color-overlay: #ffffff;
-  --color-hairline: #e4e7ee;
-  --color-hairline-soft: #eef0f5;
-  --color-hover: #f6f7fb;
-  --color-search-border: #dce1ea;
+  --color-hairline: #e4e4e7;
+  --color-hairline-soft: #efeff1;
+  --color-hover: #f6f6f7;
+  --color-search-border: #d4d4d8;
 
-  --color-success: #059669;
-  --color-success-tint: #ecfdf5;
-  --color-warning: #d97706;
+  --color-success: #15803d;
+  --color-success-tint: #f0fdf4;
+  --color-warning: #b45309;
   --color-warning-tint: #fffbeb;
-  --color-danger: #e11d48;
-  --color-danger-tint: #fff1f2;
-  --color-sky: #0284c7;
-  --color-sky-tint: #f0f9ff;
+  --color-danger: #dc2626;
+  --color-danger-tint: #fef2f2;
+  --color-teal: #0f766e;
+  --color-teal-tint: #f0fdfa;
   --color-violet: #7c3aed;
   --color-violet-tint: #f5f3ff;
+  --color-orange: #c2410c;
+  --color-orange-tint: #fff7ed;
 
-  --color-sidebar: #0b1220;
-  --color-sidebar-raised: #141d2f;
-  --color-sidebar-border: #1c2638;
-  --color-sidebar-text: #94a3b8;
-  --color-sidebar-ink: #f1f5f9;
+  --color-sidebar: #f4f4f5;
+  --color-sidebar-hover: #e9e9eb;
 
-  --radius-card: 14px;
-  --radius-control: 9px;
+  --radius-card: 16px;
+  --radius-control: 10px;
 }
 
 body {
@@ -66,9 +65,4 @@ body {
 @utility scrollbar-slim {
   scrollbar-width: thin;
   scrollbar-color: var(--color-hairline) transparent;
-}
-
-@utility scrollbar-dark {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-sidebar-border) transparent;
 }

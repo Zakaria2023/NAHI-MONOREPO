@@ -33,7 +33,7 @@ export const ExtractLinesTable = ({ lines }: ExtractLinesTableProps) => {
       data={[...rows, total]}
       rowKey={(r) => r.key}
       columns={[
-        { key: "description", header: "Description", render: (r) => <span className={r.isTotal ? "font-medium" : ""}>{r.description}</span> },
+        { key: "description", header: "Description", wrap: true, render: (r) => <span className={r.isTotal ? "font-medium" : ""}>{r.description}</span> },
         { key: "unit", header: "Unit", render: (r) => r.unit },
         { key: "qty", header: "Quantity", align: "end", render: (r) => (r.isTotal ? "" : formatNumber(r.qty)) },
         { key: "unitRate", header: "Unit rate", align: "end", render: (r) => (r.isTotal ? "" : formatMoney(r.unitRate)) },

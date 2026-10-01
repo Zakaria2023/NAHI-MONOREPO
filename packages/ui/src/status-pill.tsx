@@ -25,7 +25,7 @@ const DOT_CLASSES: Record<PillTone, string> = {
 
 export const StatusPill = ({ tone = "neutral", children }: StatusPillProps) => (
   <span
-    className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ring-1 ring-inset ${TONE_CLASSES[tone]}`}
+    className={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${TONE_CLASSES[tone]}`}
   >
     <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_CLASSES[tone]}`} />
     {children}

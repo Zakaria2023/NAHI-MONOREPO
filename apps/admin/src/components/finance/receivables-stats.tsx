@@ -1,6 +1,6 @@
 import { AlarmClock, CircleCheck, Wallet } from "lucide-react";
 import { listCustomerInvoices } from "services";
-import { StatTile } from "ui";
+import { StatStrip, StatTile } from "ui";
 import { formatCompactMoney, formatMoney, sumBy } from "utils";
 
 export const ReceivablesStats = async () => {
@@ -9,7 +9,7 @@ export const ReceivablesStats = async () => {
   const overdue = invoices.filter((i) => i.overdue);
   const collected = invoices.filter((i) => i.paidAt);
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <StatStrip columns="sm:grid-cols-3">
       <StatTile
         tone="primary" href="/finance/receivables?status=outstanding"
         label="Outstanding"
@@ -31,6 +31,6 @@ export const ReceivablesStats = async () => {
         hint={`${collected.length} invoice(s) paid`}
         icon={<CircleCheck size={18} />}
       />
-    </div>
+    </StatStrip>
   );
 };

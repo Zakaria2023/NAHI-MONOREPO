@@ -1,5 +1,5 @@
 import { getBudget } from "services";
-import { Card, StatTile } from "ui";
+import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, formatPercent, round2 } from "utils";
 import { budgetCategories } from "@/db/enum";
 import { approveBudgetAction, saveBudgetLinesAction } from "@/app/(dashboard)/finance/budgets/[projectUuid]/actions";
@@ -43,7 +43,7 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
           </>
         }
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <StatStrip columns="sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Planned" value={formatMoney(totals.planned)} hint={`${budget?.lines.length ?? 0} study line(s)`} />
         <StatTile
           label="Consumed"
@@ -52,7 +52,7 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
         />
         <StatTile label="Remaining" value={<span className={totals.remaining < 0 ? "text-danger" : ""}>{formatMoney(totals.remaining)}</span>} hint={totals.remaining < 0 ? "Over budget" : "Left to charge"} />
         <StatTile label="Planned margin" value={formatMoney(margin)} hint={`Customer PO ${formatMoney(project.poValue)} less planned cost`} />
-      </div>
+      </StatStrip>
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="flex flex-col gap-6 xl:col-span-2">
           <Card title="Budget vs actual" description="Reserved by approved requests, committed on POs (net of VAT), spent through custody, extracts and stock. Actual cost adds supplier invoices.">
