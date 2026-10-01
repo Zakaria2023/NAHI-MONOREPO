@@ -1,0 +1,26 @@
+{
+  "name": "nahi-erp",
+  "private": true,
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "dev:client": "pnpm --filter client dev",
+    "build": "pnpm test && turbo run build",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:reset": "tsx scripts/reset-store.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.23.1",
+    "turbo": "^2.5.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  }
+}

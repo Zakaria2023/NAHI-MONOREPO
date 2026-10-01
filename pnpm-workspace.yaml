@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# EVERY dependency with an install script has to be named here, `false` included.
+# pnpm 11+ does not quietly skip an undeclared one — it FAILS the install with
+# ERR_PNPM_IGNORED_BUILDS. `false` is the default answer: an install script runs
+# arbitrary code at install time, and only what genuinely cannot run without it
+# gets `true`.
+allowBuilds:
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
