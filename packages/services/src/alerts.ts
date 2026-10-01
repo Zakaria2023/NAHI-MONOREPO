@@ -11,6 +11,9 @@ import {
   permitExpiry,
 } from "./rules/mobily";
 import { designWaitEndsAt, milestoneNeedsC09 } from "./rules/stc";
+import { stockBalance } from "./core/stock";
+import { CUSTODY_SETTLEMENT_DAYS } from "./custody";
+import { nextCountAt } from "./warehouse";
 
 // THE ALERTS the documents ask for — before permits expire, before FAC and Final
 // Clearance fall due (Mobily §7), the STC 24-hour countdown and C09 warning
@@ -150,14 +153,68 @@ const customerInvoiceAlerts: AlertCollector = (store, now) =>
     ];
   });
 
-const COLLECTORS: AlertCollector[] = [mobilyAlerts, stcAlerts, customerInvoiceAlerts];
+const latePurchaseOrderAlerts: AlertCollector = (store, now) =>
+  store.PurchaseOrders.filter(
+    (po) =>
+      (po.status === "sent" || po.status === "partially_received") &&
+      po.expectedDeliveryAt !== undefined &&
+      po.expectedDeliveryAt < now,
+  ).map((po) => ({
+    key: `po-late-${po.uuid}`,
+    severity: "danger" as const,
+    title: `PO delivery late ${-daysUntil(po.expectedDeliveryAt ?? now, now)} day(s)`,
+    detail: `${po.number} — ${store.Suppliers.find((s) => s.uuid === po.supplierUuid)?.name ?? ""}, due ${formatDate(po.expectedDeliveryAt)}`,
+    target: { kind: "purchase_order" as const, uuid: po.uuid },
+    dueAt: po.expectedDeliveryAt,
+  }));
 
-/** Other modules add their collectors as they arrive. */
-export const registerAlertCollector = (collector: AlertCollector): void => {
-  if (!COLLECTORS.includes(collector)) {
-    COLLECTORS.push(collector);
-  }
+const reorderAlerts: AlertCollector = (store) =>
+  store.Items.flatMap((item): Alert[] => {
+    const total = stockBalance(store, item.uuid);
+    return total >= item.reorderLevel
+      ? []
+      : [
+          {
+            key: `reorder-${item.uuid}`,
+            severity: "warning",
+            title: "Item below reorder level",
+            detail: `${item.code} ${item.name} — ${total} ${item.unit} left, reorder at ${item.reorderLevel}`,
+            target: { kind: "system", uuid: item.uuid },
+          },
+        ];
+  });
+
+const custodyAlerts: AlertCollector = (store, now) => {
+  const counts = store.AssetCustodies.filter(
+    (c) => c.status === "with_employee" && nextCountAt(c) < now,
+  ).map((c) => ({
+    key: `count-${c.uuid}`,
+    severity: "warning" as const,
+    title: "Custody count overdue",
+    detail: `${c.employeeName} — ${store.Items.find((i) => i.uuid === c.itemUuid)?.name ?? ""}, due ${formatDate(nextCountAt(c))}`,
+    target: { kind: "asset_custody" as const, uuid: c.uuid },
+    dueAt: nextCountAt(c),
+  }));
+  const cash = store.CashCustodies.filter(
+    (c) => c.status === "disbursed" && c.disbursedAt && -daysUntil(c.disbursedAt, now) > CUSTODY_SETTLEMENT_DAYS,
+  ).map((c) => ({
+    key: `cash-${c.uuid}`,
+    severity: "warning" as const,
+    title: "Cash custody not settled",
+    detail: `${c.number} — ${c.employeeName}, disbursed ${formatDate(c.disbursedAt)}`,
+    target: { kind: "cash_custody" as const, uuid: c.uuid },
+  }));
+  return [...counts, ...cash];
 };
+
+const COLLECTORS: AlertCollector[] = [
+  mobilyAlerts,
+  stcAlerts,
+  customerInvoiceAlerts,
+  latePurchaseOrderAlerts,
+  reorderAlerts,
+  custodyAlerts,
+];
 
 export const listAlerts = async (): Promise<Alert[]> => {
   const store = readStore();
