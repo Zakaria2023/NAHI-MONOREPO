@@ -140,7 +140,9 @@ const labTestsPassed = (ctx: MobilyContext): string | null => {
 
 export const isMobilyStageComplete = (stage: MobilyStage, ctx: MobilyContext): boolean => {
   if (stage === "permits") {
-    return ctx.workflow.permits.length > 0 && ctx.workflow.permits.every((p) => p.issuedAt);
+    // Works start on the first issued permit; the rest (MOT, Traffic, …) often
+    // arrive while they run, and each is still listed with its own status.
+    return ctx.workflow.permits.some((p) => p.issuedAt);
   }
   if (stage === "invoicing") {
     return (["rfs", "pac", "fac"] as const).every((kind) =>

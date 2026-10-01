@@ -20,3 +20,10 @@ export const assertRole = <R extends string>(
     throw new Error(`Your role cannot ${action}`);
   }
 };
+
+/** A recorded event cannot be dated later than today (a day's grace for time zones). */
+export const assertNotFuture = (iso: string): void => {
+  if (new Date(iso).getTime() > Date.now() + 24 * 60 * 60 * 1000) {
+    throw new Error("A date cannot be in the future");
+  }
+};

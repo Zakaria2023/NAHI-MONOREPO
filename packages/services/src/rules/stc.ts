@@ -6,10 +6,12 @@ import {
   StcPatStep,
   StcStage,
   stcDocuments,
+  stcM3Checks,
   stcPatSteps,
 } from "../../../../db/enum";
 import {
   STC_DOCUMENT_LABELS,
+  STC_M3_CHECK_LABELS,
   STC_PARTY_LABELS,
   STC_PAT_STEP_LABELS,
 } from "../../../../db/label";
@@ -260,7 +262,11 @@ export const stcMissingItems = (workflow: StcWorkflow, now: string): string[] =>
     const pat = stcPatSteps
       .filter((step) => !workflow.patSteps[step])
       .map((step) => STC_PAT_STEP_LABELS[step]);
-    return [...docs, ...pat];
+    const checks = stcM3Checks
+      .filter((check) => !workflow.m3Checks[check])
+      .map((check) => STC_M3_CHECK_LABELS[check]);
+    const milestone = workflow.milestone.status === "closed" ? [] : ["Milestone not closed"];
+    return [...docs, ...pat, ...checks, ...milestone];
   }
   const blocker = stcAdvanceBlocker(workflow, now);
   return blocker && docs.length === 0 && workflow.stage !== "completed" ? [blocker] : docs;

@@ -68,3 +68,10 @@ export const fromDateInput = (value: string): string =>
 
 /** "2026-09" — the key a monthly closing period is stored under. */
 export const periodOf = (iso: string): string => iso.slice(0, 7);
+
+/**
+ * A form's date ("2026-10-01") or a full ISO timestamp, as an ISO timestamp.
+ * Services take either, so an action can pass a date field straight through.
+ */
+export const toIso = (value: string): string =>
+  new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00.000Z` : value).toISOString();

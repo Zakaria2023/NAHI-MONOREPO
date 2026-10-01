@@ -6,6 +6,7 @@
 export const nextDocumentNumber = (
   prefix: string,
   existing: readonly string[],
+  digits: number = 4,
 ): string => {
   const highest = existing.reduce((max, number) => {
     if (!number.startsWith(`${prefix}-`)) {
@@ -14,5 +15,5 @@ export const nextDocumentNumber = (
     const value = Number.parseInt(number.slice(prefix.length + 1), 10);
     return Number.isFinite(value) && value > max ? value : max;
   }, 0);
-  return `${prefix}-${String(highest + 1).padStart(4, "0")}`;
+  return `${prefix}-${String(highest + 1).padStart(digits, "0")}`;
 };
