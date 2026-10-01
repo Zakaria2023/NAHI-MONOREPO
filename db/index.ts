@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { buildSeed } from "./seed";
 import { Store } from "./types";
@@ -9,7 +10,7 @@ import { Store } from "./types";
 // services make — `readStore()` and `transact()` — so moving to a real database
 // changes this file and nothing that imports it.
 //
-// One file at the repo root rather than memory in each process, because the
+// One file rather than memory in each process, because the
 // admin and the portal are two Next.js servers: a change made in one has to be
 // visible in the other, which is the whole point of the portal.
 //
@@ -38,8 +39,17 @@ const findRepoRoot = (): string => {
   return dir;
 };
 
+// ON VERCEL the deployment's own folder is read-only: writing the store next to
+// the code there failed on the first request and took every page down with it.
+// The only writable place is the OS temp folder, so the store lives there. It
+// belongs to one server instance and starts again from the seed on a cold
+// start — fine for a demo, and the reason this MVP still needs a real database
+// before anyone relies on what they enter.
 const dataFile = (): string =>
-  process.env.ERP_DATA_FILE ?? path.join(findRepoRoot(), ".data", "store.json");
+  process.env.ERP_DATA_FILE ??
+  (process.env.VERCEL
+    ? path.join(os.tmpdir(), "erp-store.json")
+    : path.join(findRepoRoot(), ".data", "store.json"));
 
 const isMemory = (): boolean => dataFile() === MEMORY;
 
