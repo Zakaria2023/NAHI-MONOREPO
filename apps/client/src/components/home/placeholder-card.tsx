@@ -13,7 +13,7 @@ export const PlaceholderCard = () => (
         <Landmark size={22} />
       </div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl text-ink">Projects ERP — Client</h1>
+        <h1 className="text-xl text-ink">NAHI — Client</h1>
         <p className="text-sm text-muted">
           This app is reserved for a later phase. Every workflow — projects, procurement, warehouse, custody and finance — is in the admin dashboard.
         </p>

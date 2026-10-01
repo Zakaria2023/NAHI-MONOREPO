@@ -7,7 +7,7 @@ type Props = {
 };
 
 export const metadata: Metadata = {
-  title: "Projects ERP — Client",
+  title: "NAHI — Client",
   description: "Client app — reserved for a later phase",
 };
 

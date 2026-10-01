@@ -16,7 +16,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Projects ERP — Admin",
+  title: "NAHI — Admin",
   description: "Mobily and STC project workflows, procurement, warehouse, custody and finance",
 };
 
