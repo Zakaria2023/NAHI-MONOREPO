@@ -19,7 +19,6 @@ const StockPage = async ({ searchParams }: Props) => {
       <PageHeader
         title="Stock balance"
         description="What every warehouse holds, at average cost, and the items that have fallen under their reorder level."
-        action={{ href: "#add-item", label: "Add item" }}
       />
       <AsyncSection reloadKey="stock-stats">
         <StockStats />

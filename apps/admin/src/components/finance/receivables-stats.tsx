@@ -11,18 +11,21 @@ export const ReceivablesStats = async () => {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatTile
+        tone="primary" href="/finance/receivables?status=outstanding"
         label="Outstanding"
         value={formatCompactMoney(sumBy(open, (i) => i.total))}
         hint={`${open.length} invoice(s), ${formatMoney(sumBy(open, (i) => i.total))} with VAT`}
         icon={<Wallet size={18} />}
       />
       <StatTile
+        tone="danger" href="/finance/receivables?status=overdue"
         label="Overdue"
         value={overdue.length}
         hint={`${formatMoney(sumBy(overdue, (i) => i.total))} past the due date`}
         icon={<AlarmClock size={18} />}
       />
       <StatTile
+        tone="success" href="/finance/receivables?status=collected"
         label="Collected"
         value={formatCompactMoney(sumBy(collected, (i) => i.total))}
         hint={`${collected.length} invoice(s) paid`}

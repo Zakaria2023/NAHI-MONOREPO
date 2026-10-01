@@ -12,18 +12,21 @@ export const CashCustodyStats = async () => {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatTile
+        tone="sky" href="/custody?status=disbursed"
         label="With employees"
         value={formatCompactMoney(outstanding)}
         hint={`${formatMoney(outstanding)} in ${disbursed.length} disbursed custody`}
         icon={<Wallet size={18} />}
       />
       <StatTile
+        tone="warning" href="/custody?status=pending_approval"
         label="Awaiting approval"
         value={pending.length}
         hint={`${formatMoney(sumBy(pending, (r) => r.amount))} requested`}
         icon={<Hourglass size={18} />}
       />
       <StatTile
+        tone="danger" href="/custody?status=disbursed"
         label="Settlement overdue"
         value={overdue.length}
         hint={`Open more than ${CUSTODY_SETTLEMENT_DAYS} days`}
