@@ -2,12 +2,13 @@ import { addDays, formatMoney, generateUuid, nextDocumentNumber, nowIso, periodO
 import { AsBuiltInvoiceInput, CollectionInput } from "validators";
 import { readStore, transact } from "../../../db";
 import { CUSTOMER_INVOICE_BASIS_LABELS } from "../../../db/label";
-import { CustomerInvoice, Project } from "../../../db/types";
+import { CustomerInvoice, Project, Store } from "../../../db/types";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { assertNotFuture, assertRole, findOrThrow } from "./core/lookup";
 import { FINANCE_EDITORS } from "./core/roles";
 import { withVat } from "./core/tax";
+import { accountFor, writeCheque } from "./banking";
 import { AgeingBuckets, ageing } from "./rules/finance";
 import { isStcDocumentApproved } from "./rules/stc";
 
@@ -28,6 +29,12 @@ export type VatPeriod = {
   output: number;
   input: number;
   net: number;
+};
+
+export type VatQuarter = VatPeriod & {
+  /** "2026-Q3". */
+  quarter: string;
+  months: string[];
 };
 
 export const listCustomerInvoices = async (): Promise<CustomerInvoiceRow[]> => {
@@ -96,7 +103,24 @@ export const recordCustomerCollection = async (
     if (invoice.paidAt) {
       throw new Error("This invoice is already collected");
     }
+    const project = findOrThrow(store.Projects, invoice.projectUuid, "Project");
+    const account = accountFor(store, input.bankAccountUuid);
+    const cheque =
+      input.method === "cheque"
+        ? writeCheque(store, {
+            number: input.chequeNumber,
+            direction: "received",
+            bankAccountUuid: account.uuid,
+            party: project.operator === "mobily" ? "Mobily" : "STC",
+            amount: invoice.total,
+            issuedAt: paidAt,
+            dueDate: toIso(input.chequeDueDate),
+            ref: { kind: "customer_invoice", uuid: invoice.uuid, label: invoice.number },
+          })
+        : undefined;
     invoice.paidAt = paidAt;
+    invoice.collectedToUuid = account.uuid;
+    invoice.collectionChequeUuid = cheque?.uuid;
     logActivity(store, {
       actorName: actor.name,
       entity: "customer_invoice",
@@ -122,9 +146,28 @@ export const customerAgeing = async (): Promise<CustomerAgeingRow[]> => {
   }));
 };
 
-/** Tax §8: output VAT from customer invoices, input VAT from supplier invoices, by month. */
-export const vatSummary = async (): Promise<VatPeriod[]> => {
-  const store = readStore();
+/** Tax §8: output VAT from customer invoices, input VAT from supplier invoices and expenses, by month. */
+export const vatSummary = async (): Promise<VatPeriod[]> => vatPeriods(readStore());
+
+/** The quarterly return: the months added up by calendar quarter. */
+export const vatQuarters = async (): Promise<VatQuarter[]> => {
+  const quarters = new Map<string, VatQuarter>();
+  for (const month of vatPeriods(readStore())) {
+    const [year, m] = month.period.split("-").map(Number);
+    const quarter = `${year}-Q${Math.ceil(m / 3)}`;
+    const row = quarters.get(quarter) ?? { quarter, period: quarter, months: [], output: 0, input: 0, net: 0 };
+    quarters.set(quarter, {
+      ...row,
+      months: [...row.months, month.period].sort(),
+      output: round2(row.output + month.output),
+      input: round2(row.input + month.input),
+      net: round2(row.net + month.net),
+    });
+  }
+  return [...quarters.values()].sort((a, b) => b.quarter.localeCompare(a.quarter));
+};
+
+export const vatPeriods = (store: Store): VatPeriod[] => {
   const periods = new Map<string, { output: number; input: number }>();
   const add = (period: string, key: "output" | "input", amount: number) => {
     const row = periods.get(period) ?? { output: 0, input: 0 };
@@ -136,6 +179,9 @@ export const vatSummary = async (): Promise<VatPeriod[]> => {
   }
   for (const invoice of store.SupplierInvoices.filter((i) => i.status !== "rejected")) {
     add(periodOf(invoice.invoiceDate), "input", invoice.vat);
+  }
+  for (const expense of store.Expenses.filter((e) => e.vat > 0)) {
+    add(periodOf(expense.date), "input", expense.vat);
   }
   return [...periods.entries()]
     .sort(([a], [b]) => b.localeCompare(a))

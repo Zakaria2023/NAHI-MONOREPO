@@ -1,12 +1,13 @@
 import { addDays, formatMoney, generateUuid, nextDocumentNumber, nowIso, round2, sumBy, toIso } from "utils";
-import { PaymentInput, SupplierInvoiceInput } from "validators";
+import { PaymentInput, StatementCheckInput, SupplierInvoiceInput } from "validators";
 import { readStore, transact } from "../../../db";
 import { PAYMENT_METHOD_LABELS } from "../../../db/label";
-import { GoodsReceipt, PurchaseOrder, Store, Supplier, SupplierInvoice } from "../../../db/types";
+import { GoodsReceipt, PurchaseOrder, Store, Supplier, SupplierInvoice, SupplierStatementCheck } from "../../../db/types";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { assertNotFuture, assertRole, findOrThrow } from "./core/lookup";
 import { FINANCE_EDITORS } from "./core/roles";
+import { accountFor, writeCheque } from "./banking";
 import { applyDebitNotes } from "./returns";
 import { latePenaltyFor } from "./rules/procurement";
 import {
@@ -237,14 +238,31 @@ export const recordSupplierPayment = async (actor: Actor, uuid: string, input: P
       throw new Error(`Only ${formatMoney(outstanding)} is outstanding`);
     }
     const supplier = findOrThrow(store.Suppliers, invoice.supplierUuid, "Supplier");
+    const account = accountFor(store, input.bankAccountUuid);
+    const paymentUuid = generateUuid();
+    const cheque =
+      input.method === "cheque"
+        ? writeCheque(store, {
+            number: input.chequeNumber,
+            direction: "issued",
+            bankAccountUuid: account.uuid,
+            party: supplier.name,
+            amount: round2(input.amount),
+            issuedAt: at,
+            dueDate: toIso(input.chequeDueDate),
+            ref: { kind: "supplier_invoice", uuid: invoice.uuid, label: invoice.number, paymentUuid },
+          })
+        : undefined;
     invoice.payments.push({
-      uuid: generateUuid(),
+      uuid: paymentUuid,
       at,
       method: input.method,
       reference: input.reference,
       amount: round2(input.amount),
       by: actor.name,
       noticeSentAt: nowIso(),
+      bankAccountUuid: account.uuid,
+      chequeUuid: cheque?.uuid,
     });
     if (round2(invoice.netPayable - paidOf(invoice)) <= 0) {
       invoice.status = "paid";
@@ -289,9 +307,12 @@ export const supplierAgeing = async (): Promise<SupplierAgeingRow[]> => {
   }).filter((row) => row.total > 0);
 };
 
+export type StatementCheckRow = SupplierStatementCheck;
+
 /** §1 step 9: the statement the supplier's own is reconciled against. */
-export const supplierStatement = async (supplierUuid: string): Promise<StatementRow[]> => {
-  const store = readStore();
+export const supplierStatement = async (supplierUuid: string): Promise<StatementRow[]> => statementRows(readStore(), supplierUuid);
+
+export const statementRows = (store: Store, supplierUuid: string): StatementRow[] => {
   const entries = store.SupplierInvoices.filter((i) => i.supplierUuid === supplierUuid && i.status !== "rejected").flatMap(
     (i) => [
       { at: i.invoiceDate, reference: i.invoiceNumber, description: `Invoice ${i.number}`, debit: 0, credit: i.total },
@@ -324,4 +345,44 @@ export const supplierStatement = async (supplierUuid: string): Promise<Statement
       balance = round2(balance + e.credit - e.debit);
       return { ...e, balance };
     });
+};
+
+export const listStatementChecks = async (supplierUuid: string): Promise<StatementCheckRow[]> =>
+  readStore()
+    .SupplierStatementChecks.filter((c) => c.supplierUuid === supplierUuid)
+    .sort((a, b) => b.asOf.localeCompare(a.asOf));
+
+/**
+ * §1 step 9: the balance on the supplier's own statement against the system's at
+ * the same date; any difference is shown, and kept with the check.
+ */
+export const recordStatementCheck = async (actor: Actor, supplierUuid: string, input: StatementCheckInput): Promise<SupplierStatementCheck> => {
+  assertRole(actor.role, FINANCE_EDITORS, "match supplier statements");
+  const asOf = `${input.asOf}T23:59:59.999Z`;
+  assertNotFuture(asOf);
+  return transact((store) => {
+    const supplier = findOrThrow(store.Suppliers, supplierUuid, "Supplier");
+    const systemBalance = statementRows(store, supplierUuid).filter((r) => r.at <= asOf).at(-1)?.balance ?? 0;
+    const check: SupplierStatementCheck = {
+      uuid: generateUuid(),
+      supplierUuid,
+      asOf,
+      reportedBalance: round2(input.reportedBalance),
+      systemBalance,
+      difference: round2(input.reportedBalance - systemBalance),
+      note: input.note?.trim() || undefined,
+      by: actor.name,
+      at: nowIso(),
+    };
+    store.SupplierStatementChecks.push(check);
+    logActivity(store, {
+      actorName: actor.name,
+      entity: "supplier",
+      entityUuid: supplier.uuid,
+      entityLabel: supplier.name,
+      action: check.difference === 0 ? "Statement matched" : "Statement difference found",
+      detail: check.difference === 0 ? `Balance ${formatMoney(systemBalance)} agrees` : `Supplier says ${formatMoney(check.reportedBalance)}, system ${formatMoney(systemBalance)}`,
+    });
+    return check;
+  });
 };

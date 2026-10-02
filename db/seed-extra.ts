@@ -2,6 +2,7 @@ import { addDays, generateUuid, round2 } from "utils";
 // The seed fixes each demo payslip with the same rule the payroll service uses,
 // so the demo's figures are the ones the system would have calculated.
 import { chargeFor, disposalGainLoss } from "../packages/services/src/rules/assets";
+import { reconciliationGap } from "../packages/services/src/rules/banking";
 import { overheadPool, overheadShares } from "../packages/services/src/rules/costs";
 import { computePayslip, timesheetFromAttendance } from "../packages/services/src/rules/payroll";
 import { AssetCategory, BudgetCategory, EmploymentType, ExpenseCategory, Nationality, StaffRole } from "./enum";
@@ -19,8 +20,9 @@ import {
 } from "./types";
 
 // DEMO DATA for the parts built after the first MVP: annual contracts, supplier
-// returns, payroll, fixed assets, the budget study, cost centres, expenses and
-// overhead. Each record is placed to show one screen or rule.
+// returns, payroll, fixed assets, the budget study, cost centres, expenses,
+// overhead, banks, cheques, guarantees and tax filings. Each record is placed to
+// show one screen or rule.
 
 const VAT = 0.15;
 
@@ -544,4 +546,174 @@ export const addExtraDemoData = (store: Store, now: string): void => {
       postedAt: ago(30),
     },
   ];
+
+  // ─── Banks, cheques, guarantees, tax filings ─────────────────────────────
+
+  store.BankAccounts = [
+    {
+      uuid: generateUuid(),
+      code: "SNB-OPS",
+      name: "Operations account",
+      bank: "Saudi National Bank",
+      iban: "SA4410000001234567890123",
+      openingBalance: 2400000,
+      openingDate: ago(730),
+      primary: true,
+    },
+    {
+      uuid: generateUuid(),
+      code: "RJH-PRJ",
+      name: "Projects collections",
+      bank: "Al Rajhi Bank",
+      iban: "SA8780000201608010167519",
+      openingBalance: 650000,
+      openingDate: ago(730),
+      primary: false,
+    },
+  ];
+  const [ops, collections] = store.BankAccounts;
+  const invoice = (number: string) => find(store.SupplierInvoices, (i) => i.number === number, number);
+  const customerInvoice = (number: string) => find(store.CustomerInvoices, (i) => i.number === number, number);
+
+  // AP-0002 was paid by a cheque that has since cleared.
+  const ap2 = invoice("AP-0002");
+  const ap2Payment = ap2.payments[0];
+  const ap2Cheque = {
+    uuid: generateUuid(),
+    number: "004512",
+    direction: "issued" as const,
+    bankAccountUuid: ops.uuid,
+    party: find(store.Suppliers, (s) => s.uuid === ap2.supplierUuid, "AP-0002 supplier").name,
+    amount: ap2Payment.amount,
+    issuedAt: ap2Payment.at,
+    dueDate: ap2Payment.at,
+    status: "cleared" as const,
+    ref: { kind: "supplier_invoice" as const, uuid: ap2.uuid, label: ap2.number, paymentUuid: ap2Payment.uuid },
+    clearedAt: addDays(ap2Payment.at, 2),
+  };
+  ap2Payment.method = "cheque";
+  ap2Payment.reference = "CHQ 004512";
+  ap2Payment.bankAccountUuid = ops.uuid;
+  ap2Payment.chequeUuid = ap2Cheque.uuid;
+
+  // AP-0003: SAR 1,000 paid by a post-dated cheque, due in 12 days; the rest still owed.
+  const ap3 = invoice("AP-0003");
+  const ap3PaymentUuid = generateUuid();
+  const ap3Cheque = {
+    uuid: generateUuid(),
+    number: "004538",
+    direction: "issued" as const,
+    bankAccountUuid: ops.uuid,
+    party: find(store.Suppliers, (s) => s.uuid === ap3.supplierUuid, "AP-0003 supplier").name,
+    amount: 1000,
+    issuedAt: ago(3),
+    dueDate: ahead(12),
+    status: "pending" as const,
+    ref: { kind: "supplier_invoice" as const, uuid: ap3.uuid, label: ap3.number, paymentUuid: ap3PaymentUuid },
+  };
+  ap3.payments.push({
+    uuid: ap3PaymentUuid,
+    at: ago(3),
+    method: "cheque",
+    reference: "CHQ 004538 (post-dated)",
+    amount: 1000,
+    by: nameOf("accountant"),
+    noticeSentAt: ago(3),
+    bankAccountUuid: ops.uuid,
+    chequeUuid: ap3Cheque.uuid,
+  });
+
+  // CI-0001 was collected into the projects account by bank transfer.
+  customerInvoice("CI-0001").collectedToUuid = collections.uuid;
+
+  // CI-0003: STC's cheque bounced twelve days ago, so the invoice is open again.
+  const ci3 = customerInvoice("CI-0003");
+  const bounced = {
+    uuid: generateUuid(),
+    number: "781204",
+    direction: "received" as const,
+    bankAccountUuid: collections.uuid,
+    party: "STC",
+    amount: ci3.total,
+    issuedAt: ago(16),
+    dueDate: ago(14),
+    status: "bounced" as const,
+    ref: { kind: "customer_invoice" as const, uuid: ci3.uuid, label: ci3.number },
+    bouncedAt: ago(12),
+    bounceReason: "Signature mismatch — re-issue requested",
+  };
+  store.Cheques = [ap2Cheque, ap3Cheque, bounced];
+
+  // Last month is reconciled on both accounts (its closing has bank reconciliation ticked).
+  store.BankReconciliations = store.BankAccounts.map((account) => {
+    const gap = reconciliationGap(store, account, lastMonth);
+    return {
+      uuid: generateUuid(),
+      bankAccountUuid: account.uuid,
+      period: lastMonth,
+      statementBalance: gap.expectedStatement,
+      bookBalance: gap.bookBalance,
+      outstandingIssued: gap.outstandingIssued,
+      uncreditedReceived: gap.uncreditedReceived,
+      by: nameOf("accountant"),
+      at: ago(1),
+    };
+  });
+
+  store.LettersOfGuarantee = [
+    {
+      uuid: generateUuid(),
+      number: "LG-SNB-22071",
+      bank: "Saudi National Bank",
+      kind: "performance",
+      beneficiary: "Mobily",
+      projectUuid: project("MOB-001"),
+      amount: 64000,
+      issuedAt: ago(70),
+      expiresAt: ahead(300),
+    },
+    {
+      // Expires in 20 days — the renewal alert is live.
+      uuid: generateUuid(),
+      number: "LG-RJH-10388",
+      bank: "Al Rajhi Bank",
+      kind: "advance_payment",
+      beneficiary: "STC",
+      projectUuid: project("STC-005"),
+      amount: 32800,
+      issuedAt: ago(345),
+      expiresAt: ahead(20),
+    },
+    {
+      uuid: generateUuid(),
+      number: "LG-SNB-21950",
+      bank: "Saudi National Bank",
+      kind: "bid",
+      beneficiary: "Mobily",
+      amount: 25000,
+      issuedAt: ago(200),
+      expiresAt: ago(20),
+      releasedAt: ago(40),
+      note: "Released after award",
+    },
+  ];
+
+  // VAT and GOSI filed for every month but the last, which is still open.
+  const vatNet = (p: string) =>
+    round2(
+      store.CustomerInvoices.filter((i) => i.submittedAt.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
+        store.SupplierInvoices.filter((i) => i.status !== "rejected" && i.invoiceDate.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
+        store.Expenses.filter((e) => e.date.slice(0, 7) === p).reduce((sum, e) => sum + e.vat, 0),
+    );
+  const gosi = (p: string) =>
+    round2(
+      (store.PayrollRuns.find((r) => r.period === p)?.payslips ?? []).reduce((sum, s) => sum + s.gosiEmployee + s.gosiEmployer, 0),
+    );
+  store.TaxFilings = [2, 3, 4, 5, 6].flatMap((monthsAgo) => {
+    const p = period(monthsAgo);
+    return [
+      { uuid: generateUuid(), kind: "vat" as const, period: p, amount: vatNet(p), reference: `ZATCA-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 50), by: nameOf("accountant") },
+      { uuid: generateUuid(), kind: "gosi" as const, period: p, amount: gosi(p), reference: `GOSI-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 42), by: nameOf("accountant") },
+    ];
+  });
 };

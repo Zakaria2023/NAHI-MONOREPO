@@ -76,6 +76,12 @@ const emptyStore = (): Store => ({
   CostCenters: [],
   Expenses: [],
   OverheadAllocations: [],
+  BankAccounts: [],
+  Cheques: [],
+  BankReconciliations: [],
+  LettersOfGuarantee: [],
+  SupplierStatementChecks: [],
+  TaxFilings: [],
   Activity: [],
 });
 

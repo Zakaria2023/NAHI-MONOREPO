@@ -111,7 +111,36 @@ period, issue the financial statements.
 ## 5 (rules added) — the closing checklist
 
 Payroll can be ticked only when the month's payroll is paid; depreciation only when the
-month's depreciation is posted.
+month's depreciation is posted; bank reconciliation only when every bank account is
+reconciled for the month.
+
+## Treasury — banks, cheques, guarantees
+
+- **Bank accounts** — the balance is never stored: it is the opening balance plus every
+  movement the documents record (supplier payments, customer collections, paid extracts,
+  salaries, expenses, cash custody out and back). A payment or collection names its
+  account, or goes through the primary one.
+- **Cheques** — a payment or collection by cheque writes the cheque with its due date (a
+  later date makes it post-dated). It is booked when written and **clears** at the bank
+  on or after its due date. A **bounced** cheque undoes what it paid: the supplier
+  invoice is owed again, or the customer invoice reopens.
+- **Bank reconciliation** — for each account and month: the statement's closing balance
+  must equal the book balance plus issued cheques not yet cleared, less received cheques
+  not yet credited. Anything else is refused, with the difference shown.
+- **Letters of guarantee** — bank, kind (bid, performance, advance payment, retention),
+  beneficiary, project, amount, expiry; an alert 30 days before expiry; released when
+  returned. The retentions held on subcontractors are listed with them.
+- **Supplier statement matching** (§1 step 9) — the balance on the supplier's own
+  statement at a date against the system's at the same date; the difference is shown and
+  kept.
+
+## 8. Taxes and obligations
+
+- VAT by month and by quarter: output VAT on customer invoices; input VAT on supplier
+  invoices and on expenses.
+- The tax and insurance calendar: each month's VAT return and GOSI payment with its due
+  date; an alert **7 days before**, and once overdue. Filing records the reference and
+  fixes the amount. GOSI is paid only on an approved payroll.
 
 ## 8–9. Taxes, reports
 
@@ -131,3 +160,7 @@ The VAT summary (input VAT from supplier invoices, output VAT from customer invo
   non-Saudi 2 % company only (occupational hazards). Daily workers follow the same rates
   on their earned basic.
 - The payroll approval chain is the finance manager alone (the documents name none).
+- VAT is filed monthly, by the last day of the following month; GOSI is paid by the 15th
+  of the following month.
+- Supplier advances paid on a PO are not yet a bank movement (they carry no payment date
+  in the MVP); every other payment and collection is.

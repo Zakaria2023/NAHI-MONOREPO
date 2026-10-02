@@ -1,5 +1,6 @@
 import {
   Activity,
+  AlarmClock,
   BadgeCheck,
   Bell,
   Boxes,
@@ -8,25 +9,27 @@ import {
   CalendarClock,
   ClipboardList,
   Coins,
-  FileSpreadsheet,
   FileSignature,
+  FileSpreadsheet,
   FileText,
   FolderKanban,
+  Forklift,
   HandCoins,
   IdCard,
   Landmark,
   LayoutDashboard,
   Lock,
-  Forklift,
   Network,
   Package,
   PackageX,
   Percent,
   PiggyBank,
-  TrendingDown,
   Receipt,
+  ScrollText,
   Settings,
+  ShieldCheck,
   ShoppingCart,
+  TrendingDown,
   Truck,
   Users,
   Wallet,
@@ -41,7 +44,7 @@ type NavBadges = {
 
 const ICON = 17;
 
-/** The admin's whole menu, grouped as the four specification documents are. */
+/** The admin's whole menu, grouped by area of work. */
 export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
   {
     title: "Overview",
@@ -89,20 +92,39 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
     ],
   },
   {
-    title: "Finance",
+    title: "Payables & receivables",
     links: [
       { icon: <Receipt size={ICON} />, label: "Supplier invoices", href: "/finance/payables" },
       { icon: <CalendarClock size={ICON} />, label: "Due schedule & ageing", href: "/finance/schedule" },
       { icon: <HandCoins size={ICON} />, label: "Subcontractors", href: "/finance/subcontracts" },
       { icon: <FileSpreadsheet size={ICON} />, label: "Extracts", href: "/finance/extracts" },
       { icon: <FileText size={ICON} />, label: "Customer invoices", href: "/finance/receivables" },
+    ],
+  },
+  {
+    title: "Treasury",
+    links: [
+      { icon: <Landmark size={ICON} />, label: "Bank accounts", href: "/finance/bank" },
+      { icon: <ScrollText size={ICON} />, label: "Cheques", href: "/finance/cheques" },
+      { icon: <ShieldCheck size={ICON} />, label: "Guarantees & retentions", href: "/finance/guarantees" },
+    ],
+  },
+  {
+    title: "Cost control",
+    links: [
       { icon: <PiggyBank size={ICON} />, label: "Project budgets", href: "/finance/budgets" },
       { icon: <Coins size={ICON} />, label: "Expenses & cost centres", href: "/finance/expenses" },
       { icon: <Network size={ICON} />, label: "Overhead allocation", href: "/finance/overhead" },
+    ],
+  },
+  {
+    title: "Accounting",
+    links: [
       { icon: <Forklift size={ICON} />, label: "Fixed assets", href: "/finance/assets" },
       { icon: <TrendingDown size={ICON} />, label: "Depreciation", href: "/finance/depreciation" },
       { icon: <Lock size={ICON} />, label: "Monthly closing", href: "/finance/closing" },
-      { icon: <Percent size={ICON} />, label: "VAT summary", href: "/finance/vat" },
+      { icon: <Percent size={ICON} />, label: "VAT", href: "/finance/vat" },
+      { icon: <AlarmClock size={ICON} />, label: "Tax & insurance calendar", href: "/finance/obligations" },
     ],
   },
   {

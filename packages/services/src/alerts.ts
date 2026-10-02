@@ -1,7 +1,7 @@
 import { daysUntil, formatDate, nowIso } from "utils";
 import { readStore } from "../../../db";
 import { EntityKind } from "../../../db/enum";
-import { CUSTOMER_INVOICE_BASIS_LABELS, PERMIT_AUTHORITY_LABELS } from "../../../db/label";
+import { CUSTOMER_INVOICE_BASIS_LABELS, GUARANTEE_KIND_LABELS, OBLIGATION_KIND_LABELS, PERMIT_AUTHORITY_LABELS } from "../../../db/label";
 import { Store } from "../../../db/types";
 import { mobilyContext } from "./projects";
 import {
@@ -14,6 +14,7 @@ import { designWaitEndsAt, milestoneNeedsC09 } from "./rules/stc";
 import { stockBalance } from "./core/stock";
 import { CUSTODY_SETTLEMENT_DAYS } from "./custody";
 import { nextCountAt } from "./warehouse";
+import { obligationsFor } from "./obligations";
 
 // THE ALERTS the documents ask for — before permits expire, before FAC and Final
 // Clearance fall due (Mobily §7), the STC 24-hour countdown and C09 warning
@@ -227,6 +228,66 @@ const contractAlerts: AlertCollector = (store, now) =>
     ];
   });
 
+const GUARANTEE_WARNING_DAYS = 30;
+
+/** Tax §8: seven days before a VAT return or GOSI payment is due, and after. */
+const obligationAlerts: AlertCollector = (store, now) =>
+  obligationsFor(store, now)
+    .filter((o) => o.status === "overdue" || o.status === "due_soon")
+    .map((o) => ({
+      key: `obligation-${o.key}`,
+      severity: o.status === "overdue" ? ("danger" as const) : ("warning" as const),
+      title: o.status === "overdue" ? `${OBLIGATION_KIND_LABELS[o.kind]} overdue` : `${OBLIGATION_KIND_LABELS[o.kind]} due in ${o.daysLeft} day(s)`,
+      detail: `${o.period} — due ${formatDate(o.dueAt)}`,
+      target: { kind: "tax_filing" as const, uuid: o.key },
+      dueAt: o.dueAt,
+    }));
+
+const guaranteeAlerts: AlertCollector = (store, now) =>
+  store.LettersOfGuarantee.filter((g) => !g.releasedAt).flatMap((g): Alert[] => {
+    const days = daysUntil(g.expiresAt, now);
+    return days > GUARANTEE_WARNING_DAYS
+      ? []
+      : [
+          {
+            key: `lg-${g.uuid}`,
+            severity: days < 0 ? "danger" : "warning",
+            title: days < 0 ? "Letter of guarantee expired" : `Letter of guarantee expires in ${days} day(s)`,
+            detail: `${g.number} — ${GUARANTEE_KIND_LABELS[g.kind]}, ${g.beneficiary}`,
+            target: { kind: "guarantee", uuid: g.uuid },
+            dueAt: g.expiresAt,
+          },
+        ];
+  });
+
+const chequeAlerts: AlertCollector = (store, now) =>
+  store.Cheques.flatMap((c): Alert[] => {
+    if (c.status === "bounced" && c.bouncedAt && daysUntil(c.bouncedAt, now) > -30) {
+      return [
+        {
+          key: `cheque-bounced-${c.uuid}`,
+          severity: "danger",
+          title: c.direction === "received" ? "Customer cheque bounced" : "Our cheque bounced",
+          detail: `${c.number} — ${c.party}, ${c.ref.label} reopened`,
+          target: { kind: "cheque", uuid: c.uuid },
+        },
+      ];
+    }
+    if (c.status === "pending" && c.dueDate <= now) {
+      return [
+        {
+          key: `cheque-due-${c.uuid}`,
+          severity: "info",
+          title: c.direction === "received" ? "Cheque to deposit" : "Cheque due — not cleared yet",
+          detail: `${c.number} — ${c.party}, due ${formatDate(c.dueDate)}`,
+          target: { kind: "cheque", uuid: c.uuid },
+          dueAt: c.dueDate,
+        },
+      ];
+    }
+    return [];
+  });
+
 const COLLECTORS: AlertCollector[] = [
   mobilyAlerts,
   stcAlerts,
@@ -235,6 +296,9 @@ const COLLECTORS: AlertCollector[] = [
   reorderAlerts,
   custodyAlerts,
   contractAlerts,
+  obligationAlerts,
+  guaranteeAlerts,
+  chequeAlerts,
 ];
 
 export const listAlerts = async (): Promise<Alert[]> => {

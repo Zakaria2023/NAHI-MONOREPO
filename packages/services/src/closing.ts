@@ -7,11 +7,12 @@ import { ClosingPeriod, Store } from "../../../db/types";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { assertRole } from "./core/lookup";
+import { unreconciledAccounts } from "./banking";
 
 // MONTHLY CLOSING (finance §5): a period closes only when every checklist item
 // is ticked, and some can only be ticked when the system agrees — nothing open
-// in procurement/warehouse or custody, the month's payroll paid, its
-// depreciation posted.
+// in procurement/warehouse or custody, every bank account reconciled, the
+// month's payroll paid, its depreciation posted.
 
 export type ClosingItemView = {
   item: ClosingItem;
@@ -44,6 +45,10 @@ const itemBlocker = (store: Store, item: ClosingItem, period: string): string | 
   if (item === "payroll") {
     const run = store.PayrollRuns.find((r) => r.period === period);
     return run?.status === "paid" ? null : `The payroll for ${period} is ${run ? run.status : "not run"} — pay it first`;
+  }
+  if (item === "bank_reconciliation") {
+    const open = unreconciledAccounts(store, period);
+    return open.length > 0 ? `Not reconciled for ${period}: ${open.join(", ")}` : null;
   }
   if (item === "depreciation") {
     return store.DepreciationRuns.some((r) => r.period === period) ? null : `Depreciation for ${period} is not posted yet`;

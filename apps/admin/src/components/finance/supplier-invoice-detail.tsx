@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getSupplierInvoice } from "services";
+import { getSupplierInvoice, listBankAccounts } from "services";
 import { Card, StatusPill } from "ui";
 import { formatDate, formatDateTime } from "utils";
 import { SUPPLIER_INVOICE_STATUS_LABELS } from "@/db/label";
@@ -23,7 +23,11 @@ type SupplierInvoiceDetailProps = {
 };
 
 export const SupplierInvoiceDetail = async ({ uuid }: SupplierInvoiceDetailProps) => {
-  const [{ invoice, supplier, po, receipts, match }, actor] = await Promise.all([getSupplierInvoice(uuid), getCurrentStaff()]);
+  const [{ invoice, supplier, po, receipts, match }, actor, accounts] = await Promise.all([
+    getSupplierInvoice(uuid),
+    getCurrentStaff(),
+    listBankAccounts(),
+  ]);
   const approveBlocker = actor.role === "finance_manager" ? null : "Only the Finance manager approves supplier invoices — switch user at the foot of the sidebar.";
   const paymentBlocker =
     invoice.status === "registered"
@@ -72,7 +76,11 @@ export const SupplierInvoiceDetail = async ({ uuid }: SupplierInvoiceDetailProps
           <Card title="Payments" description="Bank transfer or cheque against this invoice. Each payment e-mails a notice to the supplier.">
             <div className="flex flex-col gap-5">
               {invoice.status === "approved" && invoice.outstanding > 0 && (
-                <PaymentForm action={recordSupplierPaymentAction.bind(null, invoice.uuid)} outstanding={invoice.outstanding} />
+                <PaymentForm
+                  action={recordSupplierPaymentAction.bind(null, invoice.uuid)}
+                  outstanding={invoice.outstanding}
+                  accounts={accounts.map((a) => ({ value: a.uuid, label: `${a.code} — ${a.bank}` }))}
+                />
               )}
               {paymentBlocker && <BlockedNote reason={paymentBlocker} />}
               {invoice.status === "paid" && <DoneNote label="Paid in full" at={invoice.payments.at(-1)?.at} />}

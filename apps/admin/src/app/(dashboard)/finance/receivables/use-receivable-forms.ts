@@ -17,4 +17,4 @@ export const useAsBuiltInvoiceForm = () =>
   });
 
 /** Takes the action already bound to the invoice. */
-export const useInvoiceCollectionForm = (action: FormAction) => useActionForm(collectionSchema, action, { paidAt: today() });
+export const useInvoiceCollectionForm = (action: FormAction) => useActionForm(collectionSchema, action, { method: "bank_transfer" as const, bankAccountUuid: "", chequeNumber: "", chequeDueDate: "", paidAt: today() });

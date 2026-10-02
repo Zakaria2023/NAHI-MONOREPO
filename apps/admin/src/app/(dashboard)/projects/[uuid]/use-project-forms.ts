@@ -43,7 +43,7 @@ export const useLabResultForm = (action: FormAction, testUuid: string) =>
 export const useCertificateInvoiceForm = (action: FormAction, kind: CertificateKind, amount: number) =>
   useActionForm(certificateInvoiceSchema, action, { kind, amount, submittedAt: today() });
 
-export const useCollectionForm = (action: FormAction) => useActionForm(collectionSchema, action, { paidAt: today() });
+export const useCollectionForm = (action: FormAction) => useActionForm(collectionSchema, action, { method: "bank_transfer" as const, bankAccountUuid: "", chequeNumber: "", chequeDueDate: "", paidAt: today() });
 
 export const useDesignForm = (action: FormAction) =>
   useActionForm(stcDesignSchema, action, { designClosedAt: today(), designEndDate: nowIso().slice(0, 16) });

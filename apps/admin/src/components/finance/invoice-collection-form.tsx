@@ -2,6 +2,7 @@
 
 import { useInvoiceCollectionForm } from "@/app/(dashboard)/finance/receivables/use-receivable-forms";
 import { ActionForm } from "@/components/forms/action-form";
+import { BankFields } from "@/components/forms/bank-fields";
 import { TextField } from "@/components/forms/text-field";
 import { FormAction } from "@/lib/action-result";
 
@@ -16,6 +17,7 @@ export const InvoiceCollectionForm = ({ action }: InvoiceCollectionFormProps) =>
       <div className="w-36">
         <TextField name="paidAt" label="Collected on" type="date" />
       </div>
+      <BankFields compact />
     </ActionForm>
   );
 };

@@ -9,6 +9,9 @@ import { useActionForm } from "@/lib/use-action-form";
 export const usePaymentForm = (action: FormAction, outstanding: number) =>
   useActionForm(paymentSchema, action, {
     method: "bank_transfer",
+    bankAccountUuid: "",
+    chequeNumber: "",
+    chequeDueDate: "",
     reference: "",
     amount: outstanding,
     paidAt: toDateInput(nowIso()),

@@ -34,6 +34,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  ChequeDirection,
+  ChequeStatus,
+  GuaranteeKind,
+  ObligationKind,
   CostCenterKind,
   EquipmentSupplyType,
   ExpenseCategory,
@@ -514,6 +518,9 @@ export type SupplierPayment = {
   by: string;
   /** When the payment notice went to the supplier's e-mail. */
   noticeSentAt: string;
+  /** The account it left; absent on older records = the primary account. */
+  bankAccountUuid?: string;
+  chequeUuid?: string;
 };
 
 export type SupplierInvoice = {
@@ -605,6 +612,9 @@ export type CustomerInvoice = {
   submittedAt: string;
   dueAt: string;
   paidAt?: string;
+  /** Where the collection went; absent = the primary account. */
+  collectedToUuid?: string;
+  collectionChequeUuid?: string;
   createdBy: string;
 };
 
@@ -851,6 +861,92 @@ export type DepreciationRun = {
   postedAt: string;
 };
 
+// ─── Banking and obligations ───────────────────────────────────────────────
+
+export type BankAccount = {
+  uuid: string;
+  code: string;
+  name: string;
+  bank: string;
+  iban: string;
+  openingBalance: number;
+  openingDate: string;
+  /** Payments and collections recorded without an account go through this one. */
+  primary: boolean;
+};
+
+/**
+ * A cheque, issued with a supplier payment or received with a customer
+ * collection. Post-dated until its due date; booked when written, on the bank
+ * statement when cleared. A bounced cheque undoes the payment or collection.
+ */
+export type Cheque = {
+  uuid: string;
+  number: string;
+  direction: ChequeDirection;
+  bankAccountUuid: string;
+  party: string;
+  amount: number;
+  issuedAt: string;
+  dueDate: string;
+  status: ChequeStatus;
+  ref: { kind: "supplier_invoice" | "customer_invoice"; uuid: string; label: string; paymentUuid?: string };
+  clearedAt?: string;
+  bouncedAt?: string;
+  bounceReason?: string;
+};
+
+/** A month's bank reconciliation: the statement against the book, explained by uncleared cheques. */
+export type BankReconciliation = {
+  uuid: string;
+  bankAccountUuid: string;
+  period: string;
+  statementBalance: number;
+  bookBalance: number;
+  outstandingIssued: number;
+  uncreditedReceived: number;
+  by: string;
+  at: string;
+};
+
+export type LetterOfGuarantee = {
+  uuid: string;
+  number: string;
+  bank: string;
+  kind: GuaranteeKind;
+  beneficiary: string;
+  projectUuid?: string;
+  amount: number;
+  issuedAt: string;
+  expiresAt: string;
+  releasedAt?: string;
+  note?: string;
+};
+
+/** The supplier's own statement, matched against the system's balance (finance §1 step 9). */
+export type SupplierStatementCheck = {
+  uuid: string;
+  supplierUuid: string;
+  asOf: string;
+  reportedBalance: number;
+  systemBalance: number;
+  difference: number;
+  note?: string;
+  by: string;
+  at: string;
+};
+
+/** A VAT return or a GOSI payment, filed for a month. */
+export type TaxFiling = {
+  uuid: string;
+  kind: ObligationKind;
+  period: string;
+  amount: number;
+  reference: string;
+  filedAt: string;
+  by: string;
+};
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export type ActivityEntry = {
@@ -903,5 +999,11 @@ export type Store = {
   CostCenters: CostCenter[];
   Expenses: Expense[];
   OverheadAllocations: OverheadAllocation[];
+  BankAccounts: BankAccount[];
+  Cheques: Cheque[];
+  BankReconciliations: BankReconciliation[];
+  LettersOfGuarantee: LetterOfGuarantee[];
+  SupplierStatementChecks: SupplierStatementCheck[];
+  TaxFilings: TaxFiling[];
   Activity: ActivityEntry[];
 };

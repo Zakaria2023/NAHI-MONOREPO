@@ -390,6 +390,24 @@ export type SupplierInvoiceStatus = (typeof supplierInvoiceStatuses)[number];
 
 export const paymentMethods = ["bank_transfer", "cheque"] as const satisfies readonly string[];
 
+/** Issued to a supplier, or received from a customer. */
+export const chequeDirections = ["issued", "received"] as const satisfies readonly string[];
+
+export type ChequeDirection = (typeof chequeDirections)[number];
+
+export const chequeStatuses = ["pending", "cleared", "bounced"] as const satisfies readonly string[];
+
+export type ChequeStatus = (typeof chequeStatuses)[number];
+
+export const guaranteeKinds = ["bid", "performance", "advance_payment", "retention"] as const satisfies readonly string[];
+
+export type GuaranteeKind = (typeof guaranteeKinds)[number];
+
+/** The filings tax §8 asks the system to remind about: VAT returns and social insurance. */
+export const obligationKinds = ["vat", "gosi"] as const satisfies readonly string[];
+
+export type ObligationKind = (typeof obligationKinds)[number];
+
 export type PaymentMethod = (typeof paymentMethods)[number];
 
 export const extractStatuses = [
@@ -542,6 +560,10 @@ export const entityKinds = [
   "expense",
   "cost_center",
   "overhead_allocation",
+  "bank_account",
+  "cheque",
+  "guarantee",
+  "tax_filing",
   "budget",
   "closing",
   "system",

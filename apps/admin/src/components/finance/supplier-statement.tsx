@@ -1,8 +1,13 @@
 import { notFound } from "next/navigation";
-import { listSuppliers, supplierStatement } from "services";
+import { listStatementChecks, listSuppliers, supplierStatement } from "services";
 import { Card, StatStrip, StatTile, Table } from "ui";
 import { formatDate, formatMoney, round2, sumBy } from "utils";
+import { statementCheckAction } from "@/app/(dashboard)/finance/payables/statement/[supplierUuid]/actions";
+import { CsvButton } from "@/components/shared/csv-button";
 import { FactList } from "@/components/shared/fact-list";
+import { PrintButton } from "@/components/shared/print-button";
+import { StatementCheckForm } from "./statement-check-form";
+import { StatementChecks } from "./statement-checks";
 import { PageHeader } from "@/components/shared/page-header";
 
 type SupplierStatementProps = {
@@ -11,7 +16,7 @@ type SupplierStatementProps = {
 
 /** Finance §1 step 9: the statement the supplier's own is reconciled against. */
 export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps) => {
-  const [suppliers, rows] = await Promise.all([listSuppliers(), supplierStatement(supplierUuid)]);
+  const [suppliers, rows, checks] = await Promise.all([listSuppliers(), supplierStatement(supplierUuid), listStatementChecks(supplierUuid)]);
   const supplier = suppliers.find((s) => s.uuid === supplierUuid);
   if (!supplier) {
     notFound();
@@ -42,6 +47,13 @@ export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps
         <StatTile label="Paid and recovered" value={formatMoney(debits)} hint="Payments plus advances recovered" />
         <StatTile label="Balance owed" value={formatMoney(balance)} hint={balance > 0 ? "Still payable to the supplier" : "Nothing owed"} />
       </StatStrip>
+      <div className="flex justify-end gap-2">
+        <CsvButton
+          filename={`${supplier.name}-statement`}
+          rows={[["Date", "Reference", "Description", "Debit", "Credit", "Balance"], ...rows.map((r) => [r.at.slice(0, 10), r.reference, r.description, r.debit, r.credit, r.balance])]}
+        />
+        <PrintButton />
+      </div>
       <Table
         data={rows.map((r, index) => ({ ...r, key: String(index) }))}
         rowKey={(r) => r.key}
@@ -55,6 +67,14 @@ export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps
           { key: "balance", header: "Balance", align: "end", render: (r) => <span className="font-medium">{formatMoney(r.balance)}</span> },
         ]}
       />
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3 print:hidden">
+        <Card className="xl:col-span-2" title="Matched against their statement" description="Step 9 — the supplier's own balance against ours on the same date">
+          <StatementChecks checks={checks} />
+        </Card>
+        <Card title="Match their statement">
+          <StatementCheckForm key={checks.length} action={statementCheckAction.bind(null, supplier.uuid)} />
+        </Card>
+      </div>
     </>
   );
 };

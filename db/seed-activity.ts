@@ -203,6 +203,25 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
     add("overhead_allocation", o.uuid, o.period, o.postedAt, o.postedBy, "Overhead allocated", `${o.lines.length} projects`);
   }
 
+  for (const c of store.Cheques) {
+    if (c.clearedAt) {
+      add("cheque", c.uuid, c.number, c.clearedAt, "Bank", "Cheque cleared", c.party);
+    }
+    if (c.bouncedAt) {
+      add("cheque", c.uuid, c.number, c.bouncedAt, "Bank", "Cheque bounced", `${c.ref.label} reopened — ${c.bounceReason ?? ""}`);
+    }
+  }
+  for (const r of store.BankReconciliations) {
+    const account = store.BankAccounts.find((a) => a.uuid === r.bankAccountUuid);
+    add("bank_account", r.bankAccountUuid, account?.code ?? "", r.at, r.by, "Bank reconciled", r.period);
+  }
+  for (const g of store.LettersOfGuarantee) {
+    add("guarantee", g.uuid, g.number, g.issuedAt, "Huda Al-Zahrani", "Letter of guarantee recorded", g.beneficiary);
+  }
+  for (const f of store.TaxFilings) {
+    add("tax_filing", f.uuid, `${f.kind.toUpperCase()} ${f.period}`, f.filedAt, f.by, f.kind === "vat" ? "VAT return filed" : "Social insurance paid", f.reference);
+  }
+
   for (const period of store.ClosingPeriods) {
     for (const [key, record] of Object.entries(period.items)) {
       if (record) {

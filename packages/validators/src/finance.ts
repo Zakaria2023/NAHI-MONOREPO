@@ -15,12 +15,29 @@ export const supplierInvoiceSchema = z.object({
 
 export type SupplierInvoiceInput = z.infer<typeof supplierInvoiceSchema>;
 
-export const paymentSchema = z.object({
+/** The account and, for a cheque, its number and due date — shared by payments and collections. */
+const bankFields = {
   method: z.enum(paymentMethods),
-  reference: requiredText("Reference"),
-  amount: money.refine((v) => v > 0, "Amount must be more than 0"),
-  paidAt: dateField,
-});
+  /** Empty = the primary account. */
+  bankAccountUuid: z.string(),
+  chequeNumber: z.string().trim().max(40),
+  /** Empty unless a cheque; a later date makes it post-dated. */
+  chequeDueDate: z.string(),
+};
+
+const chequeComplete = (v: { method: string; chequeNumber: string; chequeDueDate: string }) =>
+  v.method !== "cheque" || (v.chequeNumber.length > 0 && /^\d{4}-\d{2}-\d{2}$/.test(v.chequeDueDate));
+
+const CHEQUE_MESSAGE = { message: "A cheque needs its number and due date", path: ["chequeNumber"] };
+
+export const paymentSchema = z
+  .object({
+    ...bankFields,
+    reference: requiredText("Reference"),
+    amount: money.refine((v) => v > 0, "Amount must be more than 0"),
+    paidAt: dateField,
+  })
+  .refine(chequeComplete, CHEQUE_MESSAGE);
 
 export type PaymentInput = z.infer<typeof paymentSchema>;
 
@@ -78,9 +95,12 @@ export const asBuiltInvoiceSchema = z.object({
 
 export type AsBuiltInvoiceInput = z.infer<typeof asBuiltInvoiceSchema>;
 
-export const collectionSchema = z.object({
-  paidAt: dateField,
-});
+export const collectionSchema = z
+  .object({
+    ...bankFields,
+    paidAt: dateField,
+  })
+  .refine(chequeComplete, CHEQUE_MESSAGE);
 
 export type CollectionInput = z.infer<typeof collectionSchema>;
 

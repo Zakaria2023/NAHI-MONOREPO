@@ -83,9 +83,9 @@ describe("accounts payable", () => {
     const ap1 = readStore().SupplierInvoices[0];
     await approveSupplierInvoice(as("finance_manager"), ap1.uuid);
     await expect(
-      recordSupplierPayment(as("accountant"), ap1.uuid, { method: "bank_transfer", reference: "T1", amount: ap1.netPayable + 1, paidAt: today() }),
+      recordSupplierPayment(as("accountant"), ap1.uuid, { method: "bank_transfer", bankAccountUuid: "", chequeNumber: "", chequeDueDate: "", reference: "T1", amount: ap1.netPayable + 1, paidAt: today() }),
     ).rejects.toThrow(/outstanding/);
-    await recordSupplierPayment(as("accountant"), ap1.uuid, { method: "bank_transfer", reference: "T1", amount: ap1.netPayable, paidAt: today() });
+    await recordSupplierPayment(as("accountant"), ap1.uuid, { method: "bank_transfer", bankAccountUuid: "", chequeNumber: "", chequeDueDate: "", reference: "T1", amount: ap1.netPayable, paidAt: today() });
     const paid = readStore().SupplierInvoices[0];
     expect(paid.status).toBe("paid");
     expect(paid.payments[0].noticeSentAt).toBeDefined();
@@ -131,8 +131,8 @@ describe("monthly closing", () => {
     const period = new Date().toISOString().slice(0, 7);
     await expect(tickClosingItem(as("accountant"), { period, item: "procurement_warehouse" })).rejects.toThrow(/pending/);
     await expect(tickClosingItem(as("accountant"), { period, item: "custody" })).rejects.toThrow(/CC-0001/);
-    // Payroll and depreciation have their own system checks (assets.test.ts).
-    const checked = ["procurement_warehouse", "custody", "payroll", "depreciation"];
+    // Payroll, depreciation and bank reconciliation have their own system checks (assets, banking tests).
+    const checked = ["procurement_warehouse", "custody", "payroll", "depreciation", "bank_reconciliation"];
     for (const item of closingItems.filter((i) => !checked.includes(i))) {
       await tickClosingItem(as("accountant"), { period, item });
     }

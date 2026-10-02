@@ -54,6 +54,14 @@ export const entityHref = (kind: EntityKind, uuid: string): string => {
       return "/finance/expenses";
     case "overhead_allocation":
       return "/finance/overhead";
+    case "bank_account":
+      return `/finance/bank?account=${uuid}`;
+    case "cheque":
+      return "/finance/cheques";
+    case "guarantee":
+      return "/finance/guarantees";
+    case "tax_filing":
+      return "/finance/obligations";
     case "budget":
       return `/finance/budgets/${uuid}`;
     case "closing":

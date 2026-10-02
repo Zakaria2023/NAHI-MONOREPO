@@ -36,6 +36,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  ChequeDirection,
+  ChequeStatus,
+  GuaranteeKind,
+  ObligationKind,
   CostCenterKind,
   EquipmentSupplyType,
   ExpenseCategory,
@@ -425,6 +429,10 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   expense: "Expense",
   cost_center: "Cost centre",
   overhead_allocation: "Overhead allocation",
+  bank_account: "Bank account",
+  cheque: "Cheque",
+  guarantee: "Letter of guarantee",
+  tax_filing: "Tax filing",
   budget: "Budget",
   closing: "Monthly closing",
   system: "System",
@@ -527,4 +535,27 @@ export const OVERHEAD_BASIS_LABELS: Record<OverheadBasis, string> = {
   revenue: "Revenue invoiced",
   direct_cost: "Direct cost to date",
   equal: "Equal shares",
+};
+
+export const CHEQUE_DIRECTION_LABELS: Record<ChequeDirection, string> = {
+  issued: "Issued",
+  received: "Received",
+};
+
+export const CHEQUE_STATUS_LABELS: Record<ChequeStatus, string> = {
+  pending: "Pending",
+  cleared: "Cleared",
+  bounced: "Bounced",
+};
+
+export const GUARANTEE_KIND_LABELS: Record<GuaranteeKind, string> = {
+  bid: "Bid bond",
+  performance: "Performance",
+  advance_payment: "Advance payment",
+  retention: "Retention release",
+};
+
+export const OBLIGATION_KIND_LABELS: Record<ObligationKind, string> = {
+  vat: "VAT return",
+  gosi: "Social insurance (GOSI)",
 };
