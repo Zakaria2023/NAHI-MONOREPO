@@ -157,6 +157,21 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
       add("budget", b.projectUuid, code, r.at, r.by, "Approved budget revised", r.reason);
     }
   }
+  for (const c of store.SupplierContracts) {
+    add("supplier_contract", c.uuid, c.number, c.createdAt, c.createdBy, "Annual contract signed", c.title);
+  }
+  for (const r of store.SupplierReturns) {
+    add(
+      "supplier_return",
+      r.uuid,
+      r.number,
+      r.createdAt,
+      r.createdBy,
+      r.debitNoteNumber ? "Returned to supplier — debit note" : "Returned to supplier — replacement",
+      r.debitNoteNumber ? `${r.debitNoteNumber} — ${r.reason}` : r.reason,
+    );
+  }
+
   for (const period of store.ClosingPeriods) {
     for (const [key, record] of Object.entries(period.items)) {
       if (record) {

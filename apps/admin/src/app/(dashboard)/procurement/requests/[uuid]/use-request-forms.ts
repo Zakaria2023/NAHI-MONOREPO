@@ -1,6 +1,6 @@
 "use client";
 
-import { quotationSchema, selectQuotationSchema } from "validators";
+import { orderUnderContractSchema, quotationSchema, selectQuotationSchema } from "validators";
 import { FormAction } from "@/lib/action-result";
 import { useActionForm } from "@/lib/use-action-form";
 
@@ -25,3 +25,6 @@ export const useQuotationForm = (action: FormAction, lines: QuotationLineDefault
 
 export const useSelectQuotationForm = (action: FormAction, quotationUuid: string) =>
   useActionForm(selectQuotationSchema, action, { quotationUuid });
+
+export const useContractOrderForm = (action: FormAction, contractUuid: string) =>
+  useActionForm(orderUnderContractSchema, action, { contractUuid });

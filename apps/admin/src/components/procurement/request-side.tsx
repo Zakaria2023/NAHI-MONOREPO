@@ -32,7 +32,14 @@ export const RequestSide = ({ detail }: RequestSideProps) => {
           state={detail.stockChain}
         />
       )}
-      {purchaseRoute && pr.status !== "rfq" && (
+      {detail.purchaseOrder?.contractNumber && (
+        <Card title="Annual contract" description="Ordered at the contract's prices — no quotations, so no quotation approval">
+          <p className="text-sm text-secondary">
+            Raised under <span dir="ltr">{detail.purchaseOrder.contractNumber}</span>. The PO itself still goes through the PO approval chain.
+          </p>
+        </Card>
+      )}
+      {purchaseRoute && pr.status !== "rfq" && !detail.purchaseOrder?.contractNumber && (
         <ChainCard
           title="Quotation approval"
           description="The same six approve the PO after"

@@ -2,11 +2,12 @@ import Link from "next/link";
 import { PURCHASE_CHAIN, PurchaseOrderDetail } from "services";
 import { Card, StatusPill } from "ui";
 import { formatDate, formatMoney } from "utils";
-import { cancelOrderAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
+import { cancelOrderAction, penaltyTermsAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
 import { FactList } from "@/components/shared/fact-list";
 import { BlockedNote } from "./blocked-note";
 import { CancelOrderForm } from "./cancel-order-form";
 import { ChainCard } from "./chain-card";
+import { PenaltyTermsForm } from "./penalty-terms-form";
 
 type OrderSideProps = {
   detail: PurchaseOrderDetail;
@@ -59,10 +60,26 @@ export const OrderSide = ({ detail }: OrderSideProps) => {
               ),
             },
             { label: "Payment terms", value: `${po.paymentTermsDays} days` },
+            {
+              label: "Late penalty",
+              value:
+                (po.latePenaltyPctPerDay ?? 0) > 0
+                  ? `${po.latePenaltyPctPerDay} % a day, capped at ${po.latePenaltyCapPct ?? 10} %${detail.contract ? " (contract)" : ""}`
+                  : "None",
+            },
             { label: "Total incl. VAT", value: formatMoney(po.total) },
           ]}
         />
       </Card>
+      {!detail.contract && (po.status === "pending_approval" || po.status === "approved") && (
+        <Card title="Late-delivery penalty" description="Procurement, before the PO is sent — deducted from the invoice automatically">
+          <PenaltyTermsForm
+            action={penaltyTermsAction.bind(null, po.uuid)}
+            pctPerDay={po.latePenaltyPctPerDay ?? 0}
+            capPct={po.latePenaltyCapPct ?? 10}
+          />
+        </Card>
+      )}
       {!closed && (
         <Card title="Cancel the PO" description="Procurement, with the reason kept in the change log">
           {detail.receipts.length > 0 ? (

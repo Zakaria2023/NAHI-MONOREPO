@@ -261,6 +261,20 @@ export const budgetCategories = [
 
 export type BudgetCategory = (typeof budgetCategories)[number];
 
+/** What the supplier owes back for goods returned: a credit, or the goods again. */
+export const supplierReturnRemedies = ["debit_note", "replacement"] as const satisfies readonly string[];
+
+export type SupplierReturnRemedy = (typeof supplierReturnRemedies)[number];
+
+export const supplierReturnStatuses = ["awaiting_replacement", "settled"] as const satisfies readonly string[];
+
+export type SupplierReturnStatus = (typeof supplierReturnStatuses)[number];
+
+/** Rejected at the receiving check, or found faulty after it went into stock. */
+export const supplierReturnSources = ["rejected_at_receipt", "from_stock"] as const satisfies readonly string[];
+
+export type SupplierReturnSource = (typeof supplierReturnSources)[number];
+
 // ─── Warehouse ─────────────────────────────────────────────────────────────
 
 export const itemCategories = [
@@ -423,6 +437,8 @@ export const entityKinds = [
   "purchase_request",
   "quotation",
   "purchase_order",
+  "supplier_contract",
+  "supplier_return",
   "goods_receipt",
   "issue_request",
   "stock_transfer",

@@ -7,6 +7,8 @@ import { getCurrentStaff } from "@/lib/server/auth";
 import { PO_TONES } from "@/lib/status-tones";
 import { AdvanceCard } from "./advance-card";
 import { AmendmentsCard } from "./amendments-card";
+import { OrderChangesCard } from "./order-changes-card";
+import { OrderReturnsCard } from "./order-returns-card";
 import { OrderSide } from "./order-side";
 import { OrderStageCard } from "./order-stage-card";
 import { PurchaseOrderDocument } from "./purchase-order-document";
@@ -22,6 +24,8 @@ export const PurchaseOrderView = async ({ uuid }: PurchaseOrderViewProps) => {
   const [detail, actor, warehouses] = await Promise.all([getPurchaseOrder(uuid), getCurrentStaff(), listWarehouses()]);
   const { po, supplier, project } = detail;
   const receiving = po.status === "sent" || po.status === "partially_received" || po.status === "received";
+  const amendable = ["pending_approval", "approved", "sent", "partially_received"].includes(po.status);
+  const returnable = po.status === "partially_received" || po.status === "received";
   return (
     <>
       <PageHeader
@@ -41,6 +45,10 @@ export const PurchaseOrderView = async ({ uuid }: PurchaseOrderViewProps) => {
           <PurchaseOrderDocument detail={detail} />
           {receiving && <ReceiptProgressCard detail={detail} />}
           {receiving && <ReceiptsCard detail={detail} warehouses={warehouses} />}
+          {returnable && (
+            <OrderReturnsCard detail={detail} warehouses={warehouses.map((w) => ({ value: w.uuid, label: `${w.code} — ${w.name}` }))} />
+          )}
+          {amendable && <OrderChangesCard detail={detail} />}
           <AdvanceCard detail={detail} />
           <AmendmentsCard amendments={po.amendments} />
           <AsyncSection reloadKey={`log-${po.uuid}`}>

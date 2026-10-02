@@ -7,6 +7,8 @@ import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { assertNotFuture, assertRole, findOrThrow } from "./core/lookup";
 import { FINANCE_EDITORS } from "./core/roles";
+import { applyDebitNotes } from "./returns";
+import { latePenaltyFor } from "./rules/procurement";
 import {
   AgeingBuckets,
   advanceToRecover,
@@ -160,8 +162,16 @@ export const registerSupplierInvoice = async (
       (i) => i.advanceDeducted,
     );
     const advanceDeducted = advanceToRecover(po, recovered, input.total);
+    const penalty = latePenaltyFor(po, receipts, input.subtotal);
+    const uuid = generateUuid();
+    const debitNotesDeducted = applyDebitNotes(
+      store,
+      supplier.uuid,
+      uuid,
+      Math.max(0, round2(input.total - advanceDeducted - penalty.amount)),
+    );
     const invoice: SupplierInvoice = {
-      uuid: generateUuid(),
+      uuid,
       number: nextDocumentNumber("AP", store.SupplierInvoices.map((i) => i.number)),
       supplierUuid: supplier.uuid,
       invoiceNumber: input.invoiceNumber.trim(),
@@ -172,7 +182,9 @@ export const registerSupplierInvoice = async (
       vat: round2(input.vat),
       total: round2(input.total),
       advanceDeducted,
-      netPayable: round2(input.total - advanceDeducted),
+      latePenalty: penalty.amount,
+      debitNotesDeducted,
+      netPayable: round2(input.total - advanceDeducted - penalty.amount - debitNotesDeducted),
       dueDate: addDays(invoiceDate, po.paymentTermsDays),
       status: "registered",
       payments: [],
@@ -185,7 +197,13 @@ export const registerSupplierInvoice = async (
       actor,
       invoice,
       "Invoice registered and matched",
-      advanceDeducted > 0 ? `Advance ${formatMoney(advanceDeducted)} recovered` : undefined,
+      [
+        advanceDeducted > 0 && `Advance ${formatMoney(advanceDeducted)} recovered`,
+        penalty.amount > 0 && `Late penalty ${formatMoney(penalty.amount)} (${penalty.daysLate} day(s) late)`,
+        debitNotesDeducted > 0 && `Debit notes ${formatMoney(debitNotesDeducted)} set off`,
+      ]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     );
     return invoice;
   });
@@ -280,6 +298,9 @@ export const supplierStatement = async (supplierUuid: string): Promise<Statement
       ...(i.advanceDeducted > 0
         ? [{ at: i.invoiceDate, reference: i.number, description: "Advance recovered", debit: i.advanceDeducted, credit: 0 }]
         : []),
+      ...((i.latePenalty ?? 0) > 0
+        ? [{ at: i.invoiceDate, reference: i.number, description: "Late delivery penalty", debit: i.latePenalty ?? 0, credit: 0 }]
+        : []),
       ...i.payments.map((p) => ({
         at: p.at,
         reference: p.reference,
@@ -289,8 +310,15 @@ export const supplierStatement = async (supplierUuid: string): Promise<Statement
       })),
     ],
   );
+  const debitNotes = store.SupplierReturns.filter((r) => r.supplierUuid === supplierUuid && r.debitNoteNumber).map((r) => ({
+    at: r.createdAt,
+    reference: r.debitNoteNumber ?? r.number,
+    description: `Debit note — goods returned (${r.number})`,
+    debit: r.total,
+    credit: 0,
+  }));
   let balance = 0;
-  return entries
+  return [...entries, ...debitNotes]
     .sort((a, b) => a.at.localeCompare(b.at))
     .map((e) => {
       balance = round2(balance + e.credit - e.debit);

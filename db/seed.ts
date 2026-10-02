@@ -1,6 +1,7 @@
 import { addDays, addHours, generateUuid, round2 } from "utils";
 import { BudgetCategory, StaffRole, StcDocumentKey, StcParty } from "./enum";
 import { deriveActivity } from "./seed-activity";
+import { addExtraDemoData } from "./seed-extra";
 import { addMoreDemoData } from "./seed-more";
 import {
   Approval,
@@ -48,6 +49,8 @@ const emptyStore = (): Store => ({
   PurchaseRequests: [],
   Quotations: [],
   PurchaseOrders: [],
+  SupplierContracts: [],
+  SupplierReturns: [],
   GoodsReceipts: [],
   StockMovements: [],
   IssueRequests: [],
@@ -995,6 +998,7 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
   ];
 
   addMoreDemoData(store, now);
+  addExtraDemoData(store, now);
 
   store.Activity = [
     {

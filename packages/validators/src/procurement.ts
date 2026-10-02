@@ -6,6 +6,7 @@ import {
   itemCategories,
   itemKinds,
   recipientKinds,
+  supplierReturnRemedies,
   writeOffDecisions,
   writeOffReasons,
 } from "../../../db/enum";
@@ -226,3 +227,58 @@ export const clearanceSchema = z.object({
 });
 
 export type ClearanceInput = z.infer<typeof clearanceSchema>;
+
+const percent = z.coerce.number<string | number>().min(0, "Cannot be negative").max(100, "At most 100 %");
+
+const days = z.coerce.number<string | number>().int("Whole days").min(0, "Cannot be negative");
+
+export const supplierContractSchema = z
+  .object({
+    supplierUuid: z.string().min(1, "Pick a supplier"),
+    title: requiredText("Title"),
+    startsAt: dateField,
+    endsAt: dateField,
+    deliveryDays: days,
+    paymentTermsDays: days,
+    latePenaltyPctPerDay: percent,
+    latePenaltyCapPct: percent,
+    lines: z
+      .array(z.object({ itemUuid: z.string().min(1, "Pick an item"), unitPrice: money.refine((v) => v > 0, "Price the item") }))
+      .min(1, "Price at least one item"),
+  })
+  .refine((v) => v.endsAt > v.startsAt, { message: "The contract must end after it starts", path: ["endsAt"] });
+
+export type SupplierContractInput = z.infer<typeof supplierContractSchema>;
+
+export const orderUnderContractSchema = z.object({
+  contractUuid: z.string().min(1, "Pick a contract"),
+});
+
+export type OrderUnderContractInput = z.infer<typeof orderUnderContractSchema>;
+
+export const amendPurchaseOrderSchema = z.object({
+  deliveryDays: days,
+  note: requiredText("Reason"),
+  lines: z
+    .array(z.object({ itemUuid: z.string().min(1), qty: positiveQty, unitPrice: money }))
+    .min(1, "A PO needs at least one line"),
+});
+
+export type AmendPurchaseOrderInput = z.infer<typeof amendPurchaseOrderSchema>;
+
+export const penaltyTermsSchema = z.object({
+  latePenaltyPctPerDay: percent,
+  latePenaltyCapPct: percent,
+});
+
+export type PenaltyTermsInput = z.infer<typeof penaltyTermsSchema>;
+
+export const supplierReturnSchema = z.object({
+  warehouseUuid: z.string().min(1, "Pick a warehouse"),
+  itemUuid: z.string().min(1, "Pick an item"),
+  qty: positiveQty,
+  reason: requiredText("Reason"),
+  remedy: z.enum(supplierReturnRemedies),
+});
+
+export type SupplierReturnInput = z.infer<typeof supplierReturnSchema>;

@@ -11,6 +11,10 @@ export const entityHref = (kind: EntityKind, uuid: string): string => {
     case "purchase_order":
     case "goods_receipt":
       return `/procurement/orders/${uuid}`;
+    case "supplier_contract":
+      return `/procurement/contracts/${uuid}`;
+    case "supplier_return":
+      return "/procurement/returns";
     case "issue_request":
       return `/warehouse/issue-requests/${uuid}`;
     case "stock_transfer":

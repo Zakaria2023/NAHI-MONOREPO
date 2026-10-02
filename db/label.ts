@@ -36,6 +36,9 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  SupplierReturnRemedy,
+  SupplierReturnSource,
+  SupplierReturnStatus,
   WarehouseDocStatus,
   WriteOffDecision,
   WriteOffReason,
@@ -385,6 +388,8 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   purchase_request: "Purchase request",
   quotation: "Quotation",
   purchase_order: "Purchase order",
+  supplier_contract: "Annual contract",
+  supplier_return: "Supplier return",
   goods_receipt: "Goods receipt",
   issue_request: "Issue request",
   stock_transfer: "Stock transfer",
@@ -401,4 +406,19 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   budget: "Budget",
   closing: "Monthly closing",
   system: "System",
+};
+
+export const SUPPLIER_RETURN_REMEDY_LABELS: Record<SupplierReturnRemedy, string> = {
+  debit_note: "Debit note",
+  replacement: "Replacement",
+};
+
+export const SUPPLIER_RETURN_STATUS_LABELS: Record<SupplierReturnStatus, string> = {
+  awaiting_replacement: "Awaiting replacement",
+  settled: "Settled",
+};
+
+export const SUPPLIER_RETURN_SOURCE_LABELS: Record<SupplierReturnSource, string> = {
+  rejected_at_receipt: "Rejected at receipt",
+  from_stock: "Returned from stock",
 };

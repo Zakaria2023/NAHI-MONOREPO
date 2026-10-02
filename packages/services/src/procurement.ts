@@ -1,9 +1,11 @@
 import { addDays, formatMoney, generateUuid, nextDocumentNumber, nowIso, round2, sumBy, toIso } from "utils";
 import {
   AdvancePaymentInput,
+  AmendPurchaseOrderInput,
   CancelPurchaseOrderInput,
   DecisionFormInput,
   GoodsReceiptInput,
+  PenaltyTermsInput,
   ProcurementReviewInput,
   PurchaseRequestInput,
   QuotationInput,
@@ -21,6 +23,7 @@ import {
   Quotation,
   Store,
   Supplier,
+  SupplierContract,
 } from "../../../db/types";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
@@ -31,10 +34,13 @@ import { FINANCE_EDITORS, PROCUREMENT_EDITORS, REQUESTERS, WAREHOUSE_EDITORS } f
 import { addMovement, stockBalance } from "./core/stock";
 import { withVat } from "./core/tax";
 import { budgetBlocker, budgetUsage } from "./budgets";
+import { CoveringContract, coveringContracts } from "./contracts";
+import { SupplierReturnRow, listPurchaseOrderReturns, recordRejectedAtReceipt, settleRedelivered } from "./returns";
 import { PR_CHAIN, PURCHASE_CHAIN, STOCK_SUPPLY_CHAIN } from "./rules/chains";
 import {
   QuotationComparison,
   ReceiptLineState,
+  amendmentBlocker,
   compareQuotations,
   goodsReceiptBlocker,
   linesTotal,
@@ -81,7 +87,9 @@ export type PurchaseRequestDetail = {
   rfqBlocker: string | null;
   /** Total in all warehouses covers every line — procurement's system check. */
   systemStockCovers: boolean;
-  purchaseOrder: Pick<PurchaseOrder, "uuid" | "number" | "status"> | null;
+  purchaseOrder: (Pick<PurchaseOrder, "uuid" | "number" | "status"> & { contractNumber?: SupplierContract["number"] }) | null;
+  /** Annual contracts in force that price every item — the request can skip the RFQ. */
+  contracts: CoveringContract[];
 };
 
 export type PurchaseOrderRow = Pick<
@@ -97,7 +105,8 @@ export type PurchaseOrderRow = Pick<
 export type PurchaseOrderDetail = {
   po: PurchaseOrder;
   pr: Pick<PurchaseRequest, "uuid" | "number">;
-  quotation: Pick<Quotation, "uuid" | "number">;
+  quotation: Pick<Quotation, "uuid" | "number"> | null;
+  contract: Pick<SupplierContract, "uuid" | "number" | "title"> | null;
   supplier: Supplier;
   project: Pick<Project, "uuid" | "code" | "name">;
   company: typeof COMPANY_PROFILE;
@@ -107,6 +116,7 @@ export type PurchaseOrderDetail = {
   receiptState: ItemLine<ReceiptLineState>[];
   late: boolean;
   advanceRecovered: number;
+  returns: SupplierReturnRow[];
 };
 
 const itemRef = (store: Store, itemUuid: string): ItemLine<object>["item"] => {
@@ -203,7 +213,15 @@ export const getPurchaseRequest = async (uuid: string): Promise<PurchaseRequestD
     comparison: compareQuotations(quotations).map((c) => ({ ...c, supplierName: supplierName(c.supplierUuid) })),
     rfqBlocker: rfqBlocker(quotations),
     systemStockCovers: pr.lines.every((l) => stockBalance(store, l.itemUuid) >= l.qty),
-    purchaseOrder: po ? { uuid: po.uuid, number: po.number, status: po.status } : null,
+    purchaseOrder: po
+      ? {
+          uuid: po.uuid,
+          number: po.number,
+          status: po.status,
+          contractNumber: store.SupplierContracts.find((c) => c.uuid === po.contractUuid)?.number,
+        }
+      : null,
+    contracts: pr.status === "rfq" ? coveringContracts(store, pr.lines, nowIso()) : [],
   };
 };
 
@@ -228,13 +246,15 @@ export const getPurchaseOrder = async (uuid: string): Promise<PurchaseOrderDetai
   const store = readStore();
   const po = findOrThrow(store.PurchaseOrders, uuid, "Purchase order");
   const pr = findOrThrow(store.PurchaseRequests, po.prUuid, "Purchase request");
-  const quotation = findOrThrow(store.Quotations, po.quotationUuid, "Quotation");
+  const quotation = po.quotationUuid ? findOrThrow(store.Quotations, po.quotationUuid, "Quotation") : null;
+  const contract = po.contractUuid ? findOrThrow(store.SupplierContracts, po.contractUuid, "Contract") : null;
   const project = findOrThrow(store.Projects, po.projectUuid, "Project");
   const receipts = store.GoodsReceipts.filter((r) => r.poUuid === po.uuid);
   return {
     po,
     pr: { uuid: pr.uuid, number: pr.number },
-    quotation: { uuid: quotation.uuid, number: quotation.number },
+    quotation: quotation ? { uuid: quotation.uuid, number: quotation.number } : null,
+    contract: contract ? { uuid: contract.uuid, number: contract.number, title: contract.title } : null,
     supplier: findOrThrow(store.Suppliers, po.supplierUuid, "Supplier"),
     project: { uuid: project.uuid, code: project.code, name: project.name },
     company: COMPANY_PROFILE,
@@ -253,6 +273,7 @@ export const getPurchaseOrder = async (uuid: string): Promise<PurchaseOrderDetai
         (inv) => inv.advanceDeducted,
       ),
     ),
+    returns: listPurchaseOrderReturns(store, po.uuid),
   };
 };
 
@@ -571,6 +592,66 @@ export const cancelPurchaseOrder = async (
   });
 };
 
+/**
+ * Other cases — modifying a PO "with the approval of procurement and whoever
+ * approved it": procurement changes the lines or the delivery, any increase is
+ * checked against the budget, and the PO goes back through its approval chain.
+ * Every change is kept in the PO's change log.
+ */
+export const amendPurchaseOrder = async (actor: Actor, uuid: string, input: AmendPurchaseOrderInput): Promise<void> => {
+  assertRole(actor.role, PROCUREMENT_EDITORS, "modify purchase orders");
+  transact((store) => {
+    const po = findOrThrow(store.PurchaseOrders, uuid, "Purchase order");
+    const lines = input.lines.map((l) => ({ itemUuid: l.itemUuid, qty: round2(l.qty), unitPrice: round2(l.unitPrice) }));
+    const blocker = amendmentBlocker(po, store.GoodsReceipts.filter((r) => r.poUuid === uuid), lines, input.deliveryDays);
+    if (blocker) {
+      throw new Error(blocker);
+    }
+    if (lines.some((l) => !po.lines.some((p) => p.itemUuid === l.itemUuid))) {
+      throw new Error("A modification changes the PO's own lines; new items need a new request");
+    }
+    const subtotal = linesTotal(lines);
+    const increase = round2(subtotal - po.subtotal);
+    if (increase > 0) {
+      const overBudget = budgetBlocker(store, po.projectUuid, po.budgetCategory, increase);
+      if (overBudget) {
+        throw new Error(overBudget);
+      }
+    }
+    const before = formatMoney(po.total);
+    po.lines = lines;
+    po.subtotal = subtotal;
+    Object.assign(po, withVat(subtotal));
+    po.deliveryDays = input.deliveryDays;
+    po.approvals = [];
+    po.status = "pending_approval";
+    po.amendments.push({ at: nowIso(), by: actor.name, note: `Modified (${before} → ${formatMoney(po.total)}): ${input.note}` });
+    logPo(store, actor, po, "Modified — back to the approval chain", `${before} → ${formatMoney(po.total)} — ${input.note}`);
+  });
+};
+
+/** The late-delivery penalty terms of a PO not under a contract, set before it is sent. */
+export const setPenaltyTerms = async (actor: Actor, uuid: string, input: PenaltyTermsInput): Promise<void> => {
+  assertRole(actor.role, PROCUREMENT_EDITORS, "set penalty terms");
+  transact((store) => {
+    const po = findOrThrow(store.PurchaseOrders, uuid, "Purchase order");
+    if (po.contractUuid) {
+      throw new Error("A call-off carries its contract's penalty terms");
+    }
+    if (po.status !== "pending_approval" && po.status !== "approved") {
+      throw new Error("Penalty terms are set before the PO is sent");
+    }
+    po.latePenaltyPctPerDay = input.latePenaltyPctPerDay;
+    po.latePenaltyCapPct = input.latePenaltyCapPct;
+    po.amendments.push({
+      at: nowIso(),
+      by: actor.name,
+      note: `Late penalty ${input.latePenaltyPctPerDay} % a day, capped at ${input.latePenaltyCapPct} %`,
+    });
+    logPo(store, actor, po, "Late penalty terms set", `${input.latePenaltyPctPerDay} % a day, cap ${input.latePenaltyCapPct} %`);
+  });
+};
+
 /** Other cases: an advance, recovered automatically from the PO's invoices (finance §1 step 5). */
 export const recordAdvancePayment = async (
   actor: Actor,
@@ -634,6 +715,8 @@ export const receiveGoods = async (actor: Actor, poUuid: string, input: GoodsRec
     }
     const state = receiptState(po, store.GoodsReceipts);
     po.status = state.every((s) => s.outstanding === 0) ? "received" : "partially_received";
+    recordRejectedAtReceipt(store, actor, po, receipt);
+    settleRedelivered(store, po, receivedAt);
     const rejected = sumBy(receipt.lines, (l) => l.receivedQty - l.acceptedQty);
     logPo(store, actor, po, `Goods received — ${receipt.number}`, rejected > 0 ? `${rejected} rejected and returned to supplier` : undefined);
     return receipt;

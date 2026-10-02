@@ -207,6 +207,26 @@ const custodyAlerts: AlertCollector = (store, now) => {
   return [...counts, ...cash];
 };
 
+const CONTRACT_WARNING_DAYS = 30;
+
+const contractAlerts: AlertCollector = (store, now) =>
+  store.SupplierContracts.flatMap((contract): Alert[] => {
+    const days = daysUntil(contract.endsAt, now);
+    if (contract.startsAt > now || days < 0 || days > CONTRACT_WARNING_DAYS) {
+      return [];
+    }
+    return [
+      {
+        key: `contract-${contract.uuid}`,
+        severity: "info",
+        title: `Annual contract ends in ${days} day(s)`,
+        detail: `${contract.number} — ${store.Suppliers.find((s) => s.uuid === contract.supplierUuid)?.name ?? ""}, ${formatDate(contract.endsAt)}`,
+        target: { kind: "supplier_contract", uuid: contract.uuid },
+        dueAt: contract.endsAt,
+      },
+    ];
+  });
+
 const COLLECTORS: AlertCollector[] = [
   mobilyAlerts,
   stcAlerts,
@@ -214,6 +234,7 @@ const COLLECTORS: AlertCollector[] = [
   latePurchaseOrderAlerts,
   reorderAlerts,
   custodyAlerts,
+  contractAlerts,
 ];
 
 export const listAlerts = async (): Promise<Alert[]> => {

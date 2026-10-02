@@ -53,7 +53,16 @@ export const PurchaseOrderDocument = ({ detail }: PurchaseOrderDocumentProps) =>
                 </Link>
               ),
             },
-            { label: "Quotation", value: <span dir="ltr">{quotation.number}</span> },
+            detail.contract
+              ? {
+                  label: "Annual contract",
+                  value: (
+                    <Link href={`/procurement/contracts/${detail.contract.uuid}`} dir="ltr" className="hover:text-primary">
+                      {detail.contract.number}
+                    </Link>
+                  ),
+                }
+              : { label: "Quotation", value: <span dir="ltr">{quotation?.number ?? "—"}</span> },
             { label: "Budget category", value: BUDGET_CATEGORY_LABELS[po.budgetCategory] },
           ]}
         />

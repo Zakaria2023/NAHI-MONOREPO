@@ -9,9 +9,11 @@ import {
   decideQuotationAction,
   decideRequestAction,
   decideStockSupplyAction,
+  orderUnderContractAction,
 } from "@/app/(dashboard)/procurement/requests/[uuid]/actions";
 import { DecisionForm } from "@/components/shared/decision-form";
 import { PO_TONES } from "@/lib/status-tones";
+import { ContractOrderForm } from "./contract-order-form";
 import { ProcurementReview } from "./procurement-review";
 import { QuotationsPanel } from "./quotations-panel";
 
@@ -41,7 +43,11 @@ export const RequestStageCard = ({ detail, actorRole, suppliers }: RequestStageC
   return (
     <Card
       title={TITLES[pr.status].title}
-      description={TITLES[pr.status].description}
+      description={
+        detail.purchaseOrder?.contractNumber
+          ? `Ordered under annual contract ${detail.purchaseOrder.contractNumber}, at its prices and terms`
+          : TITLES[pr.status].description
+      }
       action={closed ? undefined : <StatusPill tone="info">Next step</StatusPill>}
     >
       {pr.status === "pending_manager" && prChain.nextRole && (
@@ -74,7 +80,14 @@ export const RequestStageCard = ({ detail, actorRole, suppliers }: RequestStageC
         </div>
       )}
 
-      {pr.status === "rfq" && <QuotationsPanel detail={detail} suppliers={suppliers} />}
+      {pr.status === "rfq" && (
+        <div className="flex flex-col gap-6">
+          {detail.contracts.length > 0 && (
+            <ContractOrderForm action={orderUnderContractAction.bind(null, pr.uuid)} contracts={detail.contracts} />
+          )}
+          <QuotationsPanel detail={detail} suppliers={suppliers} />
+        </div>
+      )}
 
       {pr.status === "quote_approval" && quoteChain.nextRole && (
         <div className="flex flex-col gap-4">

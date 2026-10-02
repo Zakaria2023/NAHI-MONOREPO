@@ -5,10 +5,17 @@ import {
   decidePurchaseRequest,
   decideQuotation,
   decideStockSupply,
+  orderUnderContract,
   reviewPurchaseRequest,
   submitQuotationForApproval,
 } from "services";
-import { decisionSchema, procurementReviewSchema, quotationSchema, selectQuotationSchema } from "validators";
+import {
+  decisionSchema,
+  orderUnderContractSchema,
+  procurementReviewSchema,
+  quotationSchema,
+  selectQuotationSchema,
+} from "validators";
 import { ActionResult } from "@/lib/action-result";
 import { runAction } from "@/lib/server/run-action";
 
@@ -38,3 +45,6 @@ export const submitQuotationAction = async (uuid: string, _prev: ActionResult, d
 
 export const decideQuotationAction = async (uuid: string, _prev: ActionResult, data: unknown) =>
   runAction(data, (actor, input) => decideQuotation(actor, uuid, input), { schema: decisionSchema, success: "Decision recorded" });
+
+export const orderUnderContractAction = async (uuid: string, _prev: ActionResult, data: unknown) =>
+  runAction(data, (actor, input) => orderUnderContract(actor, uuid, input), { schema: orderUnderContractSchema, success: "PO raised under the contract" });

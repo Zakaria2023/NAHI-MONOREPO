@@ -34,6 +34,9 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  SupplierReturnRemedy,
+  SupplierReturnSource,
+  SupplierReturnStatus,
   WarehouseDocStatus,
   WriteOffDecision,
   WriteOffReason,
@@ -267,7 +270,9 @@ export type PurchaseOrder = {
   uuid: string;
   number: string;
   prUuid: string;
-  quotationUuid: string;
+  /** The approved quotation it came from — absent for a call-off under an annual contract. */
+  quotationUuid?: string;
+  contractUuid?: string;
   supplierUuid: string;
   projectUuid: string;
   budgetCategory: BudgetCategory;
@@ -283,6 +288,9 @@ export type PurchaseOrder = {
   expectedDeliveryAt?: string;
   /** Paid to the supplier up front; recovered from its invoices automatically. */
   advancePaid: number;
+  /** Contract late-delivery penalty, % of the invoiced value per day late, capped. */
+  latePenaltyPctPerDay?: number;
+  latePenaltyCapPct?: number;
   amendments: { at: string; by: string; note: string }[];
   evaluation?: SupplierEvaluation;
   createdAt: string;
@@ -303,6 +311,47 @@ export type GoodsReceipt = {
   receivedAt: string;
   receivedBy: string;
   lines: GoodsReceiptLine[];
+};
+
+/** An annual agreement: repeat POs at agreed prices, without a new RFQ (procurement §1, other cases). */
+export type SupplierContract = {
+  uuid: string;
+  number: string;
+  supplierUuid: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  lines: { itemUuid: string; unitPrice: number }[];
+  deliveryDays: number;
+  paymentTermsDays: number;
+  latePenaltyPctPerDay: number;
+  latePenaltyCapPct: number;
+  createdBy: string;
+  createdAt: string;
+};
+
+/** Goods sent back to the supplier, against a debit note or a replacement. */
+export type SupplierReturn = {
+  uuid: string;
+  number: string;
+  poUuid: string;
+  supplierUuid: string;
+  grnUuid?: string;
+  warehouseUuid: string;
+  source: SupplierReturnSource;
+  lines: PricedLine[];
+  reason: string;
+  remedy: SupplierReturnRemedy;
+  status: SupplierReturnStatus;
+  subtotal: number;
+  vat: number;
+  total: number;
+  /** Set for a debit note; what is still to be deducted is `total` less what was applied. */
+  debitNoteNumber?: string;
+  appliedToInvoices: { invoiceUuid: string; amount: number }[];
+  createdBy: string;
+  createdAt: string;
+  settledAt?: string;
 };
 
 // ─── Warehouse ─────────────────────────────────────────────────────────────
@@ -466,6 +515,10 @@ export type SupplierInvoice = {
   total: number;
   /** Advance recovered from this invoice, worked out when it was registered. */
   advanceDeducted: number;
+  /** Open debit notes of the supplier set off against this invoice. */
+  debitNotesDeducted?: number;
+  /** Late-delivery penalty under the PO's contract terms. */
+  latePenalty?: number;
   netPayable: number;
   dueDate: string;
   status: SupplierInvoiceStatus;
@@ -596,6 +649,8 @@ export type Store = {
   PurchaseRequests: PurchaseRequest[];
   Quotations: Quotation[];
   PurchaseOrders: PurchaseOrder[];
+  SupplierContracts: SupplierContract[];
+  SupplierReturns: SupplierReturn[];
   GoodsReceipts: GoodsReceipt[];
   StockMovements: StockMovement[];
   IssueRequests: IssueRequest[];

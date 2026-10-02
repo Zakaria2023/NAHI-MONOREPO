@@ -73,7 +73,10 @@ describe("accounts payable", () => {
       total: ap1.total,
     });
     expect(invoice.advanceDeducted).toBe(1000);
-    expect(invoice.netPayable).toBe(ap1.total - 1000);
+    // PO-0001 also carries late-delivery penalty terms, and Arab Cables has an open
+    // debit note (DN-0001) — both come off with the advance.
+    expect(invoice.debitNotesDeducted).toBe(401.58);
+    expect(invoice.netPayable).toBeCloseTo(ap1.total - 1000 - (invoice.latePenalty ?? 0) - 401.58, 2);
   });
 
   it("pays an approved invoice and closes it when fully paid", async () => {

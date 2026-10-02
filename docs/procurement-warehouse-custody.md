@@ -28,6 +28,25 @@ Other cases: amending or cancelling a PO (procurement + the approver, change log
 late supplier (automatic alert); non-conforming delivery (return to supplier);
 annual contracts; advance payments linked to the PO and settled on the final invoice.
 
+How the system handles them:
+
+- **Modifying a PO** — procurement changes quantities, prices or delivery while the PO
+  is not fully received (never below what was accepted); an increase is checked against
+  the budget, and the PO goes back through the full PO approval chain. The change and
+  its reason go into the PO's change log.
+- **Late supplier** — the alert, plus the contract's penalty: a % of the invoiced value
+  per day the last receipt on an invoice came after the expected delivery, capped. It is
+  deducted automatically when the invoice is registered. Terms come from the annual
+  contract, or procurement sets them on the PO before it is sent.
+- **Non-conforming supply** — rejected quantities at receipt become a return note and
+  stay outstanding on the PO until re-delivered. Goods found faulty in stock are returned
+  from stock against a **debit note** (set off automatically against the supplier's next
+  invoice) or a **replacement** (booked back into stock when it arrives).
+- **Annual contracts** — agreed prices per item for a period, with delivery, payment and
+  penalty terms. A request in RFQ whose items a contract in force prices can be ordered
+  under it: the PO is raised at the contract's prices without quotations and goes to the
+  PO approval chain. An alert shows 30 days before a contract ends.
+
 ## 2. Receiving
 
 Approved PO → goods arrive → receipt report (quantity and specification against the PO)
