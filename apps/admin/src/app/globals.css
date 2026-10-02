@@ -66,3 +66,14 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--color-hairline) transparent;
 }
+
+/* On paper: no colours wasted on surfaces, and tables keep their rows together. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+  tr {
+    break-inside: avoid;
+  }
+}

@@ -9,6 +9,7 @@ import {
   CASH_CUSTODY_CHAIN,
   EXTRACT_CHAIN,
   ISSUE_CHAIN,
+  PAYROLL_CHAIN,
   PR_CHAIN,
   PURCHASE_CHAIN,
   STOCKTAKE_CHAIN,
@@ -93,6 +94,11 @@ const pending = (
   for (const ex of store.Extracts) {
     if (["submitted", "engineer_approved", "pm_approved"].includes(ex.status) && chainState(EXTRACT_CHAIN, ex.approvals).nextRole === role) {
       push({ kind: "extract", uuid: ex.uuid, number: ex.number, title: "Subcontractor extract", step: "Extract approval" });
+    }
+  }
+  for (const run of store.PayrollRuns) {
+    if (run.status === "draft" && chainState(PAYROLL_CHAIN, run.approvals).nextRole === role) {
+      push({ kind: "payroll_run", uuid: run.uuid, number: run.number, title: `Payroll ${run.period}`, step: "Payroll approval" });
     }
   }
   for (const inv of store.SupplierInvoices) {

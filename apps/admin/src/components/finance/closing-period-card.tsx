@@ -22,7 +22,7 @@ export const ClosingPeriodCard = ({ view, canCloseRole }: ClosingPeriodCardProps
       ? `${view.items.length - done} checklist item(s) still open.`
       : canCloseRole
         ? null
-        : "Only the Finance manager closes a period — switch user in the top bar.";
+        : "Only the Finance manager closes a period — switch user at the foot of the sidebar.";
   return (
     <Card
       title={`Period ${view.period}`}

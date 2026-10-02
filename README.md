@@ -21,7 +21,7 @@ pnpm db:reset    # rebuild the demo data
 - **No database.** All data is in `.data/store.json` (created from `db/seed.ts` on first
   run). `db/types.ts` is the schema; `db/index.ts` is the only code that touches the
   file, and it is what MySQL + Drizzle will replace.
-- **No auth provider.** The top bar's user switcher picks the acting staff member (one
+- **No auth provider.** The user switcher at the foot of the sidebar picks the acting staff member (one
   per role). Approval chains check that role, so walking a request through its chain
   means switching user. `apps/admin/src/lib/server/auth.ts` is where Clerk will go.
 - **No file storage.** Uploading a document records its file name.

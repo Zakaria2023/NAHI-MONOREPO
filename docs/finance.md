@@ -53,11 +53,25 @@ pending documents), bank reconciliation, supplier balances, customer balances, c
 closed (no open custody), payroll, depreciation, accruals/prepayments/suspense, lock the
 period, issue the financial statements.
 
-## 6–9. Payroll, fixed assets, taxes, reports
+## 6. Payroll
 
-Out of the MVP except the VAT summary (input VAT from supplier invoices, output VAT from
-customer invoices). Payroll, the fixed-asset register and depreciation, social insurance
-and the full report catalogue are listed in the roadmap in `README.md`.
+- **Employees** — monthly staff (basic, housing, transport) and daily workers (a daily
+  rate), each with an IBAN and a default project.
+- **Timesheets** — per employee per month: days per project, absences, overtime hours.
+  **Attendance** for daily workers is what the attendance app records (one entry per day
+  on a site); entered in the admin when the app is not used. Both close once the month's
+  payroll is approved.
+- **Payroll run** — calculates every active employee's payslip and fixes it; a draft is
+  recalculated after a timesheet changes. The finance manager approves; the accountant
+  marks it paid with the bank transfer reference.
+- **Reports** — payroll register, each employee's payslip (printable), the bank transfer
+  file (Excel), social insurance per employee, labour cost per project.
+- Labour cost is split over projects by timesheet days and counts against each project's
+  **manpower** budget once the run is approved.
+
+## 7–9. Fixed assets, taxes, reports
+
+The VAT summary (input VAT from supplier invoices, output VAT from customer invoices).
 
 ## Assumptions
 
@@ -67,3 +81,9 @@ and the full report catalogue are listed in the roadmap in `README.md`.
   plus those days.
 - A subcontract's advance is recovered in proportion to each extract's gross value, capped
   at what is left to recover.
+- Payroll: a month is 30 days; absence is deducted at (basic + housing + transport) ÷ 30
+  a day; overtime is 1.5 × the hourly rate (basic ÷ 30 ÷ 8, or the daily rate ÷ 8).
+- GOSI on basic + housing, capped at SAR 45,000: Saudi 9.75 % employee + 11.75 % company;
+  non-Saudi 2 % company only (occupational hazards). Daily workers follow the same rates
+  on their earned basic.
+- The payroll approval chain is the finance manager alone (the documents name none).

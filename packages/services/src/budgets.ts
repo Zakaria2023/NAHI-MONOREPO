@@ -6,6 +6,7 @@ import { BudgetLine, Project, ProjectBudget, Store } from "../../../db/types";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { assertRole, findOrThrow } from "./core/lookup";
+import { bookedPayrollRuns } from "./payroll";
 import { BUDGET_APPROVERS, BUDGET_EDITORS } from "./core/roles";
 
 // PROJECT BUDGET (finance §4). Matched automatically against everything charged
@@ -13,7 +14,8 @@ import { BUDGET_APPROVERS, BUDGET_EDITORS } from "./core/roles";
 //
 //   reserved   — PRs approved by the manager and not yet a PO or a stock issue
 //   committed  — POs (net of VAT) that are not cancelled or rejected
-//   spent      — cash custody out, approved subcontractor extracts, stock supplied
+//   spent      — cash custody out, approved subcontractor extracts, stock supplied,
+//                and (manpower) the labour cost of approved payroll runs
 //   remaining  — planned − reserved − committed − spent
 //
 // The PR approval (procurement step 1) checks against `remaining`.
@@ -92,7 +94,14 @@ export const budgetUsage = (store: Store, projectUuid: string): BudgetUsageLine[
       ),
       (inv) => inv.subtotal,
     );
-    const spent = round2(custody + extracts + fromStock);
+    const labour =
+      category === "manpower"
+        ? sumBy(
+            bookedPayrollRuns(store).flatMap((r) => r.payslips.flatMap((p) => p.costAllocations)),
+            (a) => (a.projectUuid === projectUuid ? a.amount : 0),
+          )
+        : 0;
+    const spent = round2(custody + extracts + fromStock + labour);
     return {
       category,
       planned,

@@ -48,8 +48,8 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
 
 **Auth (MVP — stands in for Clerk)**
 
-- There is no sign-in. The admin reads the acting staff member from the `erp_user` cookie, set by the user switcher in the navbar, through `apps/admin/src/lib/server/auth.ts` — the one file Clerk will replace.
-- Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user in the navbar is how a demo walks a request through its chain.
+- There is no sign-in. The admin reads the acting staff member from the `erp_user` cookie, set by the user switcher at the foot of the sidebar, through `apps/admin/src/lib/server/auth.ts` — the one file Clerk will replace.
+- Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user in the sidebar is how a demo walks a request through its chain.
 
 **Hard rules**
 

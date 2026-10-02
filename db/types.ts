@@ -34,6 +34,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  AttendanceSource,
+  EmploymentType,
+  Nationality,
+  PayrollRunStatus,
   SupplierReturnRemedy,
   SupplierReturnSource,
   SupplierReturnStatus,
@@ -624,6 +628,98 @@ export type ClosingPeriod = {
   closedBy?: string;
 };
 
+// ─── Payroll ───────────────────────────────────────────────────────────────
+
+/** Someone on the payroll — field staff and daily workers, not only the system's users. */
+export type Employee = {
+  uuid: string;
+  code: string;
+  name: string;
+  jobTitle: string;
+  nationality: Nationality;
+  employmentType: EmploymentType;
+  /** Monthly figures; zero for a daily worker. */
+  basicSalary: number;
+  housingAllowance: number;
+  transportAllowance: number;
+  /** Set for a daily worker. */
+  dailyRate?: number;
+  iban: string;
+  bankName: string;
+  /** Where the cost goes when a timesheet does not split it. Absent = head office. */
+  defaultProjectUuid?: string;
+  joinedAt: string;
+  active: boolean;
+};
+
+/** One employee's month: days per project, absences, overtime. */
+export type Timesheet = {
+  uuid: string;
+  employeeUuid: string;
+  /** "2026-09". */
+  period: string;
+  /** Days worked per project; a missing `projectUuid` is head office. */
+  allocations: { projectUuid?: string; days: number }[];
+  absentDays: number;
+  overtimeHours: number;
+  submittedBy: string;
+  submittedAt: string;
+};
+
+/** A daily worker's day on site — what the attendance app records. */
+export type AttendanceEntry = {
+  uuid: string;
+  employeeUuid: string;
+  /** The day, as an ISO timestamp at midnight UTC. */
+  date: string;
+  projectUuid: string;
+  hours: number;
+  source: AttendanceSource;
+  recordedBy: string;
+};
+
+/** One employee's pay for a run, fixed when the run is calculated. */
+export type Payslip = {
+  employeeUuid: string;
+  employeeCode: string;
+  employeeName: string;
+  jobTitle: string;
+  nationality: Nationality;
+  employmentType: EmploymentType;
+  iban: string;
+  bankName: string;
+  workedDays: number;
+  absentDays: number;
+  overtimeHours: number;
+  basic: number;
+  housing: number;
+  transport: number;
+  overtime: number;
+  /** Earnings before deductions. */
+  gross: number;
+  absenceDeduction: number;
+  gosiEmployee: number;
+  net: number;
+  /** The company's own share — a cost, not a deduction. */
+  gosiEmployer: number;
+  /** What the employee costs (gross − absence + employer GOSI), split by days per project. */
+  costAllocations: { projectUuid?: string; days: number; amount: number }[];
+};
+
+export type PayrollRun = {
+  uuid: string;
+  number: string;
+  period: string;
+  status: PayrollRunStatus;
+  payslips: Payslip[];
+  approvals: Approval[];
+  createdBy: string;
+  createdAt: string;
+  paidAt?: string;
+  paidBy?: string;
+  bankReference?: string;
+};
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export type ActivityEntry = {
@@ -667,5 +763,9 @@ export type Store = {
   CustomerInvoices: CustomerInvoice[];
   ProjectBudgets: ProjectBudget[];
   ClosingPeriods: ClosingPeriod[];
+  Employees: Employee[];
+  Timesheets: Timesheet[];
+  AttendanceEntries: AttendanceEntry[];
+  PayrollRuns: PayrollRun[];
   Activity: ActivityEntry[];
 };

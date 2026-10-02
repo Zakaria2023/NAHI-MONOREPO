@@ -1,9 +1,12 @@
 import { addDays, generateUuid, round2 } from "utils";
-import { StaffRole } from "./enum";
-import { PricedLine, Store, SupplierReturn } from "./types";
+// The seed fixes each demo payslip with the same rule the payroll service uses,
+// so the demo's figures are the ones the system would have calculated.
+import { computePayslip, timesheetFromAttendance } from "../packages/services/src/rules/payroll";
+import { EmploymentType, Nationality, StaffRole } from "./enum";
+import { AttendanceEntry, Employee, PricedLine, Store, SupplierReturn, Timesheet } from "./types";
 
-// DEMO DATA for the parts built after the first MVP: annual contracts and
-// supplier returns. Each record is placed to show one screen or rule.
+// DEMO DATA for the parts built after the first MVP: annual contracts, supplier
+// returns and payroll. Each record is placed to show one screen or rule.
 
 const VAT = 0.15;
 
@@ -166,4 +169,144 @@ export const addExtraDemoData = (store: Store, now: string): void => {
       });
     }
   }
+
+  // ─── Payroll ─────────────────────────────────────────────────────────────
+
+  const project = (code: string) => find(store.Projects, (p) => p.code === code, code).uuid;
+  const period = (monthsAgo: number): string => {
+    const d = new Date(now);
+    return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - monthsAgo, 1)).toISOString().slice(0, 7);
+  };
+  const lastMonth = period(1);
+  const twoMonthsAgo = period(2);
+
+  let serial = 0;
+  const employee = (
+    name: string,
+    jobTitle: string,
+    nationality: Nationality,
+    employmentType: EmploymentType,
+    pay: { basic?: number; housing?: number; transport?: number; daily?: number },
+    defaultProject?: string,
+  ): Employee => {
+    serial += 1;
+    return {
+      uuid: generateUuid(),
+      code: `EMP-${String(serial).padStart(3, "0")}`,
+      name,
+      jobTitle,
+      nationality,
+      employmentType,
+      basicSalary: pay.basic ?? 0,
+      housingAllowance: pay.housing ?? 0,
+      transportAllowance: pay.transport ?? 0,
+      dailyRate: pay.daily,
+      iban: `SA03800000006080${String(100000 + serial * 7919).padStart(8, "0")}`,
+      bankName: serial % 2 === 0 ? "Al Rajhi Bank" : "Saudi National Bank",
+      defaultProjectUuid: defaultProject ? project(defaultProject) : undefined,
+      joinedAt: ago(400 - serial * 10),
+      active: true,
+    };
+  };
+
+  store.Employees = [
+    employee("Saeed Al-Malki", "Project engineer", "saudi", "monthly", { basic: 11000, housing: 2750, transport: 1000 }, "MOB-001"),
+    employee("Bandar Al-Qahtani", "Site supervisor", "saudi", "monthly", { basic: 8000, housing: 2000, transport: 800 }, "STC-002"),
+    employee("Mohammed Rafiq", "Fiber splicing technician", "non_saudi", "monthly", { basic: 4200, housing: 1050, transport: 400 }, "MOB-001"),
+    employee("Arjun Nair", "Fiber splicing technician", "non_saudi", "monthly", { basic: 4000, housing: 1000, transport: 400 }, "MOB-004"),
+    employee("Tariq Hussain", "Civil foreman", "non_saudi", "monthly", { basic: 5200, housing: 1300, transport: 500 }, "MOB-005"),
+    employee("Ahmed Saber", "Safety officer", "non_saudi", "monthly", { basic: 5600, housing: 1400, transport: 500 }, "STC-005"),
+    employee("Lama Al-Subaie", "Accountant", "saudi", "monthly", { basic: 9500, housing: 2375, transport: 900 }),
+    employee("Ravi Kumar", "Labourer", "non_saudi", "daily", { daily: 130 }, "MOB-001"),
+    employee("Imran Khan", "Labourer", "non_saudi", "daily", { daily: 130 }, "MOB-004"),
+    employee("Joseph Mathew", "Equipment operator", "non_saudi", "daily", { daily: 180 }, "MOB-005"),
+  ];
+  const emp = (code: string) => find(store.Employees, (e) => e.code === code, code);
+
+  // Monthly staff split across sites; one absence and some overtime to show the rules.
+  const sheet = (code: string, p: string, allocations: [string | null, number][], absentDays = 0, overtimeHours = 0): Timesheet => ({
+    uuid: generateUuid(),
+    employeeUuid: emp(code).uuid,
+    period: p,
+    allocations: allocations.map(([c, days]) => ({ projectUuid: c ? project(c) : undefined, days })),
+    absentDays,
+    overtimeHours,
+    submittedBy: nameOf("project_manager"),
+    submittedAt: ago(3),
+  });
+  store.Timesheets = [twoMonthsAgo, lastMonth].flatMap((p) => [
+    sheet("EMP-001", p, [["MOB-001", 18], ["MOB-002", 12]]),
+    sheet("EMP-002", p, [["STC-002", 20], ["STC-005", 10]], 0, p === lastMonth ? 12 : 0),
+    sheet("EMP-003", p, [["MOB-001", 28]], p === lastMonth ? 2 : 0, 16),
+    sheet("EMP-004", p, [["MOB-004", 30]], 0, 8),
+    sheet("EMP-005", p, [["MOB-005", 22], ["MOB-001", 8]]),
+    sheet("EMP-006", p, [["STC-005", 15], ["STC-002", 15]]),
+    sheet("EMP-007", p, [[null, 30]]),
+  ]);
+
+  // The daily workers' attendance app: working days of the last two months and this one.
+  const attendance: AttendanceEntry[] = [];
+  const daysOf = (p: string): string[] => {
+    const [year, month] = p.split("-").map(Number);
+    const count = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    return Array.from({ length: count }, (_, i) => new Date(Date.UTC(year, month - 1, i + 1)))
+      .filter((d) => d.getUTCDay() !== 5 && d.toISOString() <= now)
+      .map((d) => d.toISOString());
+  };
+  for (const [code, site, hours] of [
+    ["EMP-008", "MOB-001", 9],
+    ["EMP-009", "MOB-004", 8],
+    ["EMP-010", "MOB-005", 10],
+  ] as const) {
+    for (const date of [...daysOf(twoMonthsAgo), ...daysOf(lastMonth), ...daysOf(period(0))]) {
+      attendance.push({
+        uuid: generateUuid(),
+        employeeUuid: emp(code).uuid,
+        date,
+        projectUuid: project(site),
+        hours,
+        source: "attendance_app",
+        recordedBy: "Attendance app",
+      });
+    }
+  }
+  store.AttendanceEntries = attendance;
+
+  const runFor = (p: string) =>
+    store.Employees.map((e) =>
+      computePayslip(
+        e,
+        e.employmentType === "daily"
+          ? timesheetFromAttendance(attendance.filter((a) => a.employeeUuid === e.uuid && a.date.slice(0, 7) === p))
+          : store.Timesheets.find((t) => t.employeeUuid === e.uuid && t.period === p),
+      ),
+    );
+
+  store.PayrollRuns = [
+    {
+      // Paid: its labour cost is booked against the projects' manpower budgets.
+      uuid: generateUuid(),
+      number: `PAY-${twoMonthsAgo}`,
+      period: twoMonthsAgo,
+      status: "paid",
+      payslips: runFor(twoMonthsAgo),
+      approvals: [{ role: "finance_manager", decision: "approved", actorName: nameOf("finance_manager"), at: ago(36) }],
+      createdBy: nameOf("accountant"),
+      createdAt: ago(37),
+      paidAt: ago(35),
+      paidBy: nameOf("accountant"),
+      bankReference: "SNB-WPS-77120",
+    },
+    {
+      // Calculated, waiting for the finance manager — in her approvals inbox.
+      uuid: generateUuid(),
+      number: `PAY-${lastMonth}`,
+      period: lastMonth,
+      status: "draft",
+      payslips: runFor(lastMonth),
+      approvals: [],
+      createdBy: nameOf("accountant"),
+      createdAt: ago(1),
+    },
+  ];
 };

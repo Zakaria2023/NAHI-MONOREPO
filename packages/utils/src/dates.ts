@@ -98,3 +98,15 @@ export const greetingFor = (iso: string = nowIso()): string => {
   }
   return "Good evening";
 };
+
+/** "2026-09" → "Sept 2026". */
+export const formatPeriod = (period: string): string =>
+  new Date(`${period}-01T00:00:00.000Z`).toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "UTC" });
+
+/** This month and the `count − 1` before it, newest first, as "2026-09" keys. */
+export const recentPeriods = (count: number, now: string = nowIso()): string[] => {
+  const d = new Date(now);
+  return Array.from({ length: count }, (_, i) =>
+    new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 1)).toISOString().slice(0, 7),
+  );
+};

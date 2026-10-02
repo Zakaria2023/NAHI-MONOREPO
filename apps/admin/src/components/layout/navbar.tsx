@@ -9,7 +9,7 @@ type NavbarProps = {
 };
 
 export const Navbar = ({ crumbs, urgentAlerts }: NavbarProps) => (
-  <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-hairline px-10">
+  <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-hairline px-10 print:hidden">
     <Breadcrumb crumbs={crumbs} />
     <div className="flex items-center gap-2">
       <span className="hidden items-center gap-2 px-2 text-sm text-muted lg:flex">

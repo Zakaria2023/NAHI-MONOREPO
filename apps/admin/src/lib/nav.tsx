@@ -4,6 +4,7 @@ import {
   Bell,
   Boxes,
   Building2,
+  CalendarCheck,
   CalendarClock,
   ClipboardList,
   FileSpreadsheet,
@@ -11,6 +12,7 @@ import {
   FileText,
   FolderKanban,
   HandCoins,
+  IdCard,
   Landmark,
   LayoutDashboard,
   Lock,
@@ -24,6 +26,7 @@ import {
   Truck,
   Users,
   Wallet,
+  WalletCards,
 } from "lucide-react";
 import { NavGroup } from "ui";
 
@@ -71,6 +74,14 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
     links: [
       { icon: <Wallet size={ICON} />, label: "Cash custody", href: "/custody" },
       { icon: <Users size={ICON} />, label: "Employees & clearance", href: "/custody/employees" },
+    ],
+  },
+  {
+    title: "HR & payroll",
+    links: [
+      { icon: <IdCard size={ICON} />, label: "Employees", href: "/payroll/employees" },
+      { icon: <CalendarCheck size={ICON} />, label: "Timesheets & attendance", href: "/payroll/timesheets" },
+      { icon: <WalletCards size={ICON} />, label: "Payroll", href: "/payroll/runs" },
     ],
   },
   {

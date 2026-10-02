@@ -27,7 +27,7 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
     : budget.lines.length === 0
       ? "Plan at least one budget line first."
       : actor.role !== "projects_manager"
-        ? "Only the Projects manager approves a budget — switch user in the top bar."
+        ? "Only the Projects manager approves a budget — switch user at the foot of the sidebar."
         : null;
   const lines = budget && budget.lines.length > 0 ? budget.lines : budgetCategories.map((category) => ({ category, planned: 0 }));
   return (

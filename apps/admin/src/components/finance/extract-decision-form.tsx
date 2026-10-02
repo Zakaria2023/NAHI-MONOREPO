@@ -23,7 +23,7 @@ export const ExtractDecisionForm = ({ action, awaitingLabel, canDecide, penaltie
   if (!canDecide) {
     return (
       <p className="rounded-control border border-hairline-soft bg-hover px-3 py-2 text-sm text-muted">
-        Waiting for <span className="font-medium text-ink">{awaitingLabel}</span>. Switch user in the top bar to act as them.
+        Waiting for <span className="font-medium text-ink">{awaitingLabel}</span>. Switch user at the foot of the sidebar to act as them.
       </p>
     );
   }

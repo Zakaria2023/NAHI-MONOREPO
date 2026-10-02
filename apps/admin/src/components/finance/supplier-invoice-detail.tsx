@@ -24,7 +24,7 @@ type SupplierInvoiceDetailProps = {
 
 export const SupplierInvoiceDetail = async ({ uuid }: SupplierInvoiceDetailProps) => {
   const [{ invoice, supplier, po, receipts, match }, actor] = await Promise.all([getSupplierInvoice(uuid), getCurrentStaff()]);
-  const approveBlocker = actor.role === "finance_manager" ? null : "Only the Finance manager approves supplier invoices — switch user in the top bar.";
+  const approveBlocker = actor.role === "finance_manager" ? null : "Only the Finance manager approves supplier invoices — switch user at the foot of the sidebar.";
   const paymentBlocker =
     invoice.status === "registered"
       ? "Payments are made against an approved invoice — approve it first."

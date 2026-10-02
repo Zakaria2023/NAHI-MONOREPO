@@ -430,6 +430,27 @@ export const closingItems = [
 
 export type ClosingItem = (typeof closingItems)[number];
 
+// ─── Payroll ───────────────────────────────────────────────────────────────
+
+/** Decides the social insurance (GOSI) rates. */
+export const nationalities = ["saudi", "non_saudi"] as const satisfies readonly string[];
+
+export type Nationality = (typeof nationalities)[number];
+
+/** Monthly staff are paid a salary; daily workers by the days they attended. */
+export const employmentTypes = ["monthly", "daily"] as const satisfies readonly string[];
+
+export type EmploymentType = (typeof employmentTypes)[number];
+
+export const payrollRunStatuses = ["draft", "approved", "paid"] as const satisfies readonly string[];
+
+export type PayrollRunStatus = (typeof payrollRunStatuses)[number];
+
+/** Where an attendance record came from — the daily workers' app, or entered in the admin. */
+export const attendanceSources = ["attendance_app", "admin"] as const satisfies readonly string[];
+
+export type AttendanceSource = (typeof attendanceSources)[number];
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export const entityKinds = [
@@ -452,6 +473,9 @@ export const entityKinds = [
   "subcontract",
   "extract",
   "customer_invoice",
+  "employee",
+  "timesheet",
+  "payroll_run",
   "budget",
   "closing",
   "system",

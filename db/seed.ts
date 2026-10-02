@@ -67,6 +67,10 @@ const emptyStore = (): Store => ({
   CustomerInvoices: [],
   ProjectBudgets: [],
   ClosingPeriods: [],
+  Employees: [],
+  Timesheets: [],
+  AttendanceEntries: [],
+  PayrollRuns: [],
   Activity: [],
 });
 
@@ -992,7 +996,6 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
       items: {
         bank_reconciliation: step(1, "accountant"),
         supplier_balances: step(1, "accountant"),
-        payroll: step(1, "finance_manager"),
       },
     },
   ];

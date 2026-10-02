@@ -6,6 +6,7 @@ import {
   IssueRequestStatus,
   LabTestStatus,
   MilestoneStatus,
+  PayrollRunStatus,
   PurchaseOrderStatus,
   PurchaseRequestStatus,
   SupplierInvoiceStatus,
@@ -90,4 +91,10 @@ export const EXTRACT_TONES: Record<ExtractStatus, PillTone> = {
   approved: "info",
   paid: "success",
   rejected: "danger",
+};
+
+export const PAYROLL_TONES: Record<PayrollRunStatus, PillTone> = {
+  draft: "warning",
+  approved: "info",
+  paid: "success",
 };

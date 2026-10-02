@@ -36,7 +36,7 @@ export const DashboardSidebar = ({ brand, tagline, brandIcon, groups, footer }: 
   );
 
   return (
-    <aside className="fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-sidebar">
+    <aside className="fixed inset-y-0 start-0 z-40 flex w-64 flex-col bg-sidebar print:hidden">
       <Link href="/" className="mx-3 mt-3 flex items-center gap-3 rounded-card px-2 py-2 transition-colors hover:bg-sidebar-hover">
         <div className="flex h-9 w-9 items-center justify-center rounded-control bg-primary text-white">{brandIcon}</div>
         <div className="flex flex-col">

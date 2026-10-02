@@ -59,3 +59,6 @@ export const EXTRACT_CHAIN: StaffRole[] = [
   "projects_manager",
   "finance_manager",
 ];
+
+/** Payroll: calculated by the accountants, approved by the finance manager before it is paid. */
+export const PAYROLL_CHAIN: StaffRole[] = ["finance_manager"];

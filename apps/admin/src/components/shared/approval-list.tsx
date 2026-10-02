@@ -11,7 +11,7 @@ type ApprovalListProps = {
 
 export const ApprovalList = ({ items }: ApprovalListProps) =>
   items.length === 0 ? (
-    <EmptyState title="Nothing is waiting for you">Switch user in the top bar to see another role&apos;s queue.</EmptyState>
+    <EmptyState title="Nothing is waiting for you">Switch user at the foot of the sidebar to see another role&apos;s queue.</EmptyState>
   ) : (
     <ul className="-mx-2 flex flex-col">
       {items.map((item) => (

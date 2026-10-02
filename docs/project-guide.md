@@ -219,7 +219,7 @@ All test files are under `packages/services/src/`; run them with `pnpm test`.
 
 ## 6. Roles and approval chains
 
-The user switcher (top bar) holds one person per role — `db/seed.ts`. The chains
+The user switcher (foot of the sidebar) holds one person per role — `db/seed.ts`. The chains
 are in `packages/services/src/rules/chains.ts`; `core/approvals.ts` enforces the order.
 
 | Chain | Roles, in order | Used by |

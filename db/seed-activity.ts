@@ -172,6 +172,14 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
     );
   }
 
+  for (const run of store.PayrollRuns) {
+    add("payroll_run", run.uuid, run.number, run.createdAt, run.createdBy, "Payroll calculated", `${run.payslips.length} employees`);
+    chain("payroll_run", run.uuid, run.number, run.approvals);
+    if (run.paidAt && run.paidBy) {
+      add("payroll_run", run.uuid, run.number, run.paidAt, run.paidBy, "Salaries paid by bank transfer", run.bankReference);
+    }
+  }
+
   for (const period of store.ClosingPeriods) {
     for (const [key, record] of Object.entries(period.items)) {
       if (record) {

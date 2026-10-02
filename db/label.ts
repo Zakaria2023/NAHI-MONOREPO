@@ -36,6 +36,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  AttendanceSource,
+  EmploymentType,
+  Nationality,
+  PayrollRunStatus,
   SupplierReturnRemedy,
   SupplierReturnSource,
   SupplierReturnStatus,
@@ -403,6 +407,9 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   subcontract: "Subcontract",
   extract: "Extract",
   customer_invoice: "Customer invoice",
+  employee: "Employee",
+  timesheet: "Timesheet",
+  payroll_run: "Payroll run",
   budget: "Budget",
   closing: "Monthly closing",
   system: "System",
@@ -421,4 +428,25 @@ export const SUPPLIER_RETURN_STATUS_LABELS: Record<SupplierReturnStatus, string>
 export const SUPPLIER_RETURN_SOURCE_LABELS: Record<SupplierReturnSource, string> = {
   rejected_at_receipt: "Rejected at receipt",
   from_stock: "Returned from stock",
+};
+
+export const NATIONALITY_LABELS: Record<Nationality, string> = {
+  saudi: "Saudi",
+  non_saudi: "Non-Saudi",
+};
+
+export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
+  monthly: "Monthly salary",
+  daily: "Daily worker",
+};
+
+export const PAYROLL_RUN_STATUS_LABELS: Record<PayrollRunStatus, string> = {
+  draft: "Draft",
+  approved: "Approved",
+  paid: "Paid",
+};
+
+export const ATTENDANCE_SOURCE_LABELS: Record<AttendanceSource, string> = {
+  attendance_app: "Attendance app",
+  admin: "Entered in admin",
 };
