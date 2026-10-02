@@ -34,6 +34,12 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  CostCenterKind,
+  EquipmentSupplyType,
+  ExpenseCategory,
+  OverheadBasis,
+  StudyResource,
+  WorkType,
   AssetCategory,
   AssetDisposalKind,
   AssetHolderKind,
@@ -614,6 +620,35 @@ export type BudgetRevision = {
   changes: { category: BudgetCategory; from: number; to: number }[];
 };
 
+/**
+ * One line of the budget study (finance §4): civil and fiber works, materials,
+ * equipment and manpower, each with its quantity and cost. Amount =
+ * qty × unit cost × duration (duration 1 when it does not apply).
+ */
+export type BudgetStudyLine = {
+  uuid: string;
+  category: BudgetCategory;
+  /** The work, the material, the equipment — or the job title, for manpower. */
+  description: string;
+  unit: string;
+  /** Quantity — or headcount, for manpower. */
+  qty: number;
+  unitCost: number;
+  /** Days or months of rent, or months of manpower. */
+  duration?: number;
+  supplyType?: EquipmentSupplyType;
+  workType?: WorkType;
+};
+
+/** A row of the study's timelines: when materials, manpower or equipment are needed on site. */
+export type BudgetScheduleItem = {
+  uuid: string;
+  resource: StudyResource;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+};
+
 export type ProjectBudget = {
   uuid: string;
   projectUuid: string;
@@ -622,6 +657,48 @@ export type ProjectBudget = {
   approvedAt?: string;
   approvedBy?: string;
   revisions: BudgetRevision[];
+  study?: BudgetStudyLine[];
+  schedule?: BudgetScheduleItem[];
+};
+
+/** A cost centre other than a project (every project is one of its own). */
+export type CostCenter = {
+  uuid: string;
+  code: string;
+  name: string;
+  kind: CostCenterKind;
+};
+
+/**
+ * A manual expense entry. It cannot be recorded without a cost centre, and a
+ * vehicle expense is split over exactly two (finance §4, controls).
+ */
+export type Expense = {
+  uuid: string;
+  number: string;
+  date: string;
+  description: string;
+  category: ExpenseCategory;
+  /** The budget line it counts against when charged to a project. */
+  budgetCategory: BudgetCategory;
+  amount: number;
+  vat: number;
+  /** A project uuid or a cost centre's uuid, with the share of `amount`. */
+  allocations: { costCenterUuid: string; amount: number }[];
+  createdBy: string;
+  createdAt: string;
+};
+
+/** A month's overhead spread over the projects on a set basis (finance §4). */
+export type OverheadAllocation = {
+  uuid: string;
+  period: string;
+  basis: OverheadBasis;
+  pool: number;
+  poolParts: { expenses: number; payroll: number; depreciation: number };
+  lines: { projectUuid: string; basisValue: number; amount: number }[];
+  postedBy: string;
+  postedAt: string;
 };
 
 export type ClosingPeriod = {
@@ -823,5 +900,8 @@ export type Store = {
   PayrollRuns: PayrollRun[];
   FixedAssets: FixedAsset[];
   DepreciationRuns: DepreciationRun[];
+  CostCenters: CostCenter[];
+  Expenses: Expense[];
+  OverheadAllocations: OverheadAllocation[];
   Activity: ActivityEntry[];
 };

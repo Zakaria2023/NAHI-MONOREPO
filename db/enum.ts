@@ -412,6 +412,41 @@ export const customerInvoiceBases = [
 
 export type CustomerInvoiceBasis = (typeof customerInvoiceBases)[number];
 
+/** What a timeline row of the budget study schedules. */
+export const studyResources = ["materials", "manpower", "equipment"] as const satisfies readonly string[];
+
+export type StudyResource = (typeof studyResources)[number];
+
+/** How a piece of equipment is provided: rented by the day or month, or the company's own. */
+export const equipmentSupplyTypes = ["daily_rent", "monthly_rent", "company_asset"] as const satisfies readonly string[];
+
+export type EquipmentSupplyType = (typeof equipmentSupplyTypes)[number];
+
+export const workTypes = ["civil", "fiber"] as const satisfies readonly string[];
+
+export type WorkType = (typeof workTypes)[number];
+
+/** A project is a cost centre of its own; these are the others. */
+export const costCenterKinds = ["department", "vehicle"] as const satisfies readonly string[];
+
+export type CostCenterKind = (typeof costCenterKinds)[number];
+
+export const expenseCategories = [
+  "vehicle",
+  "fuel",
+  "office",
+  "utilities",
+  "travel",
+  "communications",
+  "other",
+] as const satisfies readonly string[];
+
+export type ExpenseCategory = (typeof expenseCategories)[number];
+
+export const overheadBases = ["revenue", "direct_cost", "equal"] as const satisfies readonly string[];
+
+export type OverheadBasis = (typeof overheadBases)[number];
+
 export const budgetStatuses = ["draft", "approved"] as const satisfies readonly string[];
 
 export type BudgetStatus = (typeof budgetStatuses)[number];
@@ -504,6 +539,9 @@ export const entityKinds = [
   "payroll_run",
   "fixed_asset",
   "depreciation",
+  "expense",
+  "cost_center",
+  "overhead_allocation",
   "budget",
   "closing",
   "system",

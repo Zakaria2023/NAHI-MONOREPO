@@ -85,6 +85,29 @@ period, issue the financial statements.
 - **Reports** — asset register, depreciation per month, the depreciation schedule of each
   asset, the annual count's progress.
 
+## 4 (continued) — the study, cost centres, overhead
+
+- **Budget study** — per project, the detailed lines behind each category: civil and
+  fiber works (quantity × rate), materials, equipment (how it is supplied — daily or
+  monthly rent, or a company asset — for how long, civil or fiber work), manpower by job
+  title (headcount × months × monthly cost), permits, overhead. Amount = qty × unit cost ×
+  duration. **Applying the study** writes its category totals as the budget's planned
+  lines; on an approved budget that is a revision (projects or finance manager, reason
+  kept).
+- **Timelines** — when materials, manpower and equipment are needed, drawn as bars.
+- **Variance analysis** — for each category: the study, the budget, actual cost
+  (supplier invoices, custody, extracts, stock, payroll, expenses, overhead), the
+  variance and what is still committed on POs.
+- **Cost centres and manual expenses** — every project is a cost centre; departments and
+  vehicles are added. A manual expense is refused without a cost centre, a vehicle
+  expense unless it is split over exactly two, and the shares must add up to the amount.
+  A share charged to a project counts against that project's budget line.
+- **Overhead allocation** — each month's pool (expenses charged to departments and
+  vehicles, the head-office payroll, the depreciation of head-office assets) is spread
+  over the projects whose budget is approved, by revenue invoiced to date, direct cost to
+  date, or in equal shares; posted once a month, each share counts against the project's
+  overhead budget.
+
 ## 5 (rules added) — the closing checklist
 
 Payroll can be ticked only when the month's payroll is paid; depreciation only when the

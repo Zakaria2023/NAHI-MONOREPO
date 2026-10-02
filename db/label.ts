@@ -36,6 +36,12 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  CostCenterKind,
+  EquipmentSupplyType,
+  ExpenseCategory,
+  OverheadBasis,
+  StudyResource,
+  WorkType,
   AssetCategory,
   AssetDisposalKind,
   AssetHolderKind,
@@ -416,6 +422,9 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   payroll_run: "Payroll run",
   fixed_asset: "Fixed asset",
   depreciation: "Depreciation",
+  expense: "Expense",
+  cost_center: "Cost centre",
+  overhead_allocation: "Overhead allocation",
   budget: "Budget",
   closing: "Monthly closing",
   system: "System",
@@ -479,4 +488,43 @@ export const ASSET_DISPOSAL_KIND_LABELS: Record<AssetDisposalKind, string> = {
 export const ASSET_HOLDER_KIND_LABELS: Record<AssetHolderKind, string> = {
   warehouse: "Warehouse",
   employee: "Employee custody",
+};
+
+export const STUDY_RESOURCE_LABELS: Record<StudyResource, string> = {
+  materials: "Materials",
+  manpower: "Manpower",
+  equipment: "Equipment",
+};
+
+export const EQUIPMENT_SUPPLY_TYPE_LABELS: Record<EquipmentSupplyType, string> = {
+  daily_rent: "Daily rent",
+  monthly_rent: "Monthly rent",
+  company_asset: "Company asset",
+};
+
+export const WORK_TYPE_LABELS: Record<WorkType, string> = {
+  civil: "Civil",
+  fiber: "Fiber",
+};
+
+export const COST_CENTER_KIND_LABELS: Record<CostCenterKind | "project", string> = {
+  project: "Project",
+  department: "Department",
+  vehicle: "Vehicle",
+};
+
+export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
+  vehicle: "Vehicle (maintenance, insurance)",
+  fuel: "Fuel",
+  office: "Office and rent",
+  utilities: "Utilities",
+  travel: "Travel and accommodation",
+  communications: "Communications",
+  other: "Other",
+};
+
+export const OVERHEAD_BASIS_LABELS: Record<OverheadBasis, string> = {
+  revenue: "Revenue invoiced",
+  direct_cost: "Direct cost to date",
+  equal: "Equal shares",
 };

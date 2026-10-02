@@ -196,6 +196,13 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
     add("depreciation", d.uuid, d.period, d.postedAt, d.postedBy, "Depreciation posted", `${d.lines.length} assets`);
   }
 
+  for (const e of store.Expenses) {
+    add("expense", e.uuid, e.number, e.createdAt, e.createdBy, "Expense recorded", e.description);
+  }
+  for (const o of store.OverheadAllocations) {
+    add("overhead_allocation", o.uuid, o.period, o.postedAt, o.postedBy, "Overhead allocated", `${o.lines.length} projects`);
+  }
+
   for (const period of store.ClosingPeriods) {
     for (const [key, record] of Object.entries(period.items)) {
       if (record) {

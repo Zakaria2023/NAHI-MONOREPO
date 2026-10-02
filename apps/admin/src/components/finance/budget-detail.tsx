@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { getBudget } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, formatPercent, round2 } from "utils";
@@ -76,6 +78,15 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
             ) : (
               <ActionButton action={approveBudgetAction.bind(null, project.uuid)} label="Approve budget" variant="success" blocker={approveBlocker} />
             )}
+          </Card>
+          <Card title="Budget study" description="The detailed lines behind each category, the timelines for materials, manpower and equipment, and the variance analysis.">
+            <Link
+              href={`/finance/budgets/${project.uuid}/study`}
+              className="flex h-10 w-fit items-center gap-2 rounded-full border border-hairline ps-5 pe-4 text-sm font-medium text-ink transition-colors hover:border-search-border hover:bg-hover"
+            >
+              Open the study
+              <ArrowRight size={16} className="rtl:-scale-x-100" />
+            </Link>
           </Card>
           <Card title="Revisions" description="Changes made to the approved budget.">
             <BudgetRevisions revisions={budget?.revisions ?? []} />

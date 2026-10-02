@@ -2,12 +2,25 @@ import { addDays, generateUuid, round2 } from "utils";
 // The seed fixes each demo payslip with the same rule the payroll service uses,
 // so the demo's figures are the ones the system would have calculated.
 import { chargeFor, disposalGainLoss } from "../packages/services/src/rules/assets";
+import { overheadPool, overheadShares } from "../packages/services/src/rules/costs";
 import { computePayslip, timesheetFromAttendance } from "../packages/services/src/rules/payroll";
-import { AssetCategory, EmploymentType, Nationality, StaffRole } from "./enum";
-import { AssetHolder, AttendanceEntry, Employee, FixedAsset, PricedLine, Store, SupplierReturn, Timesheet } from "./types";
+import { AssetCategory, BudgetCategory, EmploymentType, ExpenseCategory, Nationality, StaffRole } from "./enum";
+import {
+  AssetHolder,
+  AttendanceEntry,
+  BudgetStudyLine,
+  Employee,
+  Expense,
+  FixedAsset,
+  PricedLine,
+  Store,
+  SupplierReturn,
+  Timesheet,
+} from "./types";
 
 // DEMO DATA for the parts built after the first MVP: annual contracts, supplier
-// returns, payroll and fixed assets. Each record is placed to show one screen or rule.
+// returns, payroll, fixed assets, the budget study, cost centres, expenses and
+// overhead. Each record is placed to show one screen or rule.
 
 const VAT = 0.15;
 
@@ -395,4 +408,140 @@ export const addExtraDemoData = (store: Store, now: string): void => {
       postedAt: ago(i === 0 ? 33 : 2),
     };
   });
+
+  // ─── Budget study ────────────────────────────────────────────────────────
+
+  const line = (
+    category: BudgetCategory,
+    description: string,
+    unit: string,
+    qty: number,
+    unitCost: number,
+    extra: Partial<BudgetStudyLine> = {},
+  ): BudgetStudyLine => ({ uuid: generateUuid(), category, description, unit, qty, unitCost, ...extra });
+  const budgetOf = (code: string) => find(store.ProjectBudgets, (b) => b.projectUuid === project(code), `${code} budget`);
+
+  // MOB-001: the study behind its approved budget, line for line — applying it changes nothing.
+  const mob1Budget = budgetOf("MOB-001");
+  const mob1Start = find(store.Projects, (p) => p.code === "MOB-001", "MOB-001").createdAt;
+  const after = (days: number) => addDays(mob1Start, days);
+  mob1Budget.study = [
+    line("civil_works", "Trench excavation", "m", 2000, 65, { workType: "civil" }),
+    line("civil_works", "Pipe laying", "m", 2000, 25, { workType: "civil" }),
+    line("civil_works", "Manhole installation", "pcs", 16, 3000, { workType: "civil" }),
+    line("civil_works", "Concrete backfilling and paving", "m²", 800, 40, { workType: "civil" }),
+    line("fiber_works", "Cable pulling", "m", 2400, 15, { workType: "fiber" }),
+    line("fiber_works", "Splicing and termination", "joint", 48, 500, { workType: "fiber" }),
+    line("fiber_materials", "Fiber cable 48F", "m", 12000, 4.2),
+    line("fiber_materials", "Splice closures 24F", "pcs", 40, 180),
+    line("fiber_materials", "ODF 24 port", "pcs", 20, 620),
+    line("civil_materials", "HDPE duct 40mm", "m", 8000, 3.1),
+    line("civil_materials", "Precast manholes", "pcs", 12, 1450),
+    line("civil_materials", "Warning tape", "roll", 80, 35),
+    line("equipment", "Mini excavator", "day", 1, 250, { duration: 60, supplyType: "company_asset", workType: "civil" }),
+    line("equipment", "Fusion splicer", "day", 1, 100, { duration: 40, supplyType: "company_asset", workType: "fiber" }),
+    line("equipment", "Plate compactor", "day", 1, 200, { duration: 30, supplyType: "daily_rent", workType: "civil" }),
+    line("manpower", "Site engineer", "person-month", 1, 9000, { duration: 3 }),
+    line("manpower", "Fiber technician", "person-month", 2, 4000, { duration: 3 }),
+    line("manpower", "Labourer", "person-month", 3, 3000, { duration: 1 }),
+    line("permits", "Municipality excavation permit", "permit", 1, 7000),
+    line("permits", "Traffic permit", "permit", 1, 3000),
+    line("permits", "MOT permit", "permit", 1, 2000),
+    line("overhead", "Head-office share", "lump sum", 1, 18000),
+  ];
+  mob1Budget.schedule = [
+    { uuid: generateUuid(), resource: "materials", description: "Civil materials delivered", startsAt: after(12), endsAt: after(16) },
+    { uuid: generateUuid(), resource: "materials", description: "Fiber materials delivered", startsAt: after(40), endsAt: after(45) },
+    { uuid: generateUuid(), resource: "equipment", description: "Mini excavator on site", startsAt: after(30), endsAt: after(90) },
+    { uuid: generateUuid(), resource: "equipment", description: "Fusion splicer", startsAt: after(80), endsAt: after(120) },
+    { uuid: generateUuid(), resource: "manpower", description: "Civil crew", startsAt: after(28), endsAt: after(100) },
+    { uuid: generateUuid(), resource: "manpower", description: "Splicing team", startsAt: after(78), endsAt: after(125) },
+  ];
+
+  // MOB-003 (draft budget): a fuller study than the draft — applying it rewrites the draft lines.
+  budgetOf("MOB-003").study = [
+    line("civil_works", "Trench excavation", "m", 1500, 65, { workType: "civil" }),
+    line("civil_works", "Pipe laying and backfilling", "m", 1500, 32, { workType: "civil" }),
+    line("fiber_materials", "Fiber cable 96F", "m", 7000, 6.8),
+    line("fiber_materials", "Splice closures", "pcs", 20, 180),
+    line("civil_materials", "HDPE duct 40mm", "m", 6000, 3.1),
+    line("civil_materials", "Precast manholes", "pcs", 14, 1450),
+    line("equipment", "Excavator", "day", 1, 400, { duration: 30, supplyType: "daily_rent", workType: "civil" }),
+    line("manpower", "Site engineer", "person-month", 1, 9000, { duration: 2 }),
+    line("manpower", "Civil crew", "person-month", 4, 3500, { duration: 2 }),
+    line("permits", "Municipality excavation permit", "permit", 1, 8000),
+    line("permits", "Traffic permit", "permit", 1, 2500),
+  ];
+
+  // ─── Cost centres and manual expenses ────────────────────────────────────
+
+  const center = (code: string, name: string, kind: "department" | "vehicle") => ({ uuid: generateUuid(), code, name, kind });
+  store.CostCenters = [
+    center("HO-ADM", "Head office administration", "department"),
+    center("HO-PRC", "Procurement department", "department"),
+    center("HO-WH", "Warehouses", "department"),
+    center("VEH-01", "Toyota Hilux — MR0FA3CD5-0091733", "vehicle"),
+    center("VEH-02", "Toyota Hilux — MR0FA3CD5-0104456", "vehicle"),
+  ];
+  const cc = (code: string) =>
+    store.CostCenters.find((c) => c.code === code)?.uuid ?? find(store.Projects, (p) => p.code === code, code).uuid;
+
+  let expenseSerial = 0;
+  const expense = (
+    at: string,
+    description: string,
+    category: ExpenseCategory,
+    budgetCategory: BudgetCategory,
+    split: [string, number][],
+    vatable = true,
+  ): Expense => {
+    expenseSerial += 1;
+    const amount = round2(split.reduce((sum, [, a]) => sum + a, 0));
+    return {
+      uuid: generateUuid(),
+      number: `EXP-${String(expenseSerial).padStart(4, "0")}`,
+      date: at,
+      description,
+      category,
+      budgetCategory,
+      amount,
+      vat: vatable ? round2(amount * VAT) : 0,
+      allocations: split.map(([code, a]) => ({ costCenterUuid: cc(code), amount: a })),
+      createdBy: nameOf("accountant"),
+      createdAt: at,
+    };
+  };
+  const dayOf = (p: string, day: number) => `${p}-${String(day).padStart(2, "0")}T09:00:00.000Z`;
+  store.Expenses = [
+    expense(dayOf(twoMonthsAgo, 3), "Head office rent", "office", "overhead", [["HO-ADM", 18000]]),
+    expense(dayOf(twoMonthsAgo, 18), "Electricity and water", "utilities", "overhead", [["HO-ADM", 2100]]),
+    expense(dayOf(twoMonthsAgo, 21), "Hilux service and tyres", "vehicle", "equipment", [["VEH-01", 1200], ["STC-002", 1200]]),
+    expense(dayOf(lastMonth, 3), "Head office rent", "office", "overhead", [["HO-ADM", 18000]]),
+    expense(dayOf(lastMonth, 9), "Crew accommodation — Dammam", "travel", "manpower", [["MOB-005", 4200]]),
+    expense(dayOf(lastMonth, 14), "Fuel cards", "fuel", "equipment", [["VEH-02", 1800], ["MOB-005", 1800]]),
+    expense(dayOf(lastMonth, 17), "Vehicle insurance renewal", "vehicle", "overhead", [["VEH-01", 3000], ["VEH-02", 3000]], false),
+    expense(dayOf(lastMonth, 20), "Mobile lines and data", "communications", "overhead", [["HO-ADM", 1500]]),
+    expense(dayOf(lastMonth, 24), "Procurement tender fees", "other", "overhead", [["HO-PRC", 900]]),
+  ];
+
+  // ─── Overhead allocation ─────────────────────────────────────────────────
+
+  // Two months ago is allocated, in equal shares; last month is left to allocate.
+  const parts = overheadPool(store, twoMonthsAgo);
+  const pool = round2(parts.expenses + parts.payroll + parts.depreciation);
+  store.OverheadAllocations = [
+    {
+      uuid: generateUuid(),
+      period: twoMonthsAgo,
+      basis: "equal",
+      pool,
+      poolParts: parts,
+      lines: overheadShares(
+        pool,
+        store.ProjectBudgets.filter((b) => b.status === "approved").map((b) => ({ projectUuid: b.projectUuid, value: 1 })),
+      ),
+      postedBy: nameOf("finance_manager"),
+      postedAt: ago(30),
+    },
+  ];
 };

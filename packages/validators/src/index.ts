@@ -1,5 +1,6 @@
 export * from "./assets";
 export * from "./common";
+export * from "./costs";
 export * from "./finance";
 export * from "./payroll";
 export * from "./procurement";

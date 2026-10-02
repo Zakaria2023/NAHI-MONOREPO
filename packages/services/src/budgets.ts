@@ -15,7 +15,8 @@ import { BUDGET_APPROVERS, BUDGET_EDITORS } from "./core/roles";
 //   reserved   — PRs approved by the manager and not yet a PO or a stock issue
 //   committed  — POs (net of VAT) that are not cancelled or rejected
 //   spent      — cash custody out, approved subcontractor extracts, stock supplied,
-//                and (manpower) the labour cost of approved payroll runs
+//                manual expenses charged to the project, (manpower) the labour
+//                cost of approved payroll runs, (overhead) its allocated share
 //   remaining  — planned − reserved − committed − spent
 //
 // The PR approval (procurement step 1) checks against `remaining`.
@@ -101,7 +102,18 @@ export const budgetUsage = (store: Store, projectUuid: string): BudgetUsageLine[
             (a) => (a.projectUuid === projectUuid ? a.amount : 0),
           )
         : 0;
-    const spent = round2(custody + extracts + fromStock + labour);
+    const expenses = sumBy(
+      store.Expenses.filter((e) => e.budgetCategory === category).flatMap((e) => e.allocations),
+      (a) => (a.costCenterUuid === projectUuid ? a.amount : 0),
+    );
+    const overhead =
+      category === "overhead"
+        ? sumBy(
+            store.OverheadAllocations.flatMap((o) => o.lines),
+            (l) => (l.projectUuid === projectUuid ? l.amount : 0),
+          )
+        : 0;
+    const spent = round2(custody + extracts + fromStock + labour + expenses + overhead);
     return {
       category,
       planned,
