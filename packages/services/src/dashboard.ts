@@ -113,7 +113,7 @@ const pending = (
  * What is waiting for `role`. The system admin is in no chain, so it sees every
  * role's queue at once, each item saying who it waits for.
  */
-const pendingFor = (store: Store, role: StaffRole): PendingApproval[] =>
+export const pendingFor = (store: Store, role: StaffRole): PendingApproval[] =>
   role === "system_admin"
     ? staffRoles.filter((r) => r !== "system_admin").flatMap((r) => pending(store, r))
     : pending(store, role);

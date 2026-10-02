@@ -9,6 +9,7 @@ import {
   CalendarClock,
   ClipboardList,
   Coins,
+  FileBarChart,
   FileSignature,
   FileSpreadsheet,
   FileText,
@@ -52,6 +53,7 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
       { icon: <LayoutDashboard size={ICON} />, label: "Dashboard", href: "/" },
       { icon: <BadgeCheck size={ICON} />, label: "My approvals", href: "/approvals", badge: approvals },
       { icon: <Bell size={ICON} />, label: "Alerts", href: "/alerts", badge: alerts },
+      { icon: <FileBarChart size={ICON} />, label: "Reports", href: "/reports" },
     ],
   },
   {

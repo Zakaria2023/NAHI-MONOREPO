@@ -31,10 +31,15 @@ pnpm db:reset    # rebuild the demo data
 | Area | Screens | Spec |
 | --- | --- | --- |
 | Projects | Mobily's 13 stages, STC's stages, permits, lab tests, documents and approvals, certificates and invoices | `docs/mobily-workflow.md`, `docs/stc-workflow.md` |
-| Procurement | Purchase requests, RFQs and comparison, quotation and PO approval, POs, receiving, suppliers | `docs/procurement-warehouse-custody.md` §1–2 |
+| Procurement | Purchase requests, RFQs and comparison, quotation and PO approval, POs (modify, late penalty, advance), receiving, annual contracts, returns and debit notes, suppliers | `docs/procurement-warehouse-custody.md` §1–2 |
 | Warehouse | Stock and item cards, issue requests, asset custody, transfers, stocktakes, write-offs | §2–5 |
 | Custody | Cash custody, employee statements and clearance | §4 |
-| Finance | Supplier invoices, due schedule and ageing, subcontractors and extracts, customer invoices, budgets, monthly closing, VAT | `docs/finance.md` |
+| HR & payroll | Employees, timesheets and daily-worker attendance, payroll runs, payslips, bank file, GOSI, labour cost per project | `docs/finance.md` §6 |
+| Payables & receivables | Supplier invoices, due schedule and ageing, supplier statement matching, subcontractors and extracts, customer invoices and collections | `docs/finance.md` §1–3 |
+| Treasury | Bank accounts and reconciliation, cheques (post-dated, cleared, bounced), letters of guarantee and retentions | `docs/finance.md` |
+| Cost control | Project budgets with the study, timelines and variance; expenses and cost centres; overhead allocation | `docs/finance.md` §4 |
+| Accounting | Fixed assets and depreciation, monthly closing, VAT by month and quarter, tax and insurance calendar | `docs/finance.md` §5, §7–8 |
+| Reports | Every report the documents list, with Excel export and print / PDF — including the derived general ledger, trial balance, income statement, balance sheet and zakat estimate | all |
 | Overview | Dashboard, my approvals, alerts, activity log | all |
 
 ## Demo walkthrough
@@ -52,11 +57,21 @@ pnpm db:reset    # rebuild the demo data
 7. **PR-0001** — switch user to *Khalid Al-Harbi (Direct manager)* and approve it; then to
    *Faisal Al-Shehri (Procurement)* to review it.
 
+## What is deliberately not real yet
+
+Everything in the four documents is built; what stands in for real infrastructure is:
+
+- **Database** — the JSON store in `.data/store.json` (MySQL + Drizzle replace `db/index.ts`).
+- **Sign-in** — the user switcher (Clerk replaces `lib/server/auth.ts`).
+- **E-mail** — RFQs, POs and payment notices are recorded as sent, not sent.
+- **Files** — an uploaded document keeps its file name only.
+- **The attendance app** — daily workers' attendance is recorded in the admin, where the
+  app's records would land.
+- **The ledger** — derived on read from the documents, not posted; a real accounting
+  system would post journal entries.
+
 ## Roadmap after the MVP
 
-- MySQL + Drizzle behind `db/index.ts`; Clerk behind `lib/server/auth.ts`; R2 for files.
-- Payroll and the fixed-asset register (finance §6–7), social insurance, the full report
-  catalogue with PDF/Excel export.
-- E-mail delivery for RFQs, POs and payment notices (recorded today, not sent).
+- The real infrastructure above.
 - Arabic (RTL) — the UI already uses logical CSS properties only.
 - A customer/subcontractor portal in `apps/client`, if wanted.

@@ -1,5 +1,5 @@
 import { round2, sumBy } from "utils";
-import { BankAccount, Cheque, Store } from "../../../../db/types";
+import { BankAccount, Cheque, PurchaseOrder, Store } from "../../../../db/types";
 
 // THE BANK RULES, pure over the store's data: the movements every document
 // implies, a balance at a date, the cheques not yet through the bank, and what
@@ -26,6 +26,19 @@ export type ReconciliationGap = {
   /** What the bank statement should show. */
   expectedStatement: number;
 };
+
+/** When a PO's advance left the bank: its change-log entry, else when the PO was sent. */
+export const advancePaidAt = (po: PurchaseOrder): string =>
+  po.amendments.find((a) => a.note.startsWith("Advance paid"))?.at ?? po.sentAt ?? po.createdAt;
+
+/** Net VAT of a month as filed: output less input (supplier invoices and expenses). */
+export const vatNetFor = (store: Store, period: string): { output: number; input: number } => ({
+  output: round2(sumBy(store.CustomerInvoices.filter((i) => i.submittedAt.slice(0, 7) === period), (i) => i.vat)),
+  input: round2(
+    sumBy(store.SupplierInvoices.filter((i) => i.status !== "rejected" && i.invoiceDate.slice(0, 7) === period), (i) => i.vat) +
+      sumBy(store.Expenses.filter((e) => e.date.slice(0, 7) === period), (e) => e.vat),
+  ),
+});
 
 export const periodEnd = (period: string): string => {
   const [year, month] = period.split("-").map(Number);
@@ -87,6 +100,28 @@ export const bankMovements = (store: Store): BankMovement[] => {
   }
   for (const e of store.Expenses) {
     lines.push({ key: `exp-${e.uuid}`, at: e.date, bankAccountUuid: primary, description: e.description, reference: e.number, amount: -round2(e.amount + e.vat) });
+  }
+  for (const po of store.PurchaseOrders.filter((p) => p.advancePaid > 0)) {
+    lines.push({ key: `adv-${po.uuid}`, at: advancePaidAt(po), bankAccountUuid: primary, description: `Advance to supplier — ${po.number}`, reference: po.number, amount: -po.advancePaid });
+  }
+  for (const sc of store.Subcontracts.filter((s) => s.advancePaid > 0)) {
+    lines.push({ key: `sc-adv-${sc.uuid}`, at: sc.createdAt, bankAccountUuid: primary, description: `Advance to subcontractor — ${sc.number}`, reference: sc.number, amount: -sc.advancePaid });
+  }
+  for (const a of store.FixedAssets) {
+    lines.push({ key: `fa-${a.uuid}`, at: a.purchaseDate, bankAccountUuid: primary, description: `Asset bought — ${a.name}`, reference: a.number, amount: -a.cost });
+    if (a.disposal && a.disposal.proceeds > 0) {
+      lines.push({ key: `fa-sale-${a.uuid}`, at: a.disposal.at, bankAccountUuid: primary, description: `Asset sold — ${a.name}`, reference: a.number, amount: a.disposal.proceeds });
+    }
+  }
+  for (const f of store.TaxFilings.filter((t) => t.amount > 0)) {
+    lines.push({
+      key: `tax-${f.uuid}`,
+      at: f.filedAt,
+      bankAccountUuid: primary,
+      description: f.kind === "vat" ? `VAT return ${f.period}` : `Social insurance ${f.period}`,
+      reference: f.reference,
+      amount: -f.amount,
+    });
   }
   for (const c of store.CashCustodies) {
     if (c.disbursedAt) {

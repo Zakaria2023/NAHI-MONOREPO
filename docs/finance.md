@@ -46,12 +46,41 @@ works, equipment, fiber materials, civil materials, manpower, permits, overhead.
 Controls: limited rights to change an approved budget, with a log of each change and its
 reason. Reports: budget vs actual, open commitments, profitability, cost to date, overruns.
 
+## 4 (continued) — the study, cost centres, overhead
+
+- **Budget study** — per project, the detailed lines behind each category: civil and
+  fiber works (quantity × rate), materials, equipment (how it is supplied — daily or
+  monthly rent, or a company asset — for how long, civil or fiber work), manpower by job
+  title (headcount × months × monthly cost), permits, overhead. Amount = qty × unit cost ×
+  duration. **Applying the study** writes its category totals as the budget's planned
+  lines; on an approved budget that is a revision (projects or finance manager, reason
+  kept).
+- **Timelines** — when materials, manpower and equipment are needed, drawn as bars.
+- **Variance analysis** — for each category: the study, the budget, actual cost
+  (supplier invoices, custody, extracts, stock, payroll, expenses, overhead), the
+  variance and what is still committed on POs.
+- **Cost centres and manual expenses** — every project is a cost centre; departments and
+  vehicles are added. A manual expense is refused without a cost centre, a vehicle
+  expense unless it is split over exactly two, and the shares must add up to the amount.
+  A share charged to a project counts against that project's budget line.
+- **Overhead allocation** — each month's pool (expenses charged to departments and
+  vehicles, the head-office payroll, the depreciation of head-office assets) is spread
+  over the projects whose budget is approved, by revenue invoiced to date, direct cost to
+  date, or in equal shares; posted once a month, each share counts against the project's
+  overhead budget.
+
 ## 5. Monthly closing
 
 A period closes only after an approved checklist: procurement and warehouse closed (no
 pending documents), bank reconciliation, supplier balances, customer balances, custody
 closed (no open custody), payroll, depreciation, accruals/prepayments/suspense, lock the
 period, issue the financial statements.
+
+## 5 (rules added) — the closing checklist
+
+Payroll can be ticked only when the month's payroll is paid; depreciation only when the
+month's depreciation is posted; bank reconciliation only when every bank account is
+reconciled for the month.
 
 ## 6. Payroll
 
@@ -85,34 +114,13 @@ period, issue the financial statements.
 - **Reports** — asset register, depreciation per month, the depreciation schedule of each
   asset, the annual count's progress.
 
-## 4 (continued) — the study, cost centres, overhead
+## 8. Taxes and obligations
 
-- **Budget study** — per project, the detailed lines behind each category: civil and
-  fiber works (quantity × rate), materials, equipment (how it is supplied — daily or
-  monthly rent, or a company asset — for how long, civil or fiber work), manpower by job
-  title (headcount × months × monthly cost), permits, overhead. Amount = qty × unit cost ×
-  duration. **Applying the study** writes its category totals as the budget's planned
-  lines; on an approved budget that is a revision (projects or finance manager, reason
-  kept).
-- **Timelines** — when materials, manpower and equipment are needed, drawn as bars.
-- **Variance analysis** — for each category: the study, the budget, actual cost
-  (supplier invoices, custody, extracts, stock, payroll, expenses, overhead), the
-  variance and what is still committed on POs.
-- **Cost centres and manual expenses** — every project is a cost centre; departments and
-  vehicles are added. A manual expense is refused without a cost centre, a vehicle
-  expense unless it is split over exactly two, and the shares must add up to the amount.
-  A share charged to a project counts against that project's budget line.
-- **Overhead allocation** — each month's pool (expenses charged to departments and
-  vehicles, the head-office payroll, the depreciation of head-office assets) is spread
-  over the projects whose budget is approved, by revenue invoiced to date, direct cost to
-  date, or in equal shares; posted once a month, each share counts against the project's
-  overhead budget.
-
-## 5 (rules added) — the closing checklist
-
-Payroll can be ticked only when the month's payroll is paid; depreciation only when the
-month's depreciation is posted; bank reconciliation only when every bank account is
-reconciled for the month.
+- VAT by month and by quarter: output VAT on customer invoices; input VAT on supplier
+  invoices and on expenses.
+- The tax and insurance calendar: each month's VAT return and GOSI payment with its due
+  date; an alert **7 days before**, and once overdue. Filing records the reference and
+  fixes the amount. GOSI is paid only on an approved payroll.
 
 ## Treasury — banks, cheques, guarantees
 
@@ -134,17 +142,19 @@ reconciled for the month.
   statement at a date against the system's at the same date; the difference is shown and
   kept.
 
-## 8. Taxes and obligations
+## 9. Reports
 
-- VAT by month and by quarter: output VAT on customer invoices; input VAT on supplier
-  invoices and on expenses.
-- The tax and insurance calendar: each month's VAT return and GOSI payment with its due
-  date; an alert **7 days before**, and once overdue. Filing records the reference and
-  fixes the amount. GOSI is paid only on an approved payroll.
+Every report the documents list is in the reports centre (**Reports** in the menu), with
+Excel export and a print / PDF view; the ones that already are a screen of their own (the
+ageing, the payroll register, the asset register…) are listed there and open that screen.
 
-## 8–9. Taxes, reports
-
-The VAT summary (input VAT from supplier invoices, output VAT from customer invoices).
+The **financial statements** — trial balance, general ledger, income statement, balance
+sheet, zakat estimate — come from a general ledger **derived** from the documents: every
+invoice, payment, receipt, issue, extract, payroll, expense, custody, asset and filing
+implies a balanced double entry (`packages/services/src/rules/ledger.ts`). Tests hold that
+every entry balances and that the ledger's bank accounts equal the bank accounts' own
+balances. Zakat is an estimate: 2.5 % of equity plus profit to date less net fixed
+assets, never less than 2.5 % of the year's net profit.
 
 ## Assumptions
 

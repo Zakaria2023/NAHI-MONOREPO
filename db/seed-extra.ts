@@ -644,6 +644,25 @@ export const addExtraDemoData = (store: Store, now: string): void => {
   };
   store.Cheques = [ap2Cheque, ap3Cheque, bounced];
 
+  // VAT and GOSI filed for every month but the last, which is still open.
+  const vatNet = (p: string) =>
+    round2(
+      store.CustomerInvoices.filter((i) => i.submittedAt.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
+        store.SupplierInvoices.filter((i) => i.status !== "rejected" && i.invoiceDate.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
+        store.Expenses.filter((e) => e.date.slice(0, 7) === p).reduce((sum, e) => sum + e.vat, 0),
+    );
+  const gosi = (p: string) =>
+    round2(
+      (store.PayrollRuns.find((r) => r.period === p)?.payslips ?? []).reduce((sum, s) => sum + s.gosiEmployee + s.gosiEmployer, 0),
+    );
+  store.TaxFilings = [2, 3, 4, 5, 6].flatMap((monthsAgo) => {
+    const p = period(monthsAgo);
+    return [
+      { uuid: generateUuid(), kind: "vat" as const, period: p, amount: vatNet(p), reference: `ZATCA-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 50), by: nameOf("accountant") },
+      { uuid: generateUuid(), kind: "gosi" as const, period: p, amount: gosi(p), reference: `GOSI-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 42), by: nameOf("accountant") },
+    ];
+  });
+
   // Last month is reconciled on both accounts (its closing has bank reconciliation ticked).
   store.BankReconciliations = store.BankAccounts.map((account) => {
     const gap = reconciliationGap(store, account, lastMonth);
@@ -697,23 +716,4 @@ export const addExtraDemoData = (store: Store, now: string): void => {
       note: "Released after award",
     },
   ];
-
-  // VAT and GOSI filed for every month but the last, which is still open.
-  const vatNet = (p: string) =>
-    round2(
-      store.CustomerInvoices.filter((i) => i.submittedAt.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
-        store.SupplierInvoices.filter((i) => i.status !== "rejected" && i.invoiceDate.slice(0, 7) === p).reduce((sum, i) => sum + i.vat, 0) -
-        store.Expenses.filter((e) => e.date.slice(0, 7) === p).reduce((sum, e) => sum + e.vat, 0),
-    );
-  const gosi = (p: string) =>
-    round2(
-      (store.PayrollRuns.find((r) => r.period === p)?.payslips ?? []).reduce((sum, s) => sum + s.gosiEmployee + s.gosiEmployer, 0),
-    );
-  store.TaxFilings = [2, 3, 4, 5, 6].flatMap((monthsAgo) => {
-    const p = period(monthsAgo);
-    return [
-      { uuid: generateUuid(), kind: "vat" as const, period: p, amount: vatNet(p), reference: `ZATCA-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 50), by: nameOf("accountant") },
-      { uuid: generateUuid(), kind: "gosi" as const, period: p, amount: gosi(p), reference: `GOSI-${p.replace("-", "")}`, filedAt: addDays(`${p}-01T00:00:00.000Z`, 42), by: nameOf("accountant") },
-    ];
-  });
 };
