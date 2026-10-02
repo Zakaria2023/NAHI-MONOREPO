@@ -34,6 +34,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  AssetCategory,
+  AssetDisposalKind,
+  AssetHolderKind,
+  AssetStatus,
   AttendanceSource,
   EmploymentType,
   Nationality,
@@ -720,6 +724,56 @@ export type PayrollRun = {
   bankReference?: string;
 };
 
+// ─── Fixed assets ──────────────────────────────────────────────────────────
+
+/** Where an asset is kept: a warehouse, or an employee who holds it. */
+export type AssetHolder = {
+  kind: AssetHolderKind;
+  warehouseUuid?: string;
+  employeeName?: string;
+};
+
+/** The asset card of finance §7. Depreciation is straight-line and computed, never stored per asset. */
+export type FixedAsset = {
+  uuid: string;
+  number: string;
+  name: string;
+  category: AssetCategory;
+  serialNumber: string;
+  purchaseDate: string;
+  cost: number;
+  salvageValue: number;
+  usefulLifeMonths: number;
+  holder: AssetHolder;
+  /** The project its depreciation is charged to; absent = head office. */
+  projectUuid?: string;
+  status: AssetStatus;
+  transfers: { at: string; by: string; from: AssetHolder; to: AssetHolder; note?: string }[];
+  /** The annual count: was it found, and in what state. */
+  counts: { at: string; by: string; found: boolean; condition: string }[];
+  disposal?: {
+    at: string;
+    by: string;
+    kind: AssetDisposalKind;
+    proceeds: number;
+    bookValue: number;
+    gainLoss: number;
+    note?: string;
+  };
+  createdBy: string;
+  createdAt: string;
+};
+
+/** A month's depreciation, posted once — what the closing checklist looks for. */
+export type DepreciationRun = {
+  uuid: string;
+  period: string;
+  lines: { assetUuid: string; amount: number }[];
+  total: number;
+  postedBy: string;
+  postedAt: string;
+};
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export type ActivityEntry = {
@@ -767,5 +821,7 @@ export type Store = {
   Timesheets: Timesheet[];
   AttendanceEntries: AttendanceEntry[];
   PayrollRuns: PayrollRun[];
+  FixedAssets: FixedAsset[];
+  DepreciationRuns: DepreciationRun[];
   Activity: ActivityEntry[];
 };

@@ -9,8 +9,9 @@ import { logActivity } from "./core/activity";
 import { assertRole } from "./core/lookup";
 
 // MONTHLY CLOSING (finance §5): a period closes only when every checklist item
-// is ticked, and two of them — procurement/warehouse and custody — can only be
-// ticked when the system shows nothing open.
+// is ticked, and some can only be ticked when the system agrees — nothing open
+// in procurement/warehouse or custody, the month's payroll paid, its
+// depreciation posted.
 
 export type ClosingItemView = {
   item: ClosingItem;
@@ -39,7 +40,14 @@ const pendingDocuments = (store: Store): string[] => [
   ...store.SupplierInvoices.filter((i) => i.status === "registered").map((i) => i.number),
 ];
 
-const itemBlocker = (store: Store, item: ClosingItem): string | null => {
+const itemBlocker = (store: Store, item: ClosingItem, period: string): string | null => {
+  if (item === "payroll") {
+    const run = store.PayrollRuns.find((r) => r.period === period);
+    return run?.status === "paid" ? null : `The payroll for ${period} is ${run ? run.status : "not run"} — pay it first`;
+  }
+  if (item === "depreciation") {
+    return store.DepreciationRuns.some((r) => r.period === period) ? null : `Depreciation for ${period} is not posted yet`;
+  }
   if (item === "procurement_warehouse") {
     const pending = pendingDocuments(store);
     return pending.length > 0 ? `${pending.length} document(s) still pending: ${pending.slice(0, 6).join(", ")}${pending.length > 6 ? "…" : ""}` : null;
@@ -56,7 +64,7 @@ const view = (store: Store, period: string): ClosingView => {
   const items = closingItems.map((item) => ({
     item,
     done: row?.items[item],
-    blocker: itemBlocker(store, item),
+    blocker: itemBlocker(store, item, period),
   }));
   return {
     period,
@@ -88,7 +96,7 @@ export const tickClosingItem = async (actor: Actor, input: ClosingTickInput): Pr
     if (row.items[input.item]) {
       throw new Error("Already ticked");
     }
-    const blocker = itemBlocker(store, input.item);
+    const blocker = itemBlocker(store, input.item, input.period);
     if (blocker) {
       throw new Error(blocker);
     }

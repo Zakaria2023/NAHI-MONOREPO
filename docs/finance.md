@@ -69,7 +69,28 @@ period, issue the financial statements.
 - Labour cost is split over projects by timesheet days and counts against each project's
   **manpower** budget once the run is approved.
 
-## 7–9. Fixed assets, taxes, reports
+## 7. Fixed assets
+
+- **Asset card** — number, category, serial, purchase date, cost, salvage value, useful
+  life, where it is (a warehouse) or who holds it (an employee), and the project its
+  depreciation is charged to.
+- **Depreciation** — straight-line, worked out by the system from the month of purchase;
+  the last month takes the rounding so the asset ends at its salvage value. Each month's
+  depreciation is **posted once**; the closing checklist will not tick depreciation until
+  it is.
+- **Transfer** between warehouses or employees updates the card and its history.
+- **Annual count** — once a year per asset: found or missing, and its condition.
+- **Sale or scrap** takes the asset off the books with the gain or loss against its book
+  value at that date; nothing is charged after it.
+- **Reports** — asset register, depreciation per month, the depreciation schedule of each
+  asset, the annual count's progress.
+
+## 5 (rules added) — the closing checklist
+
+Payroll can be ticked only when the month's payroll is paid; depreciation only when the
+month's depreciation is posted.
+
+## 8–9. Taxes, reports
 
 The VAT summary (input VAT from supplier invoices, output VAT from customer invoices).
 

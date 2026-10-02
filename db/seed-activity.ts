@@ -180,6 +180,22 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
     }
   }
 
+  for (const a of store.FixedAssets) {
+    add("fixed_asset", a.uuid, a.number, a.createdAt, a.createdBy, "Asset registered", `${a.name} — ${a.serialNumber}`);
+    for (const t of a.transfers) {
+      add("fixed_asset", a.uuid, a.number, t.at, t.by, "Asset transferred", t.note);
+    }
+    for (const c of a.counts) {
+      add("fixed_asset", a.uuid, a.number, c.at, c.by, c.found ? "Counted — found" : "Counted — missing", c.condition);
+    }
+    if (a.disposal) {
+      add("fixed_asset", a.uuid, a.number, a.disposal.at, a.disposal.by, a.disposal.kind === "sale" ? "Sold — off the books" : "Scrapped — off the books", a.disposal.note);
+    }
+  }
+  for (const d of store.DepreciationRuns) {
+    add("depreciation", d.uuid, d.period, d.postedAt, d.postedBy, "Depreciation posted", `${d.lines.length} assets`);
+  }
+
   for (const period of store.ClosingPeriods) {
     for (const [key, record] of Object.entries(period.items)) {
       if (record) {

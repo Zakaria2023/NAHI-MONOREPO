@@ -451,6 +451,32 @@ export const attendanceSources = ["attendance_app", "admin"] as const satisfies 
 
 export type AttendanceSource = (typeof attendanceSources)[number];
 
+// ─── Fixed assets ──────────────────────────────────────────────────────────
+
+export const assetCategories = [
+  "vehicles",
+  "heavy_equipment",
+  "test_equipment",
+  "tools",
+  "it_equipment",
+  "furniture",
+] as const satisfies readonly string[];
+
+export type AssetCategory = (typeof assetCategories)[number];
+
+export const assetStatuses = ["active", "disposed"] as const satisfies readonly string[];
+
+export type AssetStatus = (typeof assetStatuses)[number];
+
+export const assetDisposalKinds = ["sale", "scrap"] as const satisfies readonly string[];
+
+export type AssetDisposalKind = (typeof assetDisposalKinds)[number];
+
+/** Where an asset is: in a warehouse, or in an employee's custody. */
+export const assetHolderKinds = ["warehouse", "employee"] as const satisfies readonly string[];
+
+export type AssetHolderKind = (typeof assetHolderKinds)[number];
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export const entityKinds = [
@@ -476,6 +502,8 @@ export const entityKinds = [
   "employee",
   "timesheet",
   "payroll_run",
+  "fixed_asset",
+  "depreciation",
   "budget",
   "closing",
   "system",

@@ -6,7 +6,7 @@ const ClosingPage = () => (
   <>
     <PageHeader
       title="Monthly closing"
-      description="A period closes only when every checklist item is done. Procurement & warehouse and custody can be ticked only when the system shows nothing open."
+      description="A period closes only when every checklist item is done. Some items are checked by the system: procurement & warehouse and custody need nothing open, payroll needs the month paid, depreciation needs the month posted."
     />
     <AsyncSection reloadKey="closing">
       <ClosingPeriods />

@@ -71,6 +71,8 @@ const emptyStore = (): Store => ({
   Timesheets: [],
   AttendanceEntries: [],
   PayrollRuns: [],
+  FixedAssets: [],
+  DepreciationRuns: [],
   Activity: [],
 });
 

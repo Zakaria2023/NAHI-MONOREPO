@@ -131,7 +131,9 @@ describe("monthly closing", () => {
     const period = new Date().toISOString().slice(0, 7);
     await expect(tickClosingItem(as("accountant"), { period, item: "procurement_warehouse" })).rejects.toThrow(/pending/);
     await expect(tickClosingItem(as("accountant"), { period, item: "custody" })).rejects.toThrow(/CC-0001/);
-    for (const item of closingItems.filter((i) => i !== "procurement_warehouse" && i !== "custody")) {
+    // Payroll and depreciation have their own system checks (assets.test.ts).
+    const checked = ["procurement_warehouse", "custody", "payroll", "depreciation"];
+    for (const item of closingItems.filter((i) => !checked.includes(i))) {
       await tickClosingItem(as("accountant"), { period, item });
     }
     await expect(closePeriod(as("finance_manager"), period)).rejects.toThrow(/still open/);

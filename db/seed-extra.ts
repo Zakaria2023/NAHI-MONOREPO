@@ -1,12 +1,13 @@
 import { addDays, generateUuid, round2 } from "utils";
 // The seed fixes each demo payslip with the same rule the payroll service uses,
 // so the demo's figures are the ones the system would have calculated.
+import { chargeFor, disposalGainLoss } from "../packages/services/src/rules/assets";
 import { computePayslip, timesheetFromAttendance } from "../packages/services/src/rules/payroll";
-import { EmploymentType, Nationality, StaffRole } from "./enum";
-import { AttendanceEntry, Employee, PricedLine, Store, SupplierReturn, Timesheet } from "./types";
+import { AssetCategory, EmploymentType, Nationality, StaffRole } from "./enum";
+import { AssetHolder, AttendanceEntry, Employee, FixedAsset, PricedLine, Store, SupplierReturn, Timesheet } from "./types";
 
 // DEMO DATA for the parts built after the first MVP: annual contracts, supplier
-// returns and payroll. Each record is placed to show one screen or rule.
+// returns, payroll and fixed assets. Each record is placed to show one screen or rule.
 
 const VAT = 0.15;
 
@@ -309,4 +310,89 @@ export const addExtraDemoData = (store: Store, now: string): void => {
       createdAt: ago(1),
     },
   ];
+
+  // ─── Fixed assets ────────────────────────────────────────────────────────
+
+  const wh = (code: string): AssetHolder => ({
+    kind: "warehouse",
+    warehouseUuid: find(store.Warehouses, (w) => w.code === code, code).uuid,
+  });
+  const holderOf = (employeeName: string): AssetHolder => ({ kind: "employee", employeeName });
+  const counted = (daysAgo: number, condition = "Good, in use") => ({ at: ago(daysAgo), by: nameOf("warehouse_keeper"), found: true, condition });
+  let assetSerial = 0;
+  const asset = (
+    name: string,
+    category: AssetCategory,
+    serialNumber: string,
+    boughtDaysAgo: number,
+    cost: number,
+    salvageValue: number,
+    usefulLifeMonths: number,
+    holder: AssetHolder,
+    projectCode?: string,
+    extra: Partial<FixedAsset> = {},
+  ): FixedAsset => {
+    assetSerial += 1;
+    return {
+      uuid: generateUuid(),
+      number: `FA-${String(assetSerial).padStart(4, "0")}`,
+      name,
+      category,
+      serialNumber,
+      purchaseDate: ago(boughtDaysAgo),
+      cost,
+      salvageValue,
+      usefulLifeMonths,
+      holder,
+      projectUuid: projectCode ? project(projectCode) : undefined,
+      status: "active",
+      transfers: [],
+      counts: [],
+      createdBy: nameOf("accountant"),
+      createdAt: ago(boughtDaysAgo),
+      ...extra,
+    };
+  };
+
+  const navara = asset("Nissan Navara pickup", "vehicles", "JN1CPUD22-0045812", 1500, 98000, 25000, 60, holderOf("Bandar Al-Qahtani"), "STC-002");
+  const sold = disposalGainLoss(navara, ago(60), 38000);
+
+  store.FixedAssets = [
+    asset("Toyota Hilux pickup", "vehicles", "MR0FA3CD5-0091733", 700, 118000, 30000, 60, holderOf("Bandar Al-Qahtani"), "STC-002", {
+      counts: [counted(150)],
+    }),
+    asset("Toyota Hilux pickup", "vehicles", "MR0FA3CD5-0104456", 420, 121500, 30000, 60, holderOf("Tariq Hussain"), "MOB-005"),
+    asset("Fujikura 90S fusion splicer", "test_equipment", "FJK-90S-218841", 560, 42000, 4000, 48, holderOf("Mohammed Rafiq"), "MOB-001", {
+      counts: [counted(140, "Good — electrodes replaced")],
+    }),
+    asset("Fujikura 90S fusion splicer", "test_equipment", "FJK-90S-230017", 300, 42000, 4000, 48, wh("WH-RUH")),
+    asset("EXFO MaxTester OTDR", "test_equipment", "EXFO-MAX-715520", 380, 38000, 3000, 48, holderOf("Arjun Nair"), "MOB-004", {
+      counts: [counted(130)],
+    }),
+    asset("CAT 301.7 mini excavator", "heavy_equipment", "CAT0301-7JLK02210", 900, 165000, 45000, 84, wh("WH-DMM"), "MOB-005", {
+      transfers: [
+        { at: ago(210), by: nameOf("warehouse_keeper"), from: wh("WH-RUH"), to: wh("WH-DMM"), note: "Moved for the Dammam port link" },
+      ],
+    }),
+    asset("Diesel generator 20 kVA", "heavy_equipment", "GEN-20KVA-55190", 250, 28000, 3000, 60, wh("WH-JED")),
+    asset("Dell Latitude laptops (5)", "it_equipment", "DL-LAT-5540-BATCH7", 500, 24500, 0, 36, holderOf("Lama Al-Subaie")),
+    {
+      ...navara,
+      status: "disposed",
+      disposal: { at: ago(60), by: nameOf("finance_manager"), kind: "sale", proceeds: 38000, ...sold, note: "Sold at auction" },
+    },
+  ];
+
+  // The last two months' depreciation is posted; this month's is not yet.
+  store.DepreciationRuns = [twoMonthsAgo, lastMonth].map((p, i) => {
+    const lines = store.FixedAssets.map((a) => ({ assetUuid: a.uuid, amount: chargeFor(a, p) })).filter((l) => l.amount > 0);
+    return {
+      uuid: generateUuid(),
+      period: p,
+      lines,
+      total: round2(lines.reduce((sum, l) => sum + l.amount, 0)),
+      postedBy: nameOf("accountant"),
+      postedAt: ago(i === 0 ? 33 : 2),
+    };
+  });
 };

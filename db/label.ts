@@ -36,6 +36,10 @@ import {
   StcStage,
   StockMovementType,
   SupplierInvoiceStatus,
+  AssetCategory,
+  AssetDisposalKind,
+  AssetHolderKind,
+  AssetStatus,
   AttendanceSource,
   EmploymentType,
   Nationality,
@@ -410,6 +414,8 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   employee: "Employee",
   timesheet: "Timesheet",
   payroll_run: "Payroll run",
+  fixed_asset: "Fixed asset",
+  depreciation: "Depreciation",
   budget: "Budget",
   closing: "Monthly closing",
   system: "System",
@@ -449,4 +455,28 @@ export const PAYROLL_RUN_STATUS_LABELS: Record<PayrollRunStatus, string> = {
 export const ATTENDANCE_SOURCE_LABELS: Record<AttendanceSource, string> = {
   attendance_app: "Attendance app",
   admin: "Entered in admin",
+};
+
+export const ASSET_CATEGORY_LABELS: Record<AssetCategory, string> = {
+  vehicles: "Vehicles",
+  heavy_equipment: "Heavy equipment",
+  test_equipment: "Test & splicing equipment",
+  tools: "Tools",
+  it_equipment: "IT equipment",
+  furniture: "Furniture & fittings",
+};
+
+export const ASSET_STATUS_LABELS: Record<AssetStatus, string> = {
+  active: "In use",
+  disposed: "Disposed",
+};
+
+export const ASSET_DISPOSAL_KIND_LABELS: Record<AssetDisposalKind, string> = {
+  sale: "Sold",
+  scrap: "Scrapped",
+};
+
+export const ASSET_HOLDER_KIND_LABELS: Record<AssetHolderKind, string> = {
+  warehouse: "Warehouse",
+  employee: "Employee custody",
 };

@@ -45,6 +45,10 @@ export const entityHref = (kind: EntityKind, uuid: string): string => {
       return "/payroll/timesheets";
     case "payroll_run":
       return `/payroll/runs/${uuid}`;
+    case "fixed_asset":
+      return `/finance/assets/${uuid}`;
+    case "depreciation":
+      return "/finance/depreciation";
     case "budget":
       return `/finance/budgets/${uuid}`;
     case "closing":

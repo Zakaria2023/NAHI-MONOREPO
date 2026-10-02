@@ -1,4 +1,5 @@
 export * from "./activity";
+export * from "./assets";
 export * from "./alerts";
 export * from "./budgets";
 export * from "./closing";
@@ -15,6 +16,7 @@ export * from "./procurement";
 export * from "./projects";
 export * from "./receivables";
 export * from "./returns";
+export * from "./rules/assets";
 export * from "./rules/chains";
 export * from "./rules/finance";
 export * from "./rules/mobily";
