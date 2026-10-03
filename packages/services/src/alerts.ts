@@ -1,4 +1,4 @@
-import { daysUntil, formatDate, nowIso } from "utils";
+import { calendarDaysBetween, daysUntil, formatDate, nowIso } from "utils";
 import { readStore } from "../../../db";
 import { EntityKind } from "../../../db/enum";
 import { CUSTOMER_INVOICE_BASIS_LABELS, GUARANTEE_KIND_LABELS, OBLIGATION_KIND_LABELS, PERMIT_AUTHORITY_LABELS } from "../../../db/label";
@@ -15,6 +15,7 @@ import { stockBalance } from "./core/stock";
 import { CUSTODY_SETTLEMENT_DAYS } from "./custody";
 import { nextCountAt } from "./warehouse";
 import { obligationsFor } from "./obligations";
+import { TASK_DUE_WARNING_DAYS, isTaskOpen } from "./rules/tasks";
 
 // THE ALERTS the documents ask for — before permits expire, before FAC and Final
 // Clearance fall due (Mobily §7), the STC 24-hour countdown and C09 warning
@@ -288,6 +289,38 @@ const chequeAlerts: AlertCollector = (store, now) =>
     return [];
   });
 
+/** A task given and still not opened by its assignee after this many days. */
+const TASK_UNSEEN_WARNING_DAYS = 2;
+
+const taskAlerts: AlertCollector = (store, now) =>
+  store.Tasks.filter((t) => isTaskOpen(t) && t.status !== "in_review").flatMap((task): Alert[] => {
+    const assignee = store.StaffUsers.find((u) => u.uuid === task.assigneeUuid)?.name ?? "";
+    const target = { kind: "task" as const, uuid: task.uuid };
+    const days = calendarDaysBetween(now, task.dueAt);
+    const alerts: Alert[] = [];
+    if (days <= TASK_DUE_WARNING_DAYS) {
+      alerts.push({
+        key: `task-due-${task.uuid}`,
+        severity: dueSeverity(days),
+        title: days < 0 ? `Task overdue by ${-days} day(s)` : days === 0 ? "Task due today" : `Task due in ${days} day(s)`,
+        detail: `${task.number} — ${task.title} (${assignee})`,
+        target,
+        dueAt: task.dueAt,
+      });
+    }
+    const unseenFor = calendarDaysBetween(task.assignedAt, now);
+    if (!task.seenAt && unseenFor >= TASK_UNSEEN_WARNING_DAYS) {
+      alerts.push({
+        key: `task-unseen-${task.uuid}`,
+        severity: "warning",
+        title: `Task not opened for ${unseenFor} days`,
+        detail: `${task.number} — ${assignee} has not seen "${task.title}"`,
+        target,
+      });
+    }
+    return alerts;
+  });
+
 const COLLECTORS: AlertCollector[] = [
   mobilyAlerts,
   stcAlerts,
@@ -299,6 +332,7 @@ const COLLECTORS: AlertCollector[] = [
   obligationAlerts,
   guaranteeAlerts,
   chequeAlerts,
+  taskAlerts,
 ];
 
 export const listAlerts = async (): Promise<Alert[]> => {

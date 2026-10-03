@@ -6,3 +6,5 @@ export * from "./finance";
 export * from "./payroll";
 export * from "./procurement";
 export * from "./projects";
+export * from "./tasks";
+export * from "./auth";

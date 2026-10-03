@@ -10,6 +10,8 @@ import {
   PurchaseOrderStatus,
   PurchaseRequestStatus,
   SupplierInvoiceStatus,
+  TaskPriority,
+  TaskStatus,
   WarehouseDocStatus,
 } from "@/db/enum";
 
@@ -97,4 +99,20 @@ export const PAYROLL_TONES: Record<PayrollRunStatus, PillTone> = {
   draft: "warning",
   approved: "info",
   paid: "success",
+};
+
+export const TASK_TONES: Record<TaskStatus, PillTone> = {
+  todo: "neutral",
+  in_progress: "info",
+  on_hold: "warning",
+  in_review: "warning",
+  done: "success",
+  cancelled: "neutral",
+};
+
+export const TASK_PRIORITY_TONES: Record<TaskPriority, PillTone> = {
+  low: "neutral",
+  normal: "info",
+  high: "warning",
+  urgent: "danger",
 };

@@ -110,3 +110,7 @@ export const recentPeriods = (count: number, now: string = nowIso()): string[] =
     new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - i, 1)).toISOString().slice(0, 7),
   );
 };
+
+/** Calendar days from `from`'s date to `to`'s date (UTC) — 0 on the same day, whatever the hour. */
+export const calendarDaysBetween = (from: string, to: string): number =>
+  Math.round((Date.parse(to.slice(0, 10)) - Date.parse(from.slice(0, 10))) / DAY_MS);

@@ -57,6 +57,8 @@ import {
   SupplierReturnRemedy,
   SupplierReturnSource,
   SupplierReturnStatus,
+  TaskPriority,
+  TaskStatus,
   WarehouseDocStatus,
   WriteOffDecision,
   WriteOffReason,
@@ -76,6 +78,7 @@ export const STAFF_ROLE_LABELS: Record<StaffRole, string> = {
   region_accountant: "Region accountant",
   project_engineer: "Project engineer",
   accountant: "Accountant",
+  employee: "Employee",
 };
 
 export const PORTAL_ACCOUNT_KIND_LABELS: Record<PortalAccountKind, string> = {
@@ -435,6 +438,7 @@ export const ENTITY_KIND_LABELS: Record<EntityKind, string> = {
   tax_filing: "Tax filing",
   budget: "Budget",
   closing: "Monthly closing",
+  task: "Task",
   system: "System",
 };
 
@@ -558,4 +562,20 @@ export const GUARANTEE_KIND_LABELS: Record<GuaranteeKind, string> = {
 export const OBLIGATION_KIND_LABELS: Record<ObligationKind, string> = {
   vat: "VAT return",
   gosi: "Social insurance (GOSI)",
+};
+
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: "To do",
+  in_progress: "In progress",
+  on_hold: "On hold",
+  in_review: "Waiting for review",
+  done: "Done",
+  cancelled: "Cancelled",
+};
+
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: "Low",
+  normal: "Normal",
+  high: "High",
+  urgent: "Urgent",
 };

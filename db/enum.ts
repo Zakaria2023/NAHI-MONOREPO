@@ -17,6 +17,8 @@ export const staffRoles = [
   "region_accountant",
   "project_engineer",
   "accountant",
+  /** A plain employee with a sign-in: works on their own tasks, in no approval chain. */
+  "employee",
 ] as const satisfies readonly string[];
 
 export type StaffRole = (typeof staffRoles)[number];
@@ -530,6 +532,27 @@ export const assetHolderKinds = ["warehouse", "employee"] as const satisfies rea
 
 export type AssetHolderKind = (typeof assetHolderKinds)[number];
 
+// ─── Tasks ─────────────────────────────────────────────────────────────────
+
+/**
+ * A task's life: given (to do), started, maybe put on hold, handed in for
+ * review, then accepted (done) — or sent back to work. Cancelled ends it early.
+ */
+export const taskStatuses = [
+  "todo",
+  "in_progress",
+  "on_hold",
+  "in_review",
+  "done",
+  "cancelled",
+] as const satisfies readonly string[];
+
+export type TaskStatus = (typeof taskStatuses)[number];
+
+export const taskPriorities = ["low", "normal", "high", "urgent"] as const satisfies readonly string[];
+
+export type TaskPriority = (typeof taskPriorities)[number];
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export const entityKinds = [
@@ -566,6 +589,7 @@ export const entityKinds = [
   "tax_filing",
   "budget",
   "closing",
+  "task",
   "system",
 ] as const satisfies readonly string[];
 

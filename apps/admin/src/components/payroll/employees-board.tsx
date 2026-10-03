@@ -3,6 +3,7 @@ import { listEmployees, listProjectOptions } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, round2, sumBy } from "utils";
 import { EmployeeForm } from "./employee-form";
+import { EmployeeLoginForm } from "./employee-login-form";
 import { EmployeesTable } from "./employees-table";
 
 export const EmployeesBoard = async () => {
@@ -26,6 +27,12 @@ export const EmployeesBoard = async () => {
       <EmployeesTable employees={employees} />
       <Card title="Add an employee" description="The IBAN is where the salary transfer goes; the default project takes the cost when a timesheet does not split it">
         <EmployeeForm key={employees.length} projects={[{ value: "", label: "Head office (overhead)" }, ...projects]} />
+      </Card>
+      <Card title="Give an employee a sign-in" description="They sign in with this e-mail and password and see their own tasks — nothing else">
+        <EmployeeLoginForm
+          key={employees.filter((e) => e.loginEmail).length}
+          employees={employees.filter((e) => e.active && !e.loginEmail).map((e) => ({ value: e.uuid, label: `${e.name} — ${e.jobTitle}` }))}
+        />
       </Card>
     </>
   );

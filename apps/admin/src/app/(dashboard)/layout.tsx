@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { listAlerts, listPendingApprovals, listStaff } from "services";
+import { listAlerts, listPendingApprovals, listStaff, taskCountsFor } from "services";
 import { Shell } from "@/components/layout/shell";
 import { buildNav } from "@/lib/nav";
 import { getCurrentStaff } from "@/lib/server/auth";
@@ -10,17 +10,18 @@ type Props = {
 
 const DashboardLayout = async ({ children }: Props) => {
   const current = await getCurrentStaff();
-  const [users, pending, alerts] = await Promise.all([
+  const [users, pending, alerts, tasks] = await Promise.all([
     listStaff(),
     listPendingApprovals(current.role),
     listAlerts(),
+    taskCountsFor(current.uuid),
   ]);
   return (
     <Shell
-      groups={buildNav({ approvals: pending.length, alerts: alerts.length })}
+      groups={buildNav({ approvals: pending.length, alerts: alerts.length, tasks: tasks.unseen + tasks.toReview, role: current.role })}
       current={current}
       users={users.map((u) => ({ uuid: u.uuid, name: u.name, role: u.role }))}
-      urgentAlerts={alerts.filter((a) => a.severity === "danger").length}
+      urgentAlerts={current.role === "employee" ? 0 : alerts.filter((a) => a.severity === "danger").length}
     >
       {children}
     </Shell>

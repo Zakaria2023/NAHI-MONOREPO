@@ -1,7 +1,7 @@
 import { EmployeeRow } from "services";
 import { StatusPill, Table } from "ui";
 import { formatDate, formatMoney } from "utils";
-import { EMPLOYMENT_TYPE_LABELS, NATIONALITY_LABELS } from "@/db/label";
+import { EMPLOYMENT_TYPE_LABELS, NATIONALITY_LABELS, STAFF_ROLE_LABELS } from "@/db/label";
 
 type EmployeesTableProps = {
   employees: EmployeeRow[];
@@ -47,6 +47,19 @@ export const EmployeesTable = ({ employees }: EmployeesTableProps) => (
       { key: "project", header: "Default project", render: (e) => <span dir="ltr">{e.defaultProjectCode ?? "Head office"}</span> },
       { key: "bank", header: "Bank", render: (e) => <span className="text-secondary">{e.bankName}</span> },
       { key: "joined", header: "Joined", render: (e) => formatDate(e.joinedAt) },
+      {
+        key: "login",
+        header: "Sign-in",
+        render: (e) =>
+          e.loginEmail ? (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm">{e.loginEmail}</span>
+              {e.loginRole && <span className="text-xs text-muted">{STAFF_ROLE_LABELS[e.loginRole]}</span>}
+            </div>
+          ) : (
+            <span className="text-faint">No sign-in</span>
+          ),
+      },
     ]}
   />
 );

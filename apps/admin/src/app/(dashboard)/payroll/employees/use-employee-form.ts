@@ -19,6 +19,8 @@ export const useEmployeeForm = () => {
     bankName: "",
     defaultProjectUuid: "",
     joinedAt: toDateInput(nowIso()),
+    loginEmail: "",
+    loginPassword: "",
   });
   // Which pay fields the form shows: a salary and allowances, or a daily rate.
   const daily = props.form.watch("employmentType") === "daily";

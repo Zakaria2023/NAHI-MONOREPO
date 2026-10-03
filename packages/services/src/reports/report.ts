@@ -59,6 +59,7 @@ export type ReportGroup =
   | "Payroll & assets"
   | "Treasury & tax"
   | "Financial statements"
+  | "Tasks"
   | "Control";
 
 export type ReportEntry = {

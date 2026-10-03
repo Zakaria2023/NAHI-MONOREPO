@@ -55,6 +55,8 @@ import {
   SupplierReturnRemedy,
   SupplierReturnSource,
   SupplierReturnStatus,
+  TaskPriority,
+  TaskStatus,
   WarehouseDocStatus,
   WriteOffDecision,
   WriteOffReason,
@@ -92,12 +94,17 @@ export type PricedLine = QuantityLine & {
 
 // ─── People ────────────────────────────────────────────────────────────────
 
+/** Everyone who signs in. A plain employee's sign-in points at their payroll record. */
 export type StaffUser = {
   uuid: string;
   name: string;
   email: string;
   role: StaffRole;
   region: Region;
+  /** "salt:hash" (scrypt) — never the password itself. */
+  passwordHash: string;
+  /** The payroll employee this sign-in belongs to, when there is one. */
+  employeeUuid?: string;
 };
 
 export type PortalAccount = {
@@ -947,6 +954,69 @@ export type TaxFiling = {
   by: string;
 };
 
+// ─── Tasks ─────────────────────────────────────────────────────────────────
+
+/** One line of a task's checklist; the task is not handed in until each is ticked. */
+export type TaskChecklistItem = {
+  uuid: string;
+  text: string;
+  doneAt?: string;
+  doneBy?: string;
+};
+
+/** A day of work the assignee logged against the task. `date` is the day worked. */
+export type TaskWorkLog = {
+  uuid: string;
+  date: string;
+  hours: number;
+  note?: string;
+  by: string;
+  at: string;
+};
+
+export type TaskComment = {
+  uuid: string;
+  at: string;
+  by: string;
+  text: string;
+};
+
+/**
+ * Work one staff member gives another (or themselves). Who gave it reviews it:
+ * the assignee hands it in, and only the giver accepts it as done.
+ */
+export type Task = {
+  uuid: string;
+  number: string;
+  title: string;
+  description: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  /** The staff member doing it. */
+  assigneeUuid: string;
+  /** Who gave it — and who reviews it once it is handed in. */
+  assignedByUuid: string;
+  projectUuid?: string;
+  dueAt: string;
+  createdAt: string;
+  /** When it reached its current assignee: the creation, or the last reassignment. */
+  assignedAt: string;
+  /** When the current assignee first opened it. Cleared on reassignment. */
+  seenAt?: string;
+  startedAt?: string;
+  /** The last time it was handed in as finished. */
+  submittedAt?: string;
+  completedAt?: string;
+  cancelledAt?: string;
+  /** Why it is on hold, was sent back or was cancelled — the latest of these. */
+  reason?: string;
+  /** How many times the reviewer sent it back to work. */
+  returnedCount: number;
+  checklist: TaskChecklistItem[];
+  workLogs: TaskWorkLog[];
+  comments: TaskComment[];
+};
+
 // ─── Audit ─────────────────────────────────────────────────────────────────
 
 export type ActivityEntry = {
@@ -1005,5 +1075,6 @@ export type Store = {
   LettersOfGuarantee: LetterOfGuarantee[];
   SupplierStatementChecks: SupplierStatementCheck[];
   TaxFilings: TaxFiling[];
+  Tasks: Task[];
   Activity: ActivityEntry[];
 };

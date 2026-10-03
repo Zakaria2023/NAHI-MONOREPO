@@ -233,6 +233,36 @@ export const deriveActivity = (store: Store): ActivityEntry[] => {
     }
   }
 
+  const staffName = (uuid: string) => store.StaffUsers.find((u) => u.uuid === uuid)?.name ?? "Former staff";
+  for (const t of store.Tasks) {
+    const assignee = staffName(t.assigneeUuid);
+    add("task", t.uuid, t.number, t.createdAt, staffName(t.assignedByUuid), `Task given to ${assignee}`, t.title);
+    if (t.seenAt && t.assigneeUuid !== t.assignedByUuid) {
+      add("task", t.uuid, t.number, t.seenAt, assignee, "Seen by the assignee");
+    }
+    if (t.startedAt) {
+      add("task", t.uuid, t.number, t.startedAt, assignee, "Work started");
+    }
+    for (const log of t.workLogs) {
+      add("task", t.uuid, t.number, log.at, log.by, `Logged ${log.hours} hour(s)`, log.note);
+    }
+    for (const comment of t.comments) {
+      add("task", t.uuid, t.number, comment.at, comment.by, "Comment added", comment.text);
+    }
+    if (t.status === "on_hold" && t.reason) {
+      add("task", t.uuid, t.number, t.workLogs.at(-1)?.at ?? t.startedAt ?? t.createdAt, assignee, "Put on hold", t.reason);
+    }
+    if (t.submittedAt) {
+      add("task", t.uuid, t.number, t.submittedAt, assignee, "Handed in as finished");
+    }
+    if (t.completedAt) {
+      add("task", t.uuid, t.number, t.completedAt, staffName(t.assignedByUuid), "Accepted as done");
+    }
+    if (t.cancelledAt) {
+      add("task", t.uuid, t.number, t.cancelledAt, staffName(t.assignedByUuid), "Task cancelled", t.reason);
+    }
+  }
+
   return entries
     .sort((a, b) => b.at.localeCompare(a.at))
     .map((entry) => ({ uuid: generateUuid(), ...entry }));

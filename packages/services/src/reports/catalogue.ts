@@ -41,6 +41,7 @@ import {
   supplierPriceComparison,
 } from "./procurement-reports";
 import { ReportData, ReportEntry, ReportGroup, ReportParams } from "./report";
+import { taskPerformance, taskRegister } from "./task-reports";
 
 // EVERY REPORT THE FOUR DOCUMENTS ASK FOR, in one catalogue. A report either is
 // built here, or is an existing screen (`href`) — the stock balance, the ageing,
@@ -59,6 +60,7 @@ export const REPORT_GROUPS: ReportGroup[] = [
   "Payroll & assets",
   "Treasury & tax",
   "Financial statements",
+  "Tasks",
   "Control",
 ];
 
@@ -131,6 +133,11 @@ export const REPORTS: ReportEntry[] = [
   { slug: "general-ledger", title: "General ledger", group: "Financial statements", source: "Finance §9", description: "One account's entries with the running balance.", build: generalLedger },
   { slug: "income-statement", title: "Income statement", group: "Financial statements", source: "Finance §9 (final accounts)", description: "Revenue, cost of projects, operating expenses and profit for a year.", build: incomeStatementReport },
   { slug: "balance-sheet", title: "Balance sheet", group: "Financial statements", source: "Finance §9 (final accounts)", description: "Assets, liabilities and equity today.", build: balanceSheetReport },
+
+  // Tasks
+  { slug: "task-performance", title: "Task performance by employee", group: "Tasks", source: "Task management", description: "Open, unseen, overdue and done tasks per employee, on-time rate and average working days.", build: taskPerformance },
+  { slug: "task-register", title: "Task register", group: "Tasks", source: "Task management", description: "Every task: when it was given, seen, started and finished, the days worked and the hours logged.", build: taskRegister },
+  { slug: "team-workload", title: "Team workload", group: "Tasks", source: "Task management", description: "Who is carrying what right now.", href: "/tasks/team" },
 
   // Control
   { slug: "audit-log", title: "Audit log", group: "Control", source: "Finance §9, procurement §7", description: "Every change, who made it and when.", href: "/activity" },

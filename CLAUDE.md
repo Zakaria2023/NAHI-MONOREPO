@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository (`apps/admin` and `apps/client`).
 
-It follows the conventions of the SOT-MONOREPO: the code-style rules below are carried over from it unchanged. What differs is the MVP's infrastructure — there is **no Clerk and no database yet**. Both are stand-ins kept behind the same seams the real ones will use, so swapping them in later touches `db/index.ts` and `apps/*/src/lib/server/auth.ts`, nothing else.
+It follows the conventions of the SOT-MONOREPO: the code-style rules below are carried over from it unchanged. What differs is the MVP's infrastructure — there is **no Clerk and no database yet**. Both are stand-ins kept behind the same seams the real ones will use, so swapping them in later touches `db/index.ts`, `apps/*/src/lib/server/auth.ts` and the sign-in in `packages/services/src/auth.ts` (with `core/password.ts`), nothing else.
 
 ## What This System Is
 
@@ -12,6 +12,7 @@ An ERP for a telecom fiber contractor that builds sites for **Mobily** and **STC
 - `docs/stc-workflow.md` — STC's stage cycle: Design → M2 Permit → M3 Implementation/RFS → M4 → M5 → Dashboard.
 - `docs/procurement-warehouse-custody.md` — purchase requests, RFQs, POs, receiving, issuing, transfers, stocktakes, write-offs, cash and asset custody.
 - `docs/finance.md` — supplier invoices (AP), subcontractor extracts, customer invoices, project budgets, monthly closing.
+- `docs/tasks.md` — task management (not from the four documents): giving, seeing, working, handing in and reviewing tasks.
 
 Every numbered "system rule" in those documents is enforced in `packages/services`, and each one has a test in `packages/services/src/**/*.test.ts` that names it.
 
@@ -48,8 +49,10 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
 
 **Auth (MVP — stands in for Clerk)**
 
-- There is no sign-in. The admin reads the acting staff member from the `erp_user` cookie, set by the user switcher at the foot of the sidebar, through `apps/admin/src/lib/server/auth.ts` — the one file Clerk will replace.
+- Staff sign in on `/sign-in` with an e-mail and password, checked by `signIn` in `packages/services/src/auth.ts` against an scrypt hash (`core/password.ts`; every seeded account uses `DEMO_PASSWORD`). The signed-in staff member is kept in the `erp_user` cookie and read through `apps/admin/src/lib/server/auth.ts`; with nobody signed in, `getCurrentStaff()` redirects to `/sign-in`.
+- The sidebar's "Simulate as" list (the system admin and every employee) and the menu below it switch user without a password — a demo convenience that goes when Clerk comes.
 - Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user in the sidebar is how a demo walks a request through its chain.
+- The `employee` role is a plain employee with a sign-in (created with them on the Employees page, or later): their sidebar and dashboard show only their own tasks. It is in no approval chain.
 
 **Hard rules**
 

@@ -66,6 +66,8 @@ export const entityHref = (kind: EntityKind, uuid: string): string => {
       return `/finance/budgets/${uuid}`;
     case "closing":
       return "/finance/closing";
+    case "task":
+      return `/tasks/${uuid}`;
     case "system":
       return "/warehouse/stock";
   }

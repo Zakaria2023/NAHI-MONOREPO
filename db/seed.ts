@@ -2,7 +2,11 @@ import { addDays, addHours, generateUuid, round2 } from "utils";
 import { BudgetCategory, StaffRole, StcDocumentKey, StcParty } from "./enum";
 import { deriveActivity } from "./seed-activity";
 import { addExtraDemoData } from "./seed-extra";
+import { addEmployeeLogins } from "./seed-logins";
 import { addMoreDemoData } from "./seed-more";
+import { addTaskDemoData } from "./seed-tasks";
+// Seeded accounts all sign in with the demo password, hashed the way the services hash.
+import { demoPasswordHash } from "../packages/services/src/core/password";
 import {
   Approval,
   Item,
@@ -82,6 +86,7 @@ const emptyStore = (): Store => ({
   LettersOfGuarantee: [],
   SupplierStatementChecks: [],
   TaxFilings: [],
+  Tasks: [],
   Activity: [],
 });
 
@@ -102,6 +107,7 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
     email,
     role,
     region: "central",
+    passwordHash: demoPasswordHash(),
   });
 
   store.StaffUsers = [
@@ -1013,6 +1019,8 @@ export const buildSeed = (now: string, options: SeedOptions = {}): Store => {
 
   addMoreDemoData(store, now);
   addExtraDemoData(store, now);
+  addEmployeeLogins(store);
+  addTaskDemoData(store, now);
 
   store.Activity = [
     {

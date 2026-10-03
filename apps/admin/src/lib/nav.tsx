@@ -19,6 +19,8 @@ import {
   IdCard,
   Landmark,
   LayoutDashboard,
+  ListChecks,
+  ListTodo,
   Lock,
   Network,
   Package,
@@ -31,22 +33,43 @@ import {
   ShieldCheck,
   ShoppingCart,
   TrendingDown,
+  UsersRound,
   Truck,
   Users,
   Wallet,
   WalletCards,
 } from "lucide-react";
 import { NavGroup } from "ui";
+import { StaffRole } from "@/db/enum";
 
 type NavBadges = {
   approvals: number;
   alerts: number;
+  /** My unseen tasks plus the ones handed in to me for review. */
+  tasks: number;
+  /** A plain employee sees only their own work. */
+  role: StaffRole;
 };
 
 const ICON = 17;
 
+/** What a plain employee sees: their dashboard and their tasks. */
+const employeeNav = (tasks: number): NavGroup[] => [
+  {
+    title: "Overview",
+    links: [{ icon: <LayoutDashboard size={ICON} />, label: "Dashboard", href: "/" }],
+  },
+  {
+    title: "My work",
+    links: [
+      { icon: <ListTodo size={ICON} />, label: "My tasks", href: "/tasks/my", badge: tasks },
+      { icon: <ListChecks size={ICON} />, label: "Tasks I gave", href: "/tasks/my?side=given" },
+    ],
+  },
+];
+
 /** The admin's whole menu, grouped by area of work. */
-export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
+const staffNav = ({ approvals, alerts, tasks }: Omit<NavBadges, "role">): NavGroup[] => [
   {
     title: "Overview",
     links: [
@@ -54,6 +77,14 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
       { icon: <BadgeCheck size={ICON} />, label: "My approvals", href: "/approvals", badge: approvals },
       { icon: <Bell size={ICON} />, label: "Alerts", href: "/alerts", badge: alerts },
       { icon: <FileBarChart size={ICON} />, label: "Reports", href: "/reports" },
+    ],
+  },
+  {
+    title: "Tasks",
+    links: [
+      { icon: <ListTodo size={ICON} />, label: "My tasks", href: "/tasks/my", badge: tasks },
+      { icon: <ListChecks size={ICON} />, label: "All tasks", href: "/tasks" },
+      { icon: <UsersRound size={ICON} />, label: "Team workload", href: "/tasks/team" },
     ],
   },
   {
@@ -137,5 +168,8 @@ export const buildNav = ({ approvals, alerts }: NavBadges): NavGroup[] => [
     ],
   },
 ];
+
+export const buildNav = ({ approvals, alerts, tasks, role }: NavBadges): NavGroup[] =>
+  role === "employee" ? employeeNav(tasks) : staffNav({ approvals, alerts, tasks });
 
 export const BRAND_ICON = <Landmark size={19} />;

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { employmentTypes, nationalities } from "../../../db/enum";
+import { email, newPassword } from "./auth";
 import { dateField, money, requiredText } from "./common";
 
 export const periodField = z.string().regex(/^\d{4}-\d{2}$/, "Pick a month");
@@ -27,10 +28,18 @@ export const employeeSchema = z
     bankName: requiredText("Bank"),
     defaultProjectUuid: z.string(),
     joinedAt: dateField,
+    /** Optional: given, the employee gets a sign-in with the Employee role. */
+    loginEmail: z.string().trim().toLowerCase(),
+    loginPassword: z.string(),
   })
   .refine((v) => (v.employmentType === "daily" ? v.dailyRate > 0 : v.basicSalary > 0), {
     message: "A monthly employee needs a basic salary, a daily worker a daily rate",
     path: ["basicSalary"],
+  })
+  .refine((v) => !v.loginEmail || email.safeParse(v.loginEmail).success, { message: "Enter a valid e-mail", path: ["loginEmail"] })
+  .refine((v) => !v.loginEmail || newPassword.safeParse(v.loginPassword).success, {
+    message: "A sign-in needs a password of at least 8 characters",
+    path: ["loginPassword"],
   });
 
 export type EmployeeInput = z.infer<typeof employeeSchema>;
