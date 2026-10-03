@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository (`apps/admin` and `apps/client`).
 
-It follows the conventions of the SOT-MONOREPO: the code-style rules below are carried over from it unchanged. What differs is the MVP's infrastructure — there is **no Clerk and no database yet**. Both are stand-ins kept behind the same seams the real ones will use, so swapping them in later touches `db/index.ts`, `apps/*/src/lib/server/auth.ts` and the sign-in in `packages/services/src/auth.ts` (with `core/password.ts`), nothing else.
+It follows the conventions of the SOT-MONOREPO: the code-style rules below are carried over from it unchanged. What differs is the MVP's infrastructure — there is **no Clerk and no database yet**. Both are stand-ins kept behind the same seams the real ones will use, so swapping them in later touches `db/index.ts` and `apps/*/src/lib/server/auth.ts`, nothing else.
 
 ## What This System Is
 
@@ -49,10 +49,10 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
 
 **Auth (MVP — stands in for Clerk)**
 
-- Staff sign in on `/sign-in` with an e-mail and password, checked by `signIn` in `packages/services/src/auth.ts` against an scrypt hash (`core/password.ts`; every seeded account uses `DEMO_PASSWORD`). The signed-in staff member is kept in the `erp_user` cookie and read through `apps/admin/src/lib/server/auth.ts`; with nobody signed in, `getCurrentStaff()` redirects to `/sign-in`.
-- The sidebar's "Simulate as" list (the system admin and every employee) and the menu below it switch user without a password — a demo convenience that goes when Clerk comes.
-- Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user in the sidebar is how a demo walks a request through its chain.
-- The `employee` role is a plain employee with a sign-in (created with them on the Employees page, or later): their sidebar and dashboard show only their own tasks. It is in no approval chain.
+- There is no sign-in and no password. The acting user is chosen from the user menu in the navbar and kept in the `erp_user` cookie, read through `apps/admin/src/lib/server/auth.ts` — the one file Clerk will replace. With no cookie, the app acts as the system admin.
+- The menu lists the admin and the employees; the other roles fold away under "Other roles", there only so a demo can walk an approval chain.
+- Roles still matter: approval chains are enforced in services against the actor's `role`. Switching user is how a demo walks a request through its chain.
+- Two kinds of user see two different apps. The **admin** sees every module, all tasks and the team's workload, and has no "My tasks". An **employee** (role `employee`, created with their account on the New employee page) sees only their own dashboard and tasks. `rules/access.ts` (`accessRedirect`) says which pages each may open; the dashboard layout enforces it, from the path `proxy.ts` hands it in a header.
 
 **Hard rules**
 
@@ -597,6 +597,34 @@ The data layer lives in the repo-root `db/` folder, not in a package — service
       </div>
     );
   };
+  ```
+
+## Forms: A Page Or A Dialog
+
+- A **large form gets its own page**. Large means more than four fields, or any repeatable lines (`LinesField`). `BankFields` counts as the fields it shows (method, account, cheque number, cheque date). The route is `…/new` for a new record, or `…/[uuid]/<verb>` for an action on one record (`/procurement/orders/[uuid]/receive`). The list or detail page links to it — the `PageHeader` `action`, or a `Link` styled as a button — and the form's Server Action `redirect`s back when it has saved.
+- A **small form opens in a dialog** — four fields or fewer, no lines. It sits behind a button where the form would otherwise be, through `FormDialog` (`components/shared/form-dialog.tsx`), with the form component as its child. The form needs no wiring of its own: `ActionForm` closes the dialog once its action succeeds.
+- Never put a form inline in a page body — not a card holding a form under a table, not a form at the foot of a detail page. An action with no fields at all stays a single `ActionButton`; a filter or a search is navigation, not a form.
+- What is created together is entered together: one record, one form. An employee and their account are one form, not an employee form and an account form.
+
+  ```tsx
+  // ❌ Bad — a large form inline, under the list
+  <EmployeesTable employees={employees} />
+  <Card title="Add an employee">
+    <EmployeeForm projects={projects} />
+  </Card>
+
+  // ✅ Good — the list links to the form's own page
+  <PageHeader title="Employees" action={{ href: "/payroll/employees/new", label: "New employee" }} />
+
+  // ❌ Bad — a small form sitting open on a detail page
+  <Card title="Settlement">
+    <SettleForm action={settleAction} amount={custody.amount} />
+  </Card>
+
+  // ✅ Good — a button opens it in a dialog
+  <FormDialog label="Settle custody" title="Settle custody" description="What was spent against receipts">
+    <SettleForm action={settleAction} amount={custody.amount} />
+  </FormDialog>
   ```
 
 ## Form Submissions

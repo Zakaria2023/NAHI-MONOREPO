@@ -12,7 +12,7 @@ type BounceFormProps = {
 export const BounceForm = ({ action }: BounceFormProps) => {
   const { form, state, isPending, onSubmit } = useBounceForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Bounced" layout="inline" submitVariant="outline">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Bounced" submitVariant="outline">
       <div className="w-44">
         <TextField name="reason" label="Bounce reason" />
       </div>

@@ -1,11 +1,11 @@
-import { Building2, Car, ReceiptText } from "lucide-react";
+import { Building2, Car, Plus, ReceiptText } from "lucide-react";
 import { listCostCenters, listExpenses } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, round2, sumBy } from "utils";
 import { CsvButton } from "@/components/shared/csv-button";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { CostCenterForm } from "./cost-center-form";
 import { CostCentersTable } from "./cost-centers-table";
-import { ExpenseForm } from "./expense-form";
 import { ExpensesTable } from "./expenses-table";
 
 export const ExpensesBoard = async () => {
@@ -56,17 +56,17 @@ export const ExpensesBoard = async () => {
       >
         <ExpensesTable expenses={expenses} />
       </Card>
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-5">
-        <Card title="Record an expense" description="Split it over its cost centres; the shares must add up to the amount" className="xl:col-span-3">
-          <ExpenseForm key={expenses.length} centres={centres.map((c) => ({ value: c.uuid, label: `${c.code} — ${c.name}`, hint: c.kind }))} />
-        </Card>
-        <Card title="Cost centres" description="Every project is one; departments and vehicles are added here" className="xl:col-span-2">
-          <div className="flex flex-col gap-6">
-            <CostCentersTable centres={centres} />
-            <CostCenterForm key={centres.length} />
-          </div>
-        </Card>
-      </div>
+      <Card
+        title="Cost centres"
+        description="Every project is one; departments and vehicles are added here"
+        action={
+          <FormDialog label="Add cost centre" title="Add a cost centre" description="A department or a vehicle; every project is one already" icon={<Plus size={16} />} size="sm">
+            <CostCenterForm />
+          </FormDialog>
+        }
+      >
+        <CostCentersTable centres={centres} />
+      </Card>
     </>
   );
 };

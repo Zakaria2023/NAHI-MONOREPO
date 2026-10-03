@@ -1,17 +1,16 @@
+import { Undo2 } from "lucide-react";
 import { PurchaseOrderDetail } from "services";
-import { Card, DropdownOption, StatusPill, Table } from "ui";
+import { Card, StatusPill, Table } from "ui";
 import { formatDate, formatMoney } from "utils";
 import { SUPPLIER_RETURN_REMEDY_LABELS, SUPPLIER_RETURN_SOURCE_LABELS, SUPPLIER_RETURN_STATUS_LABELS } from "@/db/label";
-import { returnToSupplierAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
-import { SupplierReturnForm } from "./supplier-return-form";
+import { LinkButton } from "@/components/shared/link-button";
 
 type OrderReturnsCardProps = {
   detail: PurchaseOrderDetail;
-  warehouses: DropdownOption[];
 };
 
-/** Goods sent back on this PO, and the form to send back more from stock. */
-export const OrderReturnsCard = ({ detail, warehouses }: OrderReturnsCardProps) => (
+/** Goods sent back on this PO, and the way to send back more from stock. */
+export const OrderReturnsCard = ({ detail }: OrderReturnsCardProps) => (
   <Card
     title="Returns to the supplier"
     description="Rejected at receipt, or found faulty in stock — against a debit note or a replacement"
@@ -50,11 +49,7 @@ export const OrderReturnsCard = ({ detail, warehouses }: OrderReturnsCardProps) 
           ]}
         />
       )}
-      <SupplierReturnForm
-        action={returnToSupplierAction.bind(null, detail.po.uuid)}
-        warehouses={warehouses}
-        items={detail.lines.map((l) => ({ value: l.itemUuid, label: `${l.item.code} — ${l.item.name}` }))}
-      />
+      <LinkButton href={`/procurement/orders/${detail.po.uuid}/return`} label="Return goods to the supplier" icon={<Undo2 size={16} />} variant="outline" />
     </div>
   </Card>
 );

@@ -1,13 +1,12 @@
 import { CalendarClock, HandCoins, ShieldCheck } from "lucide-react";
-import { listGuarantees, listProjectOptions, listSubcontracts } from "services";
+import { listGuarantees, listSubcontracts } from "services";
 import { Card, StatStrip, StatTile, Table } from "ui";
 import { formatMoney, round2, sumBy } from "utils";
 import { CsvButton } from "@/components/shared/csv-button";
-import { GuaranteeForm } from "./guarantee-form";
 import { GuaranteesTable } from "./guarantees-table";
 
 export const GuaranteesBoard = async () => {
-  const [guarantees, subcontracts, projects] = await Promise.all([listGuarantees(), listSubcontracts(), listProjectOptions()]);
+  const [guarantees, subcontracts] = await Promise.all([listGuarantees(), listSubcontracts()]);
   const live = guarantees.filter((g) => g.status === "active" || g.status === "expiring");
   const retentions = subcontracts.filter((s) => s.retentionHeld > 0);
   return (
@@ -68,9 +67,6 @@ export const GuaranteesBoard = async () => {
               { key: "held", header: "Held", align: "end", render: (s) => <span className="font-medium">{formatMoney(s.retentionHeld)}</span> },
             ]}
           />
-        </Card>
-        <Card title="Record a letter of guarantee">
-          <GuaranteeForm key={guarantees.length} projects={[{ value: "", label: "Not tied to a project" }, ...projects]} />
         </Card>
       </div>
     </>

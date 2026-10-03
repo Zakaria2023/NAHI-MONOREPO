@@ -13,7 +13,7 @@ import {
 } from "@/app/(dashboard)/procurement/requests/[uuid]/actions";
 import { DecisionForm } from "@/components/shared/decision-form";
 import { PO_TONES } from "@/lib/status-tones";
-import { ContractOrderForm } from "./contract-order-form";
+import { ContractOrderCard } from "./contract-order-card";
 import { ProcurementReview } from "./procurement-review";
 import { QuotationsPanel } from "./quotations-panel";
 
@@ -83,7 +83,7 @@ export const RequestStageCard = ({ detail, actorRole, suppliers }: RequestStageC
       {pr.status === "rfq" && (
         <div className="flex flex-col gap-6">
           {detail.contracts.length > 0 && (
-            <ContractOrderForm action={orderUnderContractAction.bind(null, pr.uuid)} contracts={detail.contracts} />
+            <ContractOrderCard action={orderUnderContractAction.bind(null, pr.uuid)} contracts={detail.contracts} />
           )}
           <QuotationsPanel detail={detail} suppliers={suppliers} />
         </div>

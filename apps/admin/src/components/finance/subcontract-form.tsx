@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownOption } from "ui";
-import { useSubcontractForm } from "@/app/(dashboard)/finance/subcontracts/use-subcontract-form";
+import { useSubcontractForm } from "@/app/(dashboard)/finance/subcontracts/new/use-subcontract-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

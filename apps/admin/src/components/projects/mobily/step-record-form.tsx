@@ -14,18 +14,10 @@ type StepRecordFormProps = {
 export const StepRecordForm = ({ action, step }: StepRecordFormProps) => {
   const { form, state, isPending, onSubmit } = useMobilyStepForm(action, step);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record" layout="inline">
-      <div className="w-40">
-        <TextField name="at" label="Date" type="date" />
-      </div>
-      {step === "po_received" && (
-        <div className="w-44">
-          <TextField name="poNumber" label="PO number" placeholder="MOB-PO-…" />
-        </div>
-      )}
-      <div className="min-w-48 flex-1">
-        <TextField name="note" label="Note / reference" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record">
+      <TextField name="at" label="Date" type="date" />
+      {step === "po_received" && <TextField name="poNumber" label="PO number" placeholder="MOB-PO-…" />}
+      <TextField name="note" label="Note / reference" />
     </ActionForm>
   );
 };

@@ -14,10 +14,8 @@ type StcStepFormProps = {
 export const StcStepForm = ({ action, step }: StcStepFormProps) => {
   const { form, state, isPending, onSubmit } = useStcStepForm(action, step);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record" layout="inline">
-      <div className="w-40">
-        <TextField name="at" label="Date" type="date" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record">
+      <TextField name="at" label="Date" type="date" />
     </ActionForm>
   );
 };

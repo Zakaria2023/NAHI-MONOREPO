@@ -7,6 +7,7 @@ const SuppliersPage = () => (
     <PageHeader
       title="Suppliers"
       description="The suppliers quotations are requested from, their registration, contacts and the rating from their evaluated POs."
+      action={{ href: "/procurement/suppliers/new", label: "Register supplier" }}
     />
     <AsyncSection reloadKey="suppliers">
       <SuppliersBoard />

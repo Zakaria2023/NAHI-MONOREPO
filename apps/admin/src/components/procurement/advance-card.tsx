@@ -1,8 +1,10 @@
+import { HandCoins } from "lucide-react";
 import { PurchaseOrderDetail } from "services";
 import { Card } from "ui";
 import { formatMoney, round2 } from "utils";
 import { advancePaymentAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
 import { FactList } from "@/components/shared/fact-list";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { AdvancePaymentForm } from "./advance-payment-form";
 import { BlockedNote } from "./blocked-note";
@@ -28,7 +30,9 @@ export const AdvanceCard = ({ detail }: AdvanceCardProps) => {
         />
         {po.advancePaid > 0 && <ProgressBar value={advanceRecovered / po.advancePaid} />}
         {payable ? (
-          <AdvancePaymentForm key={po.advancePaid} action={advancePaymentAction.bind(null, po.uuid)} />
+          <FormDialog label="Record an advance" title="Advance payment" description={`Up to the PO total of ${formatMoney(po.total)}`} icon={<HandCoins size={16} />}>
+            <AdvancePaymentForm action={advancePaymentAction.bind(null, po.uuid)} />
+          </FormDialog>
         ) : (
           <BlockedNote>Advances are paid on an approved PO, up to its total of {formatMoney(po.total)}.</BlockedNote>
         )}

@@ -12,13 +12,9 @@ type DesignFormProps = {
 export const DesignForm = ({ action }: DesignFormProps) => {
   const { form, state, isPending, onSubmit } = useDesignForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record design approval" layout="inline">
-      <div className="w-44">
-        <TextField name="designClosedAt" label="Closed in ISOW" type="date" />
-      </div>
-      <div className="w-56">
-        <TextField name="designEndDate" label="End Date (STC approval)" type="datetime-local" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record design approval">
+      <TextField name="designClosedAt" label="Closed in ISOW" type="date" />
+      <TextField name="designEndDate" label="End Date (STC approval)" type="datetime-local" />
     </ActionForm>
   );
 };

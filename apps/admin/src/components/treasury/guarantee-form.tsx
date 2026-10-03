@@ -3,7 +3,7 @@
 import { DropdownOption } from "ui";
 import { GUARANTEE_KIND_LABELS } from "@/db/label";
 import { guaranteeKinds } from "@/db/enum";
-import { useGuaranteeForm } from "@/app/(dashboard)/finance/guarantees/use-guarantee-form";
+import { useGuaranteeForm } from "@/app/(dashboard)/finance/guarantees/new/use-guarantee-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

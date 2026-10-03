@@ -23,7 +23,7 @@ export const StockTable = async ({ belowOnly, search }: StockTableProps) => {
     <Table
       data={shown}
       rowKey={(r) => r.uuid}
-      emptyMessage={belowOnly ? "No item is under its reorder level." : "No item matches. Add one with the form below."}
+      emptyMessage={belowOnly ? "No item is under its reorder level." : "No item matches. Add one with New item."}
       columns={[
         {
           key: "item",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useBankAccountForm } from "@/app/(dashboard)/finance/bank/use-bank-forms";
+import { useBankAccountForm } from "@/app/(dashboard)/finance/bank/new/use-bank-account-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { TextField } from "@/components/forms/text-field";
 

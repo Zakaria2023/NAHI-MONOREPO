@@ -1,6 +1,6 @@
 "use client";
 
-import { usePaymentForm } from "@/app/(dashboard)/finance/payables/[uuid]/use-payment-form";
+import { usePaymentForm } from "@/app/(dashboard)/finance/payables/[uuid]/pay/use-payment-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownOption } from "ui";
 import { BankFields } from "@/components/forms/bank-fields";

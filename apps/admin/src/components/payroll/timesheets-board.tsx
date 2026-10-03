@@ -1,12 +1,13 @@
-import { CalendarCheck, Fingerprint, Lock, Users } from "lucide-react";
+import { CalendarCheck, CalendarPlus, Fingerprint, Lock, UserCheck, Users } from "lucide-react";
 import { listAttendance, listEmployees, listPayrollRuns, listProjectOptions, listTimesheets } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatPeriod } from "utils";
 import { PAYROLL_RUN_STATUS_LABELS } from "@/db/label";
 import { BlockedNote } from "@/components/procurement/blocked-note";
+import { FormDialog } from "@/components/shared/form-dialog";
+import { LinkButton } from "@/components/shared/link-button";
 import { AttendanceForm } from "./attendance-form";
 import { AttendanceTable } from "./attendance-table";
-import { TimesheetForm } from "./timesheet-form";
 import { TimesheetsTable } from "./timesheets-table";
 
 type TimesheetsBoardProps = {
@@ -47,33 +48,28 @@ export const TimesheetsBoard = async ({ period }: TimesheetsBoardProps) => {
           icon={<Lock size={18} />}
         />
       </StatStrip>
+      {closed ? (
+        <BlockedNote>The payroll for this month is {run?.status} — its timesheets and attendance are closed.</BlockedNote>
+      ) : (
+        <LinkButton href={`/payroll/timesheets/new?period=${period}`} label={`Record a timesheet — ${formatPeriod(period)}`} icon={<CalendarPlus size={16} />} />
+      )}
       <TimesheetsTable rows={rows} projectCodes={projectCodes} />
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-        <Card title="Record a timesheet" description={`${formatPeriod(period)} — days per project, absences and overtime; saving again replaces it`}>
-          {closed ? (
-            <BlockedNote>The payroll for this month is {run?.status} — its timesheets are closed.</BlockedNote>
-          ) : (
-            <TimesheetForm
-              key={`${period}-${rows.filter((r) => r.timesheet).length}`}
-              period={period}
-              employees={monthlyRows.map((r) => ({ value: r.employee.uuid, label: `${r.employee.code} — ${r.employee.name}`, hint: r.employee.jobTitle }))}
-              projects={[{ value: "", label: "Head office (overhead)" }, ...projects]}
-            />
-          )}
-        </Card>
-        <Card title="Attendance" description="Daily workers — normally sent by the attendance app; entered here when the app is not used">
-          <div className="flex flex-col gap-6">
-            <AttendanceTable entries={attendance} />
-            {!closed && (
+      <Card
+        title="Attendance"
+        description="Daily workers — normally sent by the attendance app; entered here when the app is not used"
+        action={
+          closed ? undefined : (
+            <FormDialog label="Record attendance" title="Record attendance" description="A daily worker's day on a project" size="sm" icon={<UserCheck size={14} />}>
               <AttendanceForm
-                key={attendance.length}
                 workers={workers.map((w) => ({ value: w.uuid, label: `${w.code} — ${w.name}`, hint: w.jobTitle }))}
                 projects={projects}
               />
-            )}
-          </div>
-        </Card>
-      </div>
+            </FormDialog>
+          )
+        }
+      >
+        <AttendanceTable entries={attendance} />
+      </Card>
     </>
   );
 };

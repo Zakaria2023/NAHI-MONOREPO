@@ -13,6 +13,7 @@ import {
 } from "@/app/(dashboard)/projects/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { FactList } from "@/components/shared/fact-list";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { MissingCard } from "../missing-card";
 import { StageSection } from "../stage-section";
 import { StageStepper } from "../stage-stepper";
@@ -65,7 +66,11 @@ export const StcWorkspace = ({ project, detail }: StcWorkspaceProps) => {
                 blocker={wf.m2EndDate ? null : "Available once the M2 End Date appears"}
               />
             )}
-            {wf.stage === "m2" && wf.sentToSupervisorAt && !wf.inspectorName && <InspectorForm action={assignInspectorAction.bind(null, project.uuid)} />}
+            {wf.stage === "m2" && wf.sentToSupervisorAt && !wf.inspectorName && (
+              <FormDialog label="Record inspector" title="Inspector assigned" description="The Inspector the Supervisor assigned (rule 4)" variant="primary">
+                <InspectorForm action={assignInspectorAction.bind(null, project.uuid)} />
+              </FormDialog>
+            )}
           </>
         );
       case "m3":

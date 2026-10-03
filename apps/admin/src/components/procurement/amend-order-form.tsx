@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownOption } from "ui";
-import { useAmendOrderForm } from "@/app/(dashboard)/procurement/orders/[uuid]/use-order-forms";
+import { useAmendOrderForm } from "@/app/(dashboard)/procurement/orders/[uuid]/amend/use-amend-order-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { LinesField } from "@/components/forms/lines-field";
 import { TextField } from "@/components/forms/text-field";

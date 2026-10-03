@@ -5,19 +5,14 @@ import { FormAction } from "@/lib/action-result";
 import { useActionForm } from "@/lib/use-action-form";
 
 /**
- * The extract's approve/reject, which also carries the penalties (finance §2
- * step 5). The schema refuses a rejection without a reason, under the note.
+ * One decision on an extract, from its dialog. Approving can set the
+ * penalties (finance §2 step 5); the schema refuses a rejection without a
+ * reason, under the note.
  */
-export const useExtractDecisionForm = (action: FormAction, penalties: number, penaltyNote?: string) => {
-  const { form, state, isPending, onSubmit } = useActionForm(extractDecisionSchema, action, {
-    decision: "approved",
+export const useExtractDecisionForm = (action: FormAction, decision: "approved" | "rejected", penalties: number, penaltyNote?: string) =>
+  useActionForm(extractDecisionSchema, action, {
+    decision,
     note: "",
     penalties,
     penaltyNote: penaltyNote ?? "",
   });
-  const decide = (decision: "approved" | "rejected") => {
-    form.setValue("decision", decision);
-    void onSubmit();
-  };
-  return { form, state, isPending, decide };
-};

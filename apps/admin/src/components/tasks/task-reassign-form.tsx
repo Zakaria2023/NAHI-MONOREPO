@@ -15,7 +15,7 @@ type TaskReassignFormProps = {
 export const TaskReassignForm = ({ action, staff }: TaskReassignFormProps) => {
   const { form, state, isPending, onSubmit } = useReassignForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Reassign" submitVariant="outline" columns={2}>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Reassign">
       <DropdownField name="assigneeUuid" label="Give it to" required options={staff} placeholder="Pick a staff member" />
       <TextField name="note" label="Why" placeholder="Optional" />
     </ActionForm>

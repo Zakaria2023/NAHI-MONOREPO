@@ -1,9 +1,11 @@
+import { ArrowRightLeft, ClipboardCheck, Trash2 } from "lucide-react";
 import { getFixedAsset, listWarehouseOptions } from "services";
 import { Card, StatStrip, StatTile, StatusPill } from "ui";
 import { formatDate, formatMoney } from "utils";
 import { ASSET_CATEGORY_LABELS, ASSET_DISPOSAL_KIND_LABELS, ASSET_STATUS_LABELS } from "@/db/label";
 import { countAssetAction, disposeAssetAction, transferAssetAction } from "@/app/(dashboard)/finance/assets/[uuid]/actions";
 import { FactList } from "@/components/shared/fact-list";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { AssetCountForm } from "./asset-count-form";
@@ -76,17 +78,31 @@ export const AssetView = async ({ uuid }: AssetViewProps) => {
         {active && (
           <div className="flex flex-col gap-6 print:hidden">
             <Card title="Annual count" description={asset.countedThisYear ? "Already counted this year" : "Found where the register says, and in what state"}>
-              {asset.countedThisYear ? (
-                <p className="text-sm text-muted">The next count is due next year.</p>
-              ) : (
+              <FormDialog
+                label="Record count"
+                title="Annual count"
+                description="Found where the register says, and in what state"
+                icon={<ClipboardCheck size={16} />}
+                blocker={asset.countedThisYear ? "The next count is due next year." : null}
+              >
                 <AssetCountForm action={countAssetAction.bind(null, asset.uuid)} />
-              )}
+              </FormDialog>
             </Card>
             <Card title="Transfer" description="To a warehouse or to an employee; the card follows it">
-              <AssetTransferForm action={transferAssetAction.bind(null, asset.uuid)} warehouses={warehouses} />
+              <FormDialog label="Move asset" title="Transfer the asset" description="To a warehouse or to an employee; the card follows it" icon={<ArrowRightLeft size={16} />}>
+                <AssetTransferForm action={transferAssetAction.bind(null, asset.uuid)} warehouses={warehouses} />
+              </FormDialog>
             </Card>
             <Card title="Sell or scrap" description="Takes it off the books, with the gain or loss against its book value">
-              <AssetDisposalForm action={disposeAssetAction.bind(null, asset.uuid)} />
+              <FormDialog
+                label="Take off the books"
+                title="Sell or scrap"
+                description="Takes it off the books, with the gain or loss against its book value"
+                icon={<Trash2 size={16} />}
+                dialogSize="lg"
+              >
+                <AssetDisposalForm action={disposeAssetAction.bind(null, asset.uuid)} />
+              </FormDialog>
             </Card>
           </div>
         )}

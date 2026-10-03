@@ -7,6 +7,7 @@ const GuaranteesPage = () => (
     <PageHeader
       title="Guarantees & retentions"
       description="Letters of guarantee given to customers, with an alert before each expires, and the retentions held on subcontractors."
+      action={{ href: "/finance/guarantees/new", label: "New letter of guarantee" }}
     />
     <AsyncSection reloadKey="guarantees">
       <GuaranteesBoard />

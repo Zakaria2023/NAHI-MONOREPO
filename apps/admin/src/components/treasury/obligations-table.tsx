@@ -2,6 +2,7 @@ import { ObligationRow } from "services";
 import { StatusPill, Table } from "ui";
 import { formatDate, formatMoney, formatPeriod } from "utils";
 import { OBLIGATION_KIND_LABELS } from "@/db/label";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FilingForm } from "./filing-form";
 
 type ObligationsTableProps = {
@@ -53,7 +54,9 @@ export const ObligationsTable = ({ rows }: ObligationsTableProps) => (
             </div>
           ) : (
             <div className="relative z-10">
-              <FilingForm kind={r.kind} period={r.period} />
+              <FormDialog label={r.kind === "vat" ? "Record filing" : "Record payment"} title={`${OBLIGATION_KIND_LABELS[r.kind]} — ${formatPeriod(r.period)}`} description="The reference from the portal" size="sm" variant="primary">
+                <FilingForm kind={r.kind} period={r.period} />
+              </FormDialog>
             </div>
           ),
       },

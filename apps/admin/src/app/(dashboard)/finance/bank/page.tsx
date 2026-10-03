@@ -13,6 +13,7 @@ const BankPage = async ({ searchParams }: Props) => {
       <PageHeader
         title="Bank accounts"
         description="Balances worked out from every payment and collection the system records, each month's movements, and the reconciliation of the bank statement against the book."
+        action={{ href: "/finance/bank/new", label: "New bank account" }}
       />
       <AsyncSection reloadKey={`${account}-${period}`}>
         <BankBoard accountUuid={account} period={period} />

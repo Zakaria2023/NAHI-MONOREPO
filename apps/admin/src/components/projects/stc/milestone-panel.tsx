@@ -6,6 +6,7 @@ import { MILESTONE_STATUS_LABELS } from "@/db/label";
 import { approveMilestoneAction, milestoneFlagsAction, resubmitMilestoneAction } from "@/app/(dashboard)/projects/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { FactList } from "@/components/shared/fact-list";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { MILESTONE_TONES } from "@/lib/status-tones";
 import { MilestoneFlagsForm } from "./milestone-flags-form";
 
@@ -39,7 +40,14 @@ export const MilestonePanel = ({ projectUuid, detail }: MilestonePanelProps) => 
         </div>
       )}
       {milestone.status !== "closed" && (
-        <MilestoneFlagsForm action={milestoneFlagsAction.bind(null, projectUuid)} qtyIncreased={milestone.qtyIncreased} newUpl={milestone.newUpl} />
+        <div className="flex flex-wrap items-center gap-3">
+          <FormDialog label="Quantity and UPL" title="Milestone changes" description="A quantity increase or a new UPL needs its own documents" size="sm">
+            <MilestoneFlagsForm action={milestoneFlagsAction.bind(null, projectUuid)} qtyIncreased={milestone.qtyIncreased} newUpl={milestone.newUpl} />
+          </FormDialog>
+          <span className="text-xs text-muted">
+            {[milestone.qtyIncreased && "Quantity increased", milestone.newUpl && "New UPL added"].filter(Boolean).join(" · ") || "No quantity increase or new UPL"}
+          </span>
+        </div>
       )}
       <FactList
         columns={3}

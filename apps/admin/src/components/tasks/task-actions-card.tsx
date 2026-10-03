@@ -12,6 +12,7 @@ import {
   submitTaskAction,
 } from "@/app/(dashboard)/tasks/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { BlockedNote } from "@/components/warehouse/blocked-note";
 import { TaskNoteForm } from "./task-note-form";
 import { TaskReassignForm } from "./task-reassign-form";
@@ -61,19 +62,19 @@ export const TaskActionsCard = ({ detail, actor, staff }: TaskActionsCardProps) 
               </div>
             )}
             {task.status === "in_progress" && (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Finished?</h3>
-                  {submitBlocker ? (
-                    <BlockedNote reason={submitBlocker} />
-                  ) : (
-                    <TaskNoteForm action={submitTaskAction.bind(null, uuid)} submitLabel="Hand in as finished" label="Note for the reviewer" placeholder="What was done, anything to check" variant="success" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Blocked?</h3>
-                  <TaskNoteForm action={holdTaskAction.bind(null, uuid)} submitLabel="Put on hold" label="What it is waiting for" required variant="outline" />
-                </div>
+              <div className="flex flex-wrap items-start gap-3">
+                <FormDialog
+                  label="Hand in as finished"
+                  title="Hand in as finished"
+                  description={`It goes to ${row.assignedByName} to accept`}
+                  variant="success"
+                  blocker={submitBlocker}
+                >
+                  <TaskNoteForm action={submitTaskAction.bind(null, uuid)} submitLabel="Hand in as finished" label="Note for the reviewer" placeholder="What was done, anything to check" variant="success" />
+                </FormDialog>
+                <FormDialog label="Put on hold" title="Put on hold" description="Blocked? Say what the task is waiting for">
+                  <TaskNoteForm action={holdTaskAction.bind(null, uuid)} submitLabel="Put on hold" label="What it is waiting for" required />
+                </FormDialog>
               </div>
             )}
             {task.status === "in_review" && <BlockedNote reason={`Handed in ${formatDateTime(task.submittedAt)} — waiting for ${row.assignedByName} to accept it`} />}
@@ -84,15 +85,13 @@ export const TaskActionsCard = ({ detail, actor, staff }: TaskActionsCardProps) 
         <Card title="Review and manage" description={actor.uuid === task.assignedByUuid ? "You gave this task" : "As system admin"}>
           <div className="flex flex-col gap-6">
             {task.status === "in_review" && (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Accept it</h3>
+              <div className="flex flex-wrap items-start gap-3">
+                <FormDialog label="Accept as done" title="Accept as done" description={`Handed in by ${row.assigneeName}`} variant="success">
                   <TaskNoteForm action={approveTaskAction.bind(null, uuid)} submitLabel="Accept as done" label="Note" placeholder="Optional" variant="success" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Not finished</h3>
-                  <TaskNoteForm action={returnTaskAction.bind(null, uuid)} submitLabel="Send back" label="What is still missing" required variant="outline" />
-                </div>
+                </FormDialog>
+                <FormDialog label="Send back" title="Send back" description={`Not finished — it goes back to ${row.assigneeName}`}>
+                  <TaskNoteForm action={returnTaskAction.bind(null, uuid)} submitLabel="Send back" label="What is still missing" required />
+                </FormDialog>
               </div>
             )}
             {task.status !== "in_review" && !mine && (
@@ -109,15 +108,13 @@ export const TaskActionsCard = ({ detail, actor, staff }: TaskActionsCardProps) 
               />
             )}
             {task.status !== "in_review" && (
-              <div className="grid grid-cols-1 gap-6 border-t border-hairline-soft pt-5 lg:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Reassign</h3>
+              <div className="flex flex-wrap items-start gap-3 border-t border-hairline-soft pt-5">
+                <FormDialog label="Reassign" title="Reassign" description={`Give the task to someone other than ${row.assigneeName}`}>
                   <TaskReassignForm action={reassignTaskAction.bind(null, uuid)} staff={staff.filter((s) => s.value !== task.assigneeUuid)} />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-sm font-medium text-ink">Cancel the task</h3>
-                  <TaskNoteForm action={cancelTaskAction.bind(null, uuid)} submitLabel="Cancel task" label="Why it is no longer needed" required variant="outline" />
-                </div>
+                </FormDialog>
+                <FormDialog label="Cancel task" title="Cancel the task" description="It closes without being done" variant="danger">
+                  <TaskNoteForm action={cancelTaskAction.bind(null, uuid)} submitLabel="Cancel task" label="Why it is no longer needed" required />
+                </FormDialog>
               </div>
             )}
           </div>

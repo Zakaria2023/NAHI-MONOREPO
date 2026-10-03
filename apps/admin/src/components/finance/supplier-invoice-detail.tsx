@@ -1,11 +1,13 @@
+import { Banknote } from "lucide-react";
 import Link from "next/link";
-import { getSupplierInvoice, listBankAccounts } from "services";
+import { getSupplierInvoice } from "services";
 import { Card, StatusPill } from "ui";
 import { formatDate, formatDateTime } from "utils";
 import { SUPPLIER_INVOICE_STATUS_LABELS } from "@/db/label";
-import { approveSupplierInvoiceAction, recordSupplierPaymentAction } from "@/app/(dashboard)/finance/payables/[uuid]/actions";
+import { approveSupplierInvoiceAction } from "@/app/(dashboard)/finance/payables/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { FactList } from "@/components/shared/fact-list";
+import { LinkButton } from "@/components/shared/link-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { getCurrentStaff } from "@/lib/server/auth";
 import { SUPPLIER_INVOICE_TONES } from "@/lib/status-tones";
@@ -13,7 +15,6 @@ import { BlockedNote } from "./blocked-note";
 import { DoneNote } from "./done-note";
 import { DueDate } from "./due-date";
 import { InvoiceAmountsCard } from "./invoice-amounts-card";
-import { PaymentForm } from "./payment-form";
 import { SupplierCard } from "./supplier-card";
 import { SupplierPaymentsTable } from "./supplier-payments-table";
 import { ThreeWayMatchCard } from "./three-way-match-card";
@@ -23,12 +24,8 @@ type SupplierInvoiceDetailProps = {
 };
 
 export const SupplierInvoiceDetail = async ({ uuid }: SupplierInvoiceDetailProps) => {
-  const [{ invoice, supplier, po, receipts, match }, actor, accounts] = await Promise.all([
-    getSupplierInvoice(uuid),
-    getCurrentStaff(),
-    listBankAccounts(),
-  ]);
-  const approveBlocker = actor.role === "finance_manager" ? null : "Only the Finance manager approves supplier invoices — switch user at the foot of the sidebar.";
+  const [{ invoice, supplier, po, receipts, match }, actor] = await Promise.all([getSupplierInvoice(uuid), getCurrentStaff()]);
+  const approveBlocker = actor.role === "finance_manager" ? null : "Only the Finance manager approves supplier invoices — switch user from the navbar.";
   const paymentBlocker =
     invoice.status === "registered"
       ? "Payments are made against an approved invoice — approve it first."
@@ -76,11 +73,7 @@ export const SupplierInvoiceDetail = async ({ uuid }: SupplierInvoiceDetailProps
           <Card title="Payments" description="Bank transfer or cheque against this invoice. Each payment e-mails a notice to the supplier.">
             <div className="flex flex-col gap-5">
               {invoice.status === "approved" && invoice.outstanding > 0 && (
-                <PaymentForm
-                  action={recordSupplierPaymentAction.bind(null, invoice.uuid)}
-                  outstanding={invoice.outstanding}
-                  accounts={accounts.map((a) => ({ value: a.uuid, label: `${a.code} — ${a.bank}` }))}
-                />
+                <LinkButton href={`/finance/payables/${invoice.uuid}/pay`} label="Record a payment" icon={<Banknote size={16} />} />
               )}
               {paymentBlocker && <BlockedNote reason={paymentBlocker} />}
               {invoice.status === "paid" && <DoneNote label="Paid in full" at={invoice.payments.at(-1)?.at} />}

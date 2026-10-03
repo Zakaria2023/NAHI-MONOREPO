@@ -13,11 +13,9 @@ type CollectionFormProps = {
 export const CollectionForm = ({ action }: CollectionFormProps) => {
   const { form, state, isPending, onSubmit } = useCollectionForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark collected" layout="inline" submitVariant="success">
-      <div className="w-40">
-        <TextField name="paidAt" label="Collected on" type="date" />
-      </div>
-      <BankFields compact />
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark collected" submitVariant="success">
+      <TextField name="paidAt" label="Collected on" type="date" />
+      <BankFields />
     </ActionForm>
   );
 };

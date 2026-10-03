@@ -16,7 +16,7 @@ const REASONS = [
 export const ClearanceForm = ({ employeeName }: ClearanceFormProps) => {
   const { form, state, isPending, onSubmit } = useClearanceForm(employeeName);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Approve clearance" layout="inline" submitVariant="outline">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Approve clearance" submitVariant="success">
       <div className="w-48">
         <DropdownField name="reason" label="Reason" options={REASONS} />
       </div>

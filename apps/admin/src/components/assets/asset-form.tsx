@@ -3,7 +3,7 @@
 import { DropdownOption } from "ui";
 import { ASSET_CATEGORY_LABELS, ASSET_HOLDER_KIND_LABELS } from "@/db/label";
 import { assetCategories, assetHolderKinds } from "@/db/enum";
-import { useAssetForm } from "@/app/(dashboard)/finance/assets/use-asset-form";
+import { useAssetForm } from "@/app/(dashboard)/finance/assets/new/use-asset-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

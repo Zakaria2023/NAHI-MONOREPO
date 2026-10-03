@@ -1,7 +1,9 @@
+import { Clock } from "lucide-react";
 import { Actor, TaskDetail, taskMoveBlocker } from "services";
 import { Card, Table } from "ui";
 import { formatDate } from "utils";
 import { logTaskWorkAction } from "@/app/(dashboard)/tasks/[uuid]/actions";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { BlockedNote } from "@/components/warehouse/blocked-note";
 import { WorkLogForm } from "./work-log-form";
 
@@ -21,7 +23,13 @@ export const TaskWorkLogCard = ({ detail, actor }: TaskWorkLogCardProps) => {
         {task.assigneeUuid === actor.uuid &&
           task.status !== "done" &&
           task.status !== "cancelled" &&
-          (blocker ? <BlockedNote reason={blocker} /> : <WorkLogForm action={logTaskWorkAction.bind(null, task.uuid)} />)}
+          (blocker ? (
+            <BlockedNote reason={blocker} />
+          ) : (
+            <FormDialog label="Log work" title="Log work" description="A day worked on the task and its hours" variant="primary" icon={<Clock size={16} />}>
+              <WorkLogForm action={logTaskWorkAction.bind(null, task.uuid)} />
+            </FormDialog>
+          ))}
         <Table
           data={logs}
           rowKey={(l) => l.uuid}

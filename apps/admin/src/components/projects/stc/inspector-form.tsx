@@ -12,10 +12,8 @@ type InspectorFormProps = {
 export const InspectorForm = ({ action }: InspectorFormProps) => {
   const { form, state, isPending, onSubmit } = useInspectorForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record assignment" layout="inline">
-      <div className="w-64">
-        <TextField name="inspectorName" label="Inspector assigned by the Supervisor" placeholder="Eng. …" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record assignment">
+      <TextField name="inspectorName" label="Inspector assigned by the Supervisor" placeholder="Eng. …" />
     </ActionForm>
   );
 };

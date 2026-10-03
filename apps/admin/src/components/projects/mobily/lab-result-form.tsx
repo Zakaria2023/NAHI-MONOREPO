@@ -14,13 +14,9 @@ type LabResultFormProps = {
 export const LabResultForm = ({ action, testUuid }: LabResultFormProps) => {
   const { form, state, isPending, onSubmit } = useLabResultForm(action, testUuid);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Save result" layout="inline" submitVariant="outline">
-      <div className="w-32">
-        <DropdownField name="status" label="Result" options={[{ value: "passed", label: "Passed" }, { value: "failed", label: "Failed" }]} />
-      </div>
-      <div className="w-40">
-        <TextField name="testedAt" label="Tested on" type="date" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Save result">
+      <DropdownField name="status" label="Result" options={[{ value: "passed", label: "Passed" }, { value: "failed", label: "Failed" }]} />
+      <TextField name="testedAt" label="Tested on" type="date" />
     </ActionForm>
   );
 };

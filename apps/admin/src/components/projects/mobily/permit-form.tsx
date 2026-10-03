@@ -15,19 +15,11 @@ type PermitFormProps = {
 export const PermitForm = ({ action }: PermitFormProps) => {
   const { form, state, isPending, onSubmit } = usePermitForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Request permit" layout="inline" submitVariant="outline">
-      <div className="w-44">
-        <DropdownField name="authority" label="Authority" options={permitAuthorities.map((a) => ({ value: a, label: PERMIT_AUTHORITY_LABELS[a] }))} />
-      </div>
-      <div className="w-40">
-        <TextField name="reference" label="Reference" />
-      </div>
-      <div className="w-40">
-        <TextField name="requestedAt" label="Requested" type="date" />
-      </div>
-      <div className="w-32">
-        <TextField name="durationDays" label="Duration (days)" type="number" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Request permit" columns={2}>
+      <DropdownField name="authority" label="Authority" options={permitAuthorities.map((a) => ({ value: a, label: PERMIT_AUTHORITY_LABELS[a] }))} />
+      <TextField name="reference" label="Reference" />
+      <TextField name="requestedAt" label="Requested" type="date" />
+      <TextField name="durationDays" label="Duration (days)" type="number" />
     </ActionForm>
   );
 };

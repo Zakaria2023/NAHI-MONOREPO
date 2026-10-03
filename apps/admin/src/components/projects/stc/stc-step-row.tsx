@@ -1,5 +1,6 @@
 import { StepRecord } from "services";
 import { StcM3Check, StcPatStep } from "@/db/enum";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FormAction } from "@/lib/action-result";
 import { DoneMark } from "../done-mark";
 import { LockedMark } from "../locked-mark";
@@ -26,7 +27,9 @@ export const StcStepRow = ({ step, label, index, record, blocker, action }: StcS
       ) : blocker ? (
         <LockedMark reason={blocker} />
       ) : (
-        <StcStepForm action={action} step={step} />
+        <FormDialog label="Record" title={label} description="The date it was done" size="sm">
+          <StcStepForm action={action} step={step} />
+        </FormDialog>
       )}
     </div>
   </div>

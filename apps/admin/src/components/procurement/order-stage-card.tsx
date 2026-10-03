@@ -1,25 +1,20 @@
-import { CircleAlert, CircleX } from "lucide-react";
-import { PurchaseOrderDetail, Warehouse } from "services";
+import { CircleAlert, CircleX, PackageCheck, Star } from "lucide-react";
+import { PurchaseOrderDetail } from "services";
 import { Card, StatusPill } from "ui";
 import { formatDate } from "utils";
 import { PurchaseOrderStatus, StaffRole } from "@/db/enum";
 import { STAFF_ROLE_LABELS } from "@/db/label";
-import {
-  decideOrderAction,
-  evaluateSupplierAction,
-  receiveGoodsAction,
-  sendOrderAction,
-} from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
+import { decideOrderAction, evaluateSupplierAction, sendOrderAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { DecisionForm } from "@/components/shared/decision-form";
-import { GoodsReceiptForm } from "./goods-receipt-form";
+import { FormDialog } from "@/components/shared/form-dialog";
+import { LinkButton } from "@/components/shared/link-button";
 import { SupplierEvaluationForm } from "./supplier-evaluation-form";
 import { SupplierEvaluationView } from "./supplier-evaluation-view";
 
 type OrderStageCardProps = {
   detail: PurchaseOrderDetail;
   actorRole: StaffRole;
-  warehouses: Warehouse[];
 };
 
 const TITLES: Record<PurchaseOrderStatus, { title: string; description: string }> = {
@@ -33,9 +28,8 @@ const TITLES: Record<PurchaseOrderStatus, { title: string; description: string }
 };
 
 /** The one thing the PO needs next, by its status. */
-export const OrderStageCard = ({ detail, actorRole, warehouses }: OrderStageCardProps) => {
+export const OrderStageCard = ({ detail, actorRole }: OrderStageCardProps) => {
   const { po, chain, supplier } = detail;
-  const outstanding = detail.receiptState.filter((s) => s.outstanding > 0);
   const rejection = po.approvals.find((a) => a.decision === "rejected");
   const cancellation = [...po.amendments].reverse().find((a) => a.note.startsWith("Cancelled"));
   const open = po.status !== "cancelled" && po.status !== "rejected" && !(po.status === "received" && po.evaluation);
@@ -75,13 +69,7 @@ export const OrderStageCard = ({ detail, actorRole, warehouses }: OrderStageCard
             The storekeeper counts what arrived and checks it against the PO. Accepted quantities are added to stock at the PO price;
             rejected ones go back to the supplier with the reason.
           </p>
-          <GoodsReceiptForm
-            key={detail.receipts.length}
-            action={receiveGoodsAction.bind(null, po.uuid)}
-            warehouseOptions={warehouses.map((w) => ({ value: w.uuid, label: `${w.code} — ${w.name}`, hint: w.city }))}
-            itemOptions={detail.receiptState.map((s) => ({ value: s.itemUuid, label: `${s.item.code} — ${s.item.name}`, hint: `Unit: ${s.item.unit}` }))}
-            lines={outstanding.map((s) => ({ itemUuid: s.itemUuid, receivedQty: s.outstanding, acceptedQty: s.outstanding, rejectionReason: "" }))}
-          />
+          <LinkButton href={`/procurement/orders/${po.uuid}/receive`} label="Receive goods" icon={<PackageCheck size={16} />} />
         </div>
       )}
 
@@ -91,7 +79,9 @@ export const OrderStageCard = ({ detail, actorRole, warehouses }: OrderStageCard
         ) : (
           <div className="flex flex-col gap-4">
             <p className="text-sm text-muted">Everything is in. Score {supplier.name} for this order; the scores make up its rating.</p>
-            <SupplierEvaluationForm action={evaluateSupplierAction.bind(null, po.uuid)} />
+            <FormDialog label="Evaluate the supplier" title={`Evaluate ${supplier.name}`} description="Quality, punctuality and price, 1 to 5" variant="primary" icon={<Star size={16} />}>
+              <SupplierEvaluationForm action={evaluateSupplierAction.bind(null, po.uuid)} />
+            </FormDialog>
           </div>
         ))}
 

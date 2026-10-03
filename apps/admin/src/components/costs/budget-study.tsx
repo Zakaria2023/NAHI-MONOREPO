@@ -1,17 +1,15 @@
+import { CalendarPlus, ListPlus, Scale } from "lucide-react";
 import { getBudgetStudy } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, formatPercent, round2, sumBy } from "utils";
-import {
-  addScheduleItemAction,
-  addStudyLineAction,
-  applyStudyAction,
-} from "@/app/(dashboard)/finance/budgets/[projectUuid]/study/actions";
+import { addScheduleItemAction, applyStudyAction } from "@/app/(dashboard)/finance/budgets/[projectUuid]/study/actions";
 import { CsvButton } from "@/components/shared/csv-button";
+import { FormDialog } from "@/components/shared/form-dialog";
+import { LinkButton } from "@/components/shared/link-button";
 import { PageHeader } from "@/components/shared/page-header";
 import { PrintButton } from "@/components/shared/print-button";
 import { ApplyStudyForm } from "./apply-study-form";
 import { ScheduleItemForm } from "./schedule-item-form";
-import { StudyLineForm } from "./study-line-form";
 import { StudyLinesTable } from "./study-lines-table";
 import { StudyTimeline } from "./study-timeline";
 import { VarianceTable } from "./variance-table";
@@ -87,21 +85,22 @@ export const BudgetStudy = async ({ projectUuid }: BudgetStudyProps) => {
           </Card>
         </div>
         <div className="flex flex-col gap-6 print:hidden">
-          <Card
-            title="Apply to the budget"
-            description={
-              study.differsFromBudget
-                ? "The study's category totals differ from the budget's planned lines"
-                : "The budget's planned lines already match the study"
-            }
-          >
-            <ApplyStudyForm action={applyStudyAction.bind(null, project.uuid)} approved={study.status === "approved"} disabled={!study.differsFromBudget} />
-          </Card>
-          <Card title="Add a study line">
-            <StudyLineForm key={study.lines.length} action={addStudyLineAction.bind(null, project.uuid)} />
-          </Card>
-          <Card title="Add a timeline row">
-            <ScheduleItemForm key={study.schedule.length} action={addScheduleItemAction.bind(null, project.uuid)} />
+          <Card title="Build the study" description="Lines, the timelines, then the totals into the budget">
+            <div className="flex flex-col gap-3">
+              <LinkButton href={`/finance/budgets/${project.uuid}/study/lines/new`} label="Add a study line" icon={<ListPlus size={16} />} />
+              <FormDialog label="Add a timeline row" title="Add a timeline row" description="When a material, a crew or a piece of equipment is needed on site" icon={<CalendarPlus size={16} />}>
+                <ScheduleItemForm action={addScheduleItemAction.bind(null, project.uuid)} />
+              </FormDialog>
+              <FormDialog
+                label="Apply to the budget"
+                title="Apply the study to the budget"
+                description="The budget's planned lines become the study's category totals"
+                icon={<Scale size={16} />}
+                blocker={study.differsFromBudget ? null : "The budget's planned lines already match the study"}
+              >
+                <ApplyStudyForm action={applyStudyAction.bind(null, project.uuid)} approved={study.status === "approved"} />
+              </FormDialog>
+            </div>
           </Card>
         </div>
       </div>

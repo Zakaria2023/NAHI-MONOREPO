@@ -3,7 +3,7 @@
 import { DropdownOption } from "ui";
 import { SUPPLIER_RETURN_REMEDY_LABELS } from "@/db/label";
 import { supplierReturnRemedies } from "@/db/enum";
-import { useSupplierReturnForm } from "@/app/(dashboard)/procurement/orders/[uuid]/use-order-forms";
+import { useSupplierReturnForm } from "@/app/(dashboard)/procurement/orders/[uuid]/return/use-supplier-return-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

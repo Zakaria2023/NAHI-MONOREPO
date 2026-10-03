@@ -12,7 +12,7 @@ type WorkLogFormProps = {
 export const WorkLogForm = ({ action }: WorkLogFormProps) => {
   const { form, state, isPending, onSubmit } = useWorkLogForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Log work" columns={3}>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Log work">
       <TextField name="date" label="Day worked" type="date" required />
       <TextField name="hours" label="Hours" type="number" step="0.5" required />
       <TextField name="note" label="What was done" placeholder="Optional" />

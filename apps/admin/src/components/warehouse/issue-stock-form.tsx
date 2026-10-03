@@ -13,7 +13,7 @@ type IssueStockFormProps = {
 export const IssueStockForm = ({ action, recipientName }: IssueStockFormProps) => {
   const { form, state, isPending, onSubmit } = useIssueStockForm(action, recipientName);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Issue stock" layout="inline" submitVariant="success">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Issue stock" submitVariant="success">
       <div className="w-72">
         <TextField name="signedByRecipient" label="Signed by the recipient" required />
       </div>

@@ -3,6 +3,7 @@ import { StatusPill } from "ui";
 import { daysUntil, formatDate, formatMoney, round2 } from "utils";
 import { certificateKinds } from "@/db/enum";
 import { CERTIFICATE_LABELS } from "@/db/label";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FormAction } from "@/lib/action-result";
 import { CollectionForm } from "../collection-form";
 import { LockedMark } from "../locked-mark";
@@ -57,14 +58,24 @@ export const CertificatesPanel = ({ detail, poValue, invoiceAction, collectActio
                     <StatusPill tone={daysUntil(invoice.dueAt) < 0 ? "danger" : "warning"}>
                       {daysUntil(invoice.dueAt) < 0 ? `Overdue ${-daysUntil(invoice.dueAt)} day(s)` : `Due in ${daysUntil(invoice.dueAt)} day(s)`}
                     </StatusPill>
-                    <CollectionForm action={collectAction(invoice.uuid)} />
+                    <FormDialog label="Mark collected" title="Payment collected" description={`${invoice.number} · ${formatMoney(invoice.total)}`} variant="success" size="sm">
+                      <CollectionForm action={collectAction(invoice.uuid)} />
+                    </FormDialog>
                   </div>
                 )}
               </div>
             ) : blocker ? (
               <LockedMark reason={blocker} />
             ) : (
-              <CertificateInvoiceForm action={invoiceAction} kind={kind} suggestedAmount={round2(poValue * MOBILY_CERTIFICATE_SPLIT[kind])} />
+              <FormDialog
+                label="Submit invoice"
+                title={`${CERTIFICATE_LABELS[kind]} invoice`}
+                description="Submitted on I-Supplier; payment is due 60 days after"
+                variant="primary"
+                size="sm"
+              >
+                <CertificateInvoiceForm action={invoiceAction} kind={kind} suggestedAmount={round2(poValue * MOBILY_CERTIFICATE_SPLIT[kind])} />
+              </FormDialog>
             )}
           </div>
         </div>

@@ -2,6 +2,7 @@ import { PermitView } from "services";
 import { StatusPill, Table } from "ui";
 import { daysUntil, formatDate } from "utils";
 import { PERMIT_AUTHORITY_LABELS } from "@/db/label";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FormAction } from "@/lib/action-result";
 import { IssuePermitForm } from "./issue-permit-form";
 import { PermitForm } from "./permit-form";
@@ -49,15 +50,21 @@ export const PermitsPanel = ({ permits, addAction, issueAction, canRequest }: Pe
             p.issuedAt ? (
               <StatusPill tone="success">Issued {formatDate(p.issuedAt)}</StatusPill>
             ) : (
-              <IssuePermitForm action={issueAction} permitUuid={p.uuid} />
+              <FormDialog label="Mark issued" title="Permit issued" description={`${PERMIT_AUTHORITY_LABELS[p.authority]} · ${p.reference}`} size="sm">
+                <IssuePermitForm action={issueAction} permitUuid={p.uuid} />
+              </FormDialog>
             ),
         },
       ]}
     />
-    {canRequest ? (
+    <FormDialog
+      label="Request permit"
+      title="Request permit"
+      description="Its expected duration sets the end date to watch"
+      dialogSize="lg"
+      blocker={canRequest ? null : "Permits are requested once the PO is received."}
+    >
       <PermitForm action={addAction} />
-    ) : (
-      <p className="text-xs text-muted">Permits are requested once the PO is received.</p>
-    )}
+    </FormDialog>
   </div>
 );

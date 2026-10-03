@@ -12,10 +12,8 @@ type ChecklistItemFormProps = {
 export const ChecklistItemForm = ({ action }: ChecklistItemFormProps) => {
   const { form, state, isPending, onSubmit } = useChecklistItemForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Add" layout="inline" submitVariant="outline">
-      <div className="min-w-64 flex-1">
-        <TextField name="text" label="New checklist item" placeholder="One more step" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Add">
+      <TextField name="text" label="New checklist item" placeholder="One more step" />
     </ActionForm>
   );
 };

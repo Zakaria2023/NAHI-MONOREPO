@@ -1,15 +1,13 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, PencilLine } from "lucide-react";
 import Link from "next/link";
 import { getBudget } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, formatPercent, round2 } from "utils";
-import { budgetCategories } from "@/db/enum";
-import { approveBudgetAction, saveBudgetLinesAction } from "@/app/(dashboard)/finance/budgets/[projectUuid]/actions";
+import { approveBudgetAction } from "@/app/(dashboard)/finance/budgets/[projectUuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { OperatorPill } from "@/components/shared/operator-pill";
 import { PageHeader } from "@/components/shared/page-header";
 import { getCurrentStaff } from "@/lib/server/auth";
-import { BudgetLinesForm } from "./budget-lines-form";
 import { BudgetRevisions } from "./budget-revisions";
 import { BudgetStatusPill } from "./budget-status-pill";
 import { BudgetUsageTable } from "./budget-usage-table";
@@ -29,9 +27,8 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
     : budget.lines.length === 0
       ? "Plan at least one budget line first."
       : actor.role !== "projects_manager"
-        ? "Only the Projects manager approves a budget — switch user at the foot of the sidebar."
+        ? "Only the Projects manager approves a budget — switch user from the navbar."
         : null;
-  const lines = budget && budget.lines.length > 0 ? budget.lines : budgetCategories.map((category) => ({ category, planned: 0 }));
   return (
     <>
       <PageHeader
@@ -68,7 +65,13 @@ export const BudgetDetail = async ({ projectUuid }: BudgetDetailProps) => {
                 : "Lines at zero are dropped when saved. Approval locks the budget against free edits."
             }
           >
-            <BudgetLinesForm key={budget?.revisions.length ?? 0} action={saveBudgetLinesAction.bind(null, project.uuid)} lines={lines} approved={approved} />
+            <Link
+              href={`/finance/budgets/${project.uuid}/lines`}
+              className="flex h-9 w-fit items-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium text-ink transition-colors hover:bg-hover"
+            >
+              <PencilLine size={15} />
+              {approved ? "Revise the planned lines" : "Edit the planned lines"}
+            </Link>
           </Card>
         </div>
         <div className="flex flex-col gap-6">

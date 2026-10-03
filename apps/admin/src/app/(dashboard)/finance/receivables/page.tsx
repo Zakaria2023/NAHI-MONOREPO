@@ -28,18 +28,20 @@ const ReceivablesPage = async ({ searchParams }: Props) => {
       <AsyncSection reloadKey="receivables-stats">
         <ReceivablesStats />
       </AsyncSection>
-      <FilterTabs
-        tabs={FILTERS.map((f) => ({
-          label: f.label,
-          href: f.value === "all" ? "/finance/receivables" : `/finance/receivables?status=${f.value}`,
-          active: f.value === filter,
-        }))}
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <FilterTabs
+          tabs={FILTERS.map((f) => ({
+            label: f.label,
+            href: f.value === "all" ? "/finance/receivables" : `/finance/receivables?status=${f.value}`,
+            active: f.value === filter,
+          }))}
+        />
+        <AsyncSection reloadKey="as-built-invoice">
+          <AsBuiltInvoiceSection />
+        </AsyncSection>
+      </div>
       <AsyncSection reloadKey={`receivables-${filter}`}>
         <CustomerInvoicesTable filter={filter} />
-      </AsyncSection>
-      <AsyncSection reloadKey="as-built-invoice">
-        <AsBuiltInvoiceSection />
       </AsyncSection>
     </>
   );

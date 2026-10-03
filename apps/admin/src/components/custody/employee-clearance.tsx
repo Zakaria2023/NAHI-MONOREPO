@@ -3,6 +3,7 @@ import { EmployeeCustodySummary } from "services";
 import { StatusPill } from "ui";
 import { formatDate } from "utils";
 import { BlockedNote } from "@/components/warehouse/blocked-note";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { ClearanceForm } from "./clearance-form";
 
 type EmployeeClearanceProps = {
@@ -40,5 +41,11 @@ export const EmployeeClearance = ({ summary, approverBlocker }: EmployeeClearanc
       </div>
     );
   }
-  return approverBlocker ? <BlockedNote reason={approverBlocker} /> : <ClearanceForm employeeName={summary.employeeName} />;
+  return approverBlocker ? (
+    <BlockedNote reason={approverBlocker} />
+  ) : (
+    <FormDialog label="Approve clearance" title={`Clear ${summary.employeeName}`} description="Everything is settled — the clearance can be issued" size="sm" variant="success">
+      <ClearanceForm employeeName={summary.employeeName} />
+    </FormDialog>
+  );
 };

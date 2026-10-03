@@ -4,6 +4,7 @@ import { Card, StatStrip, StatTile, Table } from "ui";
 import { formatDate, formatMoney, round2, sumBy } from "utils";
 import { statementCheckAction } from "@/app/(dashboard)/finance/payables/statement/[supplierUuid]/actions";
 import { CsvButton } from "@/components/shared/csv-button";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FactList } from "@/components/shared/fact-list";
 import { PrintButton } from "@/components/shared/print-button";
 import { StatementCheckForm } from "./statement-check-form";
@@ -67,14 +68,18 @@ export const SupplierStatement = async ({ supplierUuid }: SupplierStatementProps
           { key: "balance", header: "Balance", align: "end", render: (r) => <span className="font-medium">{formatMoney(r.balance)}</span> },
         ]}
       />
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3 print:hidden">
-        <Card className="xl:col-span-2" title="Matched against their statement" description="Step 9 — the supplier's own balance against ours on the same date">
-          <StatementChecks checks={checks} />
-        </Card>
-        <Card title="Match their statement">
-          <StatementCheckForm key={checks.length} action={statementCheckAction.bind(null, supplier.uuid)} />
-        </Card>
-      </div>
+      <Card
+        className="print:hidden"
+        title="Matched against their statement"
+        description="Step 9 — the supplier's own balance against ours on the same date"
+        action={
+          <FormDialog label="Match their statement" title="Match the supplier's statement" description="Their balance on a date, against ours on the same date" size="sm">
+            <StatementCheckForm action={statementCheckAction.bind(null, supplier.uuid)} />
+          </FormDialog>
+        }
+      >
+        <StatementChecks checks={checks} />
+      </Card>
     </>
   );
 };

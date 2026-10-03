@@ -13,11 +13,9 @@ type InvoiceCollectionFormProps = {
 export const InvoiceCollectionForm = ({ action }: InvoiceCollectionFormProps) => {
   const { form, state, isPending, onSubmit } = useInvoiceCollectionForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark collected" layout="inline" submitVariant="success">
-      <div className="w-36">
-        <TextField name="paidAt" label="Collected on" type="date" />
-      </div>
-      <BankFields compact />
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark collected" submitVariant="success">
+      <TextField name="paidAt" label="Collected on" type="date" />
+      <BankFields />
     </ActionForm>
   );
 };

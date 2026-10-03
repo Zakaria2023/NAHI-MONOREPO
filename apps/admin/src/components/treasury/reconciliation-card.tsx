@@ -4,6 +4,7 @@ import { Card } from "ui";
 import { formatDate, formatMoney, formatPeriod } from "utils";
 import { FigureRow } from "@/components/finance/figure-row";
 import { FormAction } from "@/lib/action-result";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { ReconciliationForm } from "./reconciliation-form";
 
 type ReconciliationCardProps = {
@@ -31,7 +32,9 @@ export const ReconciliationCard = ({ detail, action }: ReconciliationCardProps) 
             </span>
           </p>
         ) : (
-          <ReconciliationForm key={detail.period} action={action} period={detail.period} />
+          <FormDialog label="Reconcile" title={`Reconcile ${formatPeriod(detail.period)}`} description="The balance on the bank statement at the month's end" variant="primary">
+            <ReconciliationForm action={action} period={detail.period} />
+          </FormDialog>
         )}
       </div>
     </Card>

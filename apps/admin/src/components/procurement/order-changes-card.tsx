@@ -1,7 +1,7 @@
+import { PencilLine } from "lucide-react";
 import { PurchaseOrderDetail } from "services";
 import { Card } from "ui";
-import { amendOrderAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
-import { AmendOrderForm } from "./amend-order-form";
+import { LinkButton } from "@/components/shared/link-button";
 
 type OrderChangesCardProps = {
   detail: PurchaseOrderDetail;
@@ -15,12 +15,7 @@ export const OrderChangesCard = ({ detail }: OrderChangesCardProps) => {
       title="Modify the PO"
       description="Procurement — quantities, prices or delivery. Any increase is checked against the budget, and the PO goes back through its approval chain."
     >
-      <AmendOrderForm
-        action={amendOrderAction.bind(null, po.uuid)}
-        lines={po.lines.map((l) => ({ itemUuid: l.itemUuid, qty: l.qty, unitPrice: l.unitPrice }))}
-        deliveryDays={po.deliveryDays}
-        items={detail.lines.map((l) => ({ value: l.itemUuid, label: `${l.item.code} — ${l.item.name}` }))}
-      />
+      <LinkButton href={`/procurement/orders/${po.uuid}/amend`} label="Modify the PO" icon={<PencilLine size={16} />} variant="outline" />
     </Card>
   );
 };

@@ -1,9 +1,11 @@
+import { Ban, Percent } from "lucide-react";
 import Link from "next/link";
 import { PURCHASE_CHAIN, PurchaseOrderDetail } from "services";
 import { Card, StatusPill } from "ui";
 import { formatDate, formatMoney } from "utils";
 import { cancelOrderAction, penaltyTermsAction } from "@/app/(dashboard)/procurement/orders/[uuid]/actions";
 import { FactList } from "@/components/shared/fact-list";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { BlockedNote } from "./blocked-note";
 import { CancelOrderForm } from "./cancel-order-form";
 import { ChainCard } from "./chain-card";
@@ -73,11 +75,13 @@ export const OrderSide = ({ detail }: OrderSideProps) => {
       </Card>
       {!detail.contract && (po.status === "pending_approval" || po.status === "approved") && (
         <Card title="Late-delivery penalty" description="Procurement, before the PO is sent — deducted from the invoice automatically">
-          <PenaltyTermsForm
-            action={penaltyTermsAction.bind(null, po.uuid)}
-            pctPerDay={po.latePenaltyPctPerDay ?? 0}
-            capPct={po.latePenaltyCapPct ?? 10}
-          />
+          <FormDialog label="Set penalty terms" title="Late-delivery penalty" description="A share of the PO per day late, up to a cap" icon={<Percent size={16} />}>
+            <PenaltyTermsForm
+              action={penaltyTermsAction.bind(null, po.uuid)}
+              pctPerDay={po.latePenaltyPctPerDay ?? 0}
+              capPct={po.latePenaltyCapPct ?? 10}
+            />
+          </FormDialog>
         </Card>
       )}
       {!closed && (
@@ -85,7 +89,9 @@ export const OrderSide = ({ detail }: OrderSideProps) => {
           {detail.receipts.length > 0 ? (
             <BlockedNote>Goods were received against this PO — it can no longer be cancelled.</BlockedNote>
           ) : (
-            <CancelOrderForm action={cancelOrderAction.bind(null, po.uuid)} />
+            <FormDialog label="Cancel the PO" title={`Cancel ${po.number}`} description="The reason is kept in the change log" icon={<Ban size={16} />}>
+              <CancelOrderForm action={cancelOrderAction.bind(null, po.uuid)} />
+            </FormDialog>
           )}
         </Card>
       )}

@@ -1,7 +1,9 @@
+import { MessageSquarePlus } from "lucide-react";
 import { TaskDetail } from "services";
 import { Card } from "ui";
 import { formatDateTime, initialsOf } from "utils";
 import { commentOnTaskAction } from "@/app/(dashboard)/tasks/[uuid]/actions";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { CommentForm } from "./comment-form";
 
 type TaskCommentsCardProps = {
@@ -30,7 +32,9 @@ export const TaskCommentsCard = ({ detail }: TaskCommentsCardProps) => {
             ))}
           </ul>
         )}
-        <CommentForm action={commentOnTaskAction.bind(null, task.uuid)} />
+        <FormDialog label="Add comment" title="Add comment" description="Ask, answer, or note progress — everyone on the task sees it" icon={<MessageSquarePlus size={16} />}>
+          <CommentForm action={commentOnTaskAction.bind(null, task.uuid)} />
+        </FormDialog>
       </div>
     </Card>
   );

@@ -6,7 +6,6 @@ import { reconcileAction } from "@/app/(dashboard)/finance/bank/actions";
 import { CsvButton } from "@/components/shared/csv-button";
 import { FilterTabs } from "@/components/shared/filter-tabs";
 import { PrintButton } from "@/components/shared/print-button";
-import { BankAccountForm } from "./bank-account-form";
 import { BankMovementsTable } from "./bank-movements-table";
 import { ReconciliationCard } from "./reconciliation-card";
 
@@ -19,9 +18,7 @@ export const BankBoard = async ({ accountUuid, period: requested }: BankBoardPro
   const accounts = await listBankAccounts();
   if (accounts.length === 0) {
     return (
-      <Card title="Add the first account">
-        <BankAccountForm />
-      </Card>
+      <EmptyState title="No bank account yet">Add the first one with “New bank account”.</EmptyState>
     );
   }
   const periods = recentPeriods(6);
@@ -67,9 +64,6 @@ export const BankBoard = async ({ accountUuid, period: requested }: BankBoardPro
         </Card>
         <div className="flex flex-col gap-6 print:hidden">
           <ReconciliationCard detail={detail} action={reconcileAction.bind(null, selected.uuid)} />
-          <Card title="Add a bank account" description="The first account added is the primary one">
-            <BankAccountForm key={accounts.length} />
-          </Card>
         </div>
       </div>
     </>

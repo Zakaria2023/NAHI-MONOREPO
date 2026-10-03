@@ -1,7 +1,9 @@
+import { Plus } from "lucide-react";
 import { Actor, TaskDetail, taskMoveBlocker } from "services";
 import { Card } from "ui";
 import { formatDateTime } from "utils";
 import { addChecklistItemAction, toggleChecklistItemAction } from "@/app/(dashboard)/tasks/[uuid]/actions";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { ProgressBar } from "@/components/shared/progress-bar";
 import { ChecklistItemToggle } from "./checklist-item-toggle";
 import { ChecklistItemForm } from "./checklist-item-form";
@@ -47,7 +49,11 @@ export const TaskChecklistCard = ({ detail, actor }: TaskChecklistCardProps) => 
           </ul>
         )}
         {tickBlocker && task.assigneeUuid === actor.uuid && task.checklist.length > 0 && <p className="text-xs text-muted">{tickBlocker}</p>}
-        {canAdd && <ChecklistItemForm action={addChecklistItemAction.bind(null, task.uuid)} />}
+        {canAdd && (
+          <FormDialog label="Add item" title="Add checklist item" description="One more step to tick before the task is handed in" size="sm" icon={<Plus size={14} />}>
+            <ChecklistItemForm action={addChecklistItemAction.bind(null, task.uuid)} />
+          </FormDialog>
+        )}
       </div>
     </Card>
   );

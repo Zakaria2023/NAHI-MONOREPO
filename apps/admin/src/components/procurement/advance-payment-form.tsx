@@ -12,7 +12,7 @@ type AdvancePaymentFormProps = {
 export const AdvancePaymentForm = ({ action }: AdvancePaymentFormProps) => {
   const { form, state, isPending, onSubmit } = useAdvancePaymentForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record advance" layout="inline" submitVariant="outline">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record advance">
       <div className="w-48">
         <TextField name="amount" label="Advance paid (SAR)" type="number" />
       </div>

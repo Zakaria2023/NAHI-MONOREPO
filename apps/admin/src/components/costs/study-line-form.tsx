@@ -2,7 +2,7 @@
 
 import { BUDGET_CATEGORY_LABELS, EQUIPMENT_SUPPLY_TYPE_LABELS, WORK_TYPE_LABELS } from "@/db/label";
 import { budgetCategories, equipmentSupplyTypes, workTypes } from "@/db/enum";
-import { useStudyLineForm } from "@/app/(dashboard)/finance/budgets/[projectUuid]/study/use-study-forms";
+import { useStudyLineForm } from "@/app/(dashboard)/finance/budgets/[projectUuid]/study/lines/new/use-study-line-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";
@@ -15,7 +15,7 @@ type StudyLineFormProps = {
 export const StudyLineForm = ({ action }: StudyLineFormProps) => {
   const { form, state, isPending, onSubmit, equipment, works } = useStudyLineForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Add line" submitVariant="outline" columns={2}>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Add line" columns={2}>
       <div className="md:col-span-2">
         <DropdownField name="category" label="Category" options={budgetCategories.map((c) => ({ value: c, label: BUDGET_CATEGORY_LABELS[c] }))} />
       </div>

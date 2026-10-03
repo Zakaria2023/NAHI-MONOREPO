@@ -1,7 +1,6 @@
 "use server";
 
 import {
-  addQuotation,
   decidePurchaseRequest,
   decideQuotation,
   decideStockSupply,
@@ -13,7 +12,6 @@ import {
   decisionSchema,
   orderUnderContractSchema,
   procurementReviewSchema,
-  quotationSchema,
   selectQuotationSchema,
 } from "validators";
 import { ActionResult } from "@/lib/action-result";
@@ -33,9 +31,6 @@ export const reviewRequestAction = async (uuid: string, stockAvailable: boolean)
 
 export const decideStockSupplyAction = async (uuid: string, _prev: ActionResult, data: unknown) =>
   runAction(data, (actor, input) => decideStockSupply(actor, uuid, input), { schema: decisionSchema, success: "Decision recorded" });
-
-export const addQuotationAction = async (uuid: string, _prev: ActionResult, data: unknown) =>
-  runAction(data, (actor, input) => addQuotation(actor, uuid, input), { schema: quotationSchema, success: "Quotation recorded" });
 
 export const submitQuotationAction = async (uuid: string, _prev: ActionResult, data: unknown) =>
   runAction(data, (actor, input) => submitQuotationForApproval(actor, uuid, input), {

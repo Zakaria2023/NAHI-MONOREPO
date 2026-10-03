@@ -2,12 +2,14 @@
 
 import { startTransition, useActionState, useState } from "react";
 import { ActionResult } from "@/lib/action-result";
+import { useCloseOnSuccess } from "./use-close-on-success";
 
 type Decision = "approved" | "rejected";
 
 /**
- * The approve/reject pair every approval chain shows. A rejection needs a
- * reason; the services refuse one without, and this says so first.
+ * One decision on an approval chain, from its dialog. A rejection needs a
+ * reason; the services refuse one without, and this says so first. The dialog
+ * closes once the decision is recorded.
  */
 export const useDecisionForm = (
   action: (prev: ActionResult, data: { decision: Decision; note?: string }) => Promise<ActionResult>,
@@ -15,6 +17,7 @@ export const useDecisionForm = (
   const [state, dispatch, isPending] = useActionState(action, {});
   const [note, setNote] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
+  useCloseOnSuccess(state);
 
   const decide = (decision: Decision) => {
     if (decision === "rejected" && !note.trim()) {

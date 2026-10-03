@@ -7,6 +7,7 @@ const ContractsPage = () => (
     <PageHeader
       title="Annual contracts"
       description="Agreed prices for the year. A request whose items a contract in force prices is ordered without a new RFQ, on the contract's delivery, payment and penalty terms."
+      action={{ href: "/procurement/contracts/new", label: "Sign a contract" }}
     />
     <AsyncSection reloadKey="contracts">
       <ContractsBoard />

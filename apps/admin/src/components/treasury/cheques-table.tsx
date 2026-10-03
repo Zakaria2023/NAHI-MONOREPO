@@ -5,6 +5,7 @@ import { formatDate, formatMoney } from "utils";
 import { CHEQUE_DIRECTION_LABELS, CHEQUE_STATUS_LABELS } from "@/db/label";
 import { bounceChequeAction, clearChequeAction } from "@/app/(dashboard)/finance/cheques/actions";
 import { ActionButton } from "@/components/shared/action-button";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { BounceForm } from "./bounce-form";
 
 type ChequesTableProps = {
@@ -71,7 +72,9 @@ export const ChequesTable = ({ cheques }: ChequesTableProps) => (
           c.status === "pending" ? (
             <div className="relative z-10 flex flex-col gap-2">
               {!c.postdated && <ActionButton action={clearChequeAction.bind(null, c.uuid)} label="Cleared" size="sm" variant="success" />}
-              <BounceForm action={bounceChequeAction.bind(null, c.uuid)} />
+              <FormDialog label="Bounced" title={`Cheque ${c.number} bounced`} description="The invoice it paid becomes owed again" size="sm">
+                <BounceForm action={bounceChequeAction.bind(null, c.uuid)} />
+              </FormDialog>
             </div>
           ) : (
             <div className="flex flex-col gap-0.5">

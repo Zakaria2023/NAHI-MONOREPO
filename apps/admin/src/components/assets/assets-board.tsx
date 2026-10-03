@@ -1,9 +1,8 @@
 import { ClipboardCheck, Landmark, Package, TrendingDown } from "lucide-react";
-import { listFixedAssets, listProjectOptions, listWarehouseOptions } from "services";
+import { listFixedAssets } from "services";
 import { Card, StatStrip, StatTile } from "ui";
 import { formatMoney, round2, sumBy } from "utils";
 import { CsvButton } from "@/components/shared/csv-button";
-import { AssetForm } from "./asset-form";
 import { AssetsTable } from "./assets-table";
 
 type AssetsBoardProps = {
@@ -12,7 +11,7 @@ type AssetsBoardProps = {
 };
 
 export const AssetsBoard = async ({ status }: AssetsBoardProps) => {
-  const [all, projects, warehouses] = await Promise.all([listFixedAssets(), listProjectOptions(), listWarehouseOptions()]);
+  const all = await listFixedAssets();
   const active = all.filter((a) => a.status === "active");
   const shown = status === "all" ? all : all.filter((a) => a.status === status);
   const year = new Date().getUTCFullYear();
@@ -51,9 +50,6 @@ export const AssetsBoard = async ({ status }: AssetsBoardProps) => {
         }
       >
         <AssetsTable assets={shown} />
-      </Card>
-      <Card title="Register an asset" description="The asset card is created when the asset is received; depreciation starts the month it was bought">
-        <AssetForm key={all.length} projects={[{ value: "", label: "Head office (overhead)" }, ...projects]} warehouses={warehouses} />
       </Card>
     </>
   );

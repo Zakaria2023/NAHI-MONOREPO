@@ -4,6 +4,7 @@ import { formatDateTime, formatMoney } from "utils";
 import { CASH_CUSTODY_STATUS_LABELS } from "@/db/label";
 import { decideCashCustodyAction, disburseCashCustodyAction, settleCashCustodyAction } from "@/app/(dashboard)/custody/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FactList } from "@/components/shared/fact-list";
 import { PageHeader } from "@/components/shared/page-header";
 import { ApprovalCard } from "@/components/warehouse/approval-card";
@@ -47,7 +48,9 @@ export const CashCustodyView = async ({ uuid }: CashCustodyViewProps) => {
               {financeBlocker ? (
                 <BlockedNote reason={financeBlocker} />
               ) : (
-                <SettleForm action={settleCashCustodyAction.bind(null, custody.uuid)} amount={custody.amount} />
+                <FormDialog label="Settle custody" title={`Settle ${custody.number}`} description="What was spent against receipts; the rest comes back to the cash box" variant="success" dialogSize="lg">
+                  <SettleForm action={settleCashCustodyAction.bind(null, custody.uuid)} amount={custody.amount} />
+                </FormDialog>
               )}
             </Card>
           )}

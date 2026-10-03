@@ -72,12 +72,13 @@ below it.
 
 **Approving PR-0001 as the direct manager:**
 
-1. The user picks *Khalid Al-Harbi* in the top bar → `components/layout/user-switcher.tsx`
+1. The user picks *Khalid Al-Harbi* from the navbar's user menu ("Other roles") → `components/layout/user-menu.tsx`
    → `lib/use-user-switcher.ts` → `switchUserAction` in `app/(dashboard)/actions.ts` sets the `erp_user` cookie.
 2. `/procurement/requests/[uuid]` → `components/procurement/purchase-request-view.tsx`
    reads `getPurchaseRequest(uuid)` from `services/procurement.ts`, and asks
    `getCurrentStaff()` whether Khalid's role is the one the chain is waiting for.
-3. Khalid clicks **Approve** in `components/shared/decision-form.tsx` →
+3. Khalid clicks **Approve** in `components/shared/decision-form.tsx`, and confirms it in its dialog
+   (`decision-note-form.tsx`) →
    `lib/use-decision-form.ts` dispatches the bound action from
    `app/(dashboard)/procurement/requests/[uuid]/actions.ts`.
 4. The action calls `runAction` (`lib/server/run-action.ts`): resolves Khalid,
@@ -99,12 +100,22 @@ the matching section of the original PDF).
 
 ### 4.1 Overview
 
+Forms follow one rule (CLAUDE.md, "Forms: A Page Or A Dialog"): a large form has its own
+page — `…/new`, or `…/[uuid]/<verb>` such as `/procurement/orders/[uuid]/receive` — with its
+action and hook in that route folder; a small form opens in a dialog (`shared/form-dialog.tsx`)
+from a button on the page it belongs to. The tables below name the screens; a form named in a
+row lives on that row's page, in a dialog, or behind a link to its own page.
+
+Two kinds of user see two apps: the **admin** has every module, all tasks and the team workload,
+and no *My tasks*; an **employee** has only their dashboard and their tasks
+(`services/rules/access.ts`, enforced in `app/(dashboard)/layout.tsx` with the path from `proxy.ts`).
+
 | Route | What it does | Page → main components | Actions | Services | Spec |
 | --- | --- | --- | --- | --- | --- |
 | `/` Dashboard | Six KPIs (each tile opens its page), what is waiting for you, the alerts, and every project's stage and missing items. | `app/(dashboard)/page.tsx` → `components/dashboard/kpi-row.tsx`, `approvals-panel.tsx`, `alerts-panel.tsx`, `project-pipeline.tsx` | — | `dashboard.ts` (`getDashboardSummary`, `listPendingApprovals`), `alerts.ts` (`listAlerts`), `projects.ts` (`listProjects`) | Mobily §7 (per-PO dashboard), STC §6 |
 | `/approvals` My approvals | Every step whose turn belongs to your role. The system admin sees every role's queue, each item saying who it waits for. | `approvals/page.tsx` → `components/approvals/approvals-board.tsx`, `shared/approval-list.tsx` | — | `dashboard.ts` (`listPendingApprovals`) | Procurement §7 (notifications on pending requests) |
 | `/alerts` Alerts | Urgent / coming up / information: permits about to expire, FAC opening, Final Clearance due, the STC 24 h wait, missing C09, late POs, items under reorder, overdue custody counts and settlements, unpaid customer invoices. | `alerts/page.tsx` → `components/alerts/alerts-board.tsx`, `shared/alert-list.tsx` | — | `alerts.ts` (`listAlerts` and its collectors) | Mobily §7, STC §6, Procurement §1/§3, Finance §3 |
-| Top bar (every page) | Date, urgent-alerts bell, the acting user and **Switch user** — the stand-in for sign-in. | `components/layout/shell.tsx`, `navbar.tsx`, `user-switcher.tsx`; `app/(dashboard)/layout.tsx` | `app/(dashboard)/actions.ts` (`switchUserAction`) | `staff.ts` | — |
+| Top bar (every page) | Date, urgent-alerts bell (not for employees), and the user menu: the admin, the employees, and the other roles folded away — the stand-in for sign-in. | `components/layout/shell.tsx`, `navbar.tsx`, `user-menu.tsx`, `user-menu-row.tsx`; `app/(dashboard)/layout.tsx` | `app/(dashboard)/actions.ts` (`switchUserAction`) | `staff.ts` | — |
 | Sidebar (every page) | The menu, with live counts on *My approvals* and *Alerts*. | `packages/ui/src/dashboard-sidebar.tsx`, `lib/nav.tsx` | — | — | — |
 
 ### 4.2 Projects
@@ -129,7 +140,7 @@ STC-006 M5 · STC-003 on the dashboard.
 | `/procurement/requests/new` | Raise a PR: project, department, budget category, items with quantity, estimated price and date. | `procurement/requests/new/page.tsx` → `new-purchase-request.tsx`, `purchase-request-form.tsx`; hook `use-request-form.ts` | `procurement/requests/new/actions.ts` | `procurement.ts` (`createPurchaseRequest`) | §1 step 1 |
 | `/procurement/requests/[uuid]` | One card for the next step of this PR: direct manager approval (with the budget reservation) → procurement review (system stock check; *Supply from stock* or *Purchase*) → stock-supply chain, or RFQ (quotation comparison, best price/delivery/terms/quality, three-supplier rule) → quotation approval by six → link to the PO. Lines with stock, facts, chains, log. | `procurement/requests/[uuid]/page.tsx` → `purchase-request-view.tsx`, `request-stage-card.tsx`, `procurement-review.tsx`, `quotations-panel.tsx`, `quotation-comparison-table.tsx`, `quotation-form.tsx`, `select-quotation-form.tsx`, `request-facts.tsx`, `request-lines-card.tsx`, `request-side.tsx`; hooks `use-request-forms.ts` | `procurement/requests/[uuid]/actions.ts` | `procurement.ts` (`getPurchaseRequest`, `decidePurchaseRequest`, `reviewPurchaseRequest`, `decideStockSupply`, `addQuotation`, `submitQuotationForApproval`, `decideQuotation`), `budgets.ts` (`budgetBlocker`), `rules/procurement.ts` | §1 steps 1–7 |
 | `/procurement/orders` | POs: supplier, project, total, status, expected delivery with a *Late* flag, who it waits for. | `procurement/orders/page.tsx` → `purchase-order-tabs.tsx`, `purchase-orders-table.tsx` | — | `procurement.ts` (`listPurchaseOrders`) | §1 steps 7–9 |
-| `/procurement/orders/[uuid]` | The PO as a document (company and supplier blocks, lines, net / VAT 15 % / total, delivery and terms). Next step: six approvals → send by e-mail → receive goods with QC (accepted / rejected with reason) → supplier evaluation. Receipt progress, receipts, advance paid vs recovered, cancellation, amendments, log. | `procurement/orders/[uuid]/page.tsx` → `purchase-order-view.tsx`, `purchase-order-document.tsx`, `order-stage-card.tsx`, `goods-receipt-form.tsx`, `receipt-progress-card.tsx`, `receipts-card.tsx`, `advance-card.tsx`, `cancel-order-form.tsx`, `supplier-evaluation-form.tsx`, `amendments-card.tsx`, `order-side.tsx`; hooks `use-order-forms.ts` | `procurement/orders/[uuid]/actions.ts` | `procurement.ts` (`getPurchaseOrder`, `decidePurchaseOrder`, `sendPurchaseOrder`, `receiveGoods`, `recordAdvancePayment`, `cancelPurchaseOrder`, `evaluateSupplier`), `rules/procurement.ts` (`goodsReceiptBlocker`, `receiptState`) | §1 steps 7–13, §1 other cases, §2 receiving |
+| `/procurement/orders/[uuid]` | The PO as a document (company and supplier blocks, lines, net / VAT 15 % / total, delivery and terms). Next step: six approvals → send by e-mail → receive goods with QC (accepted / rejected with reason) → supplier evaluation. Receipt progress, receipts, advance paid vs recovered, cancellation, amendments, log. | `procurement/orders/[uuid]/page.tsx` → `purchase-order-view.tsx`, `purchase-order-document.tsx`, `order-stage-card.tsx`, `receipt-progress-card.tsx`, `receipts-card.tsx`, `advance-card.tsx`, `cancel-order-form.tsx`, `supplier-evaluation-form.tsx`, `amendments-card.tsx`, `order-side.tsx` (dialogs); `/receive`, `/amend`, `/return` pages → `receive-goods.tsx`, `amend-order.tsx`, `return-to-supplier.tsx`; hooks `use-order-forms.ts` and one per sub-page | `procurement/orders/[uuid]/actions.ts`, and each sub-page's `actions.ts` | `procurement.ts` (`getPurchaseOrder`, `decidePurchaseOrder`, `sendPurchaseOrder`, `receiveGoods`, `recordAdvancePayment`, `cancelPurchaseOrder`, `evaluateSupplier`), `rules/procurement.ts` (`goodsReceiptBlocker`, `receiptState`) | §1 steps 7–13, §1 other cases, §2 receiving |
 | `/procurement/suppliers` | Supplier register with VAT, CR, contact, POs and rating; *Register supplier* refuses a duplicate name or VAT number. | `procurement/suppliers/page.tsx` → `suppliers-board.tsx`, `suppliers-table.tsx`, `supplier-form.tsx`; hook `use-supplier-form.ts` | `procurement/suppliers/actions.ts` | `suppliers.ts` (`listSuppliers`, `createSupplier`, `supplierDuplicateBlocker`) | §1 step 13, Finance §1 input controls |
 
 ### 4.4 Warehouse
@@ -160,10 +171,10 @@ STC-006 M5 · STC-003 on the dashboard.
 | --- | --- | --- | --- | --- | --- |
 | `/finance/payables` | Supplier invoices: net payable, paid, outstanding, due date (red when overdue), status; tiles for awaiting approval, approved unpaid, overdue. | `finance/payables/page.tsx` → `components/finance/payables-stats.tsx`, `supplier-invoices-table.tsx` | — | `payables.ts` (`listSupplierInvoices`) | `docs/finance.md` §1 |
 | `/finance/payables/new` | Register an invoice against a PO and its receipts, with the expected net and VAT worked out; refused when VAT data is missing, the number is a duplicate, VAT is inconsistent or the three-way match fails. | `finance/payables/new/page.tsx` → `supplier-invoice-form-section.tsx`, `supplier-invoice-form.tsx`; hook `use-supplier-invoice-form.ts` | `finance/payables/new/actions.ts` | `payables.ts` (`listInvoiceableReceipts`, `registerSupplierInvoice`), `rules/finance.ts` | §1 mandatory fields, steps 1–5 |
-| `/finance/payables/[uuid]` | Three-way match, amounts (advance recovered, net payable), approval (finance manager), payments with the time the notice was e-mailed. | `finance/payables/[uuid]/page.tsx` → `supplier-invoice-detail.tsx`, `three-way-match-card.tsx`, `invoice-amounts-card.tsx`, `payment-form.tsx`, `supplier-payments-table.tsx`, `supplier-card.tsx`; hook `use-payment-form.ts` | `finance/payables/[uuid]/actions.ts` | `payables.ts` (`getSupplierInvoice`, `approveSupplierInvoice`, `recordSupplierPayment`) | §1 steps 3–8 |
+| `/finance/payables/[uuid]` | Three-way match, amounts (advance recovered, net payable), approval (finance manager), payments with the time the notice was e-mailed. | `finance/payables/[uuid]/page.tsx` → `supplier-invoice-detail.tsx`, `three-way-match-card.tsx`, `invoice-amounts-card.tsx`, `supplier-payments-table.tsx`, `supplier-card.tsx`; `/pay` page → `pay-supplier-invoice.tsx`, `payment-form.tsx`, hook `pay/use-payment-form.ts` | `finance/payables/[uuid]/actions.ts`, `pay/actions.ts` | `payables.ts` (`getSupplierInvoice`, `approveSupplierInvoice`, `recordSupplierPayment`) | §1 steps 3–8 |
 | `/finance/payables/statement/[supplierUuid]` | Supplier statement with running balance, for reconciling with the supplier's own. | `supplier-statement.tsx` | — | `payables.ts` (`supplierStatement`) | §1 step 9 |
 | `/finance/schedule` | Weekly due schedule, supplier ageing, customer ageing. | `finance/schedule/page.tsx` → `due-schedule.tsx`, `supplier-ageing.tsx`, `customer-ageing.tsx`, `ageing-table.tsx` | — | `payables.ts` (`weeklyDueSchedule`, `supplierAgeing`), `receivables.ts` (`customerAgeing`) | §1 step 6, reports; §3 reports |
-| `/finance/subcontracts` | Subcontracts (value, retention, certified, retention held, advance, materials pending deduction) and *New subcontract*; links to each subcontractor's statement. | `finance/subcontracts/page.tsx` → `subcontracts-section.tsx`, `subcontracts-table.tsx`, `subcontract-form-section.tsx`, `subcontractors-list.tsx`; hook `use-subcontract-form.ts` | `finance/subcontracts/actions.ts` | `subcontractors.ts` (`listSubcontracts`, `createSubcontract`) | §2 |
+| `/finance/subcontracts` | Subcontracts (value, retention, certified, retention held, advance, materials pending deduction) and *New subcontract*; links to each subcontractor's statement. | `finance/subcontracts/page.tsx` → `subcontracts-section.tsx`, `subcontracts-table.tsx`, `subcontractors-list.tsx`; `/new` page → `new-subcontract.tsx`, `subcontract-form.tsx`, hook `new/use-subcontract-form.ts` | `finance/subcontracts/new/actions.ts` | `subcontractors.ts` (`listSubcontracts`, `createSubcontract`) | §2 |
 | `/finance/subcontracts/statement/[subcontractorUuid]` | Subcontractor statement: extracts, gross, retention, materials, net, paid. | `subcontractor-statement.tsx` | — | `subcontractors.ts` (`subcontractorStatement`) | §2 reports |
 | `/finance/extracts` · `/new` · `/[uuid]` | Extracts of executed quantities. Detail: the deductions waterfall (gross − advance − retention − penalties − materials issued = net), engineer → projects manager → finance, penalties set at approval, *Mark paid*. | `extracts-section.tsx`, `extracts-table.tsx`; `extract-form-section.tsx`, `extract-form.tsx`; `extract-detail.tsx`, `deductions-waterfall.tsx`, `extract-decision-form.tsx`; hooks `use-extract-form.ts`, `use-extract-decision-form.ts` | `finance/extracts/new/actions.ts`, `finance/extracts/[uuid]/actions.ts` | `subcontractors.ts` (`listExtracts`, `submitExtract`, `getExtract`, `decideExtract`, `markExtractPaid`), `rules/finance.ts` (`extractFigures`) | §2 steps 1–7 |
 | `/finance/receivables` | Customer invoices (Mobily certificates and STC as-built) with collection, overdue flags, and *Issue as-built tax invoice* for STC. | `finance/receivables/page.tsx` → `receivables-stats.tsx`, `customer-invoices-table.tsx`, `invoice-collection-form.tsx`, `as-built-invoice-section.tsx`; hooks `use-receivable-forms.ts` | `finance/receivables/actions.ts` | `receivables.ts` (`listCustomerInvoices`, `createAsBuiltInvoice`, `recordCustomerCollection`) | §3 |
@@ -219,7 +230,7 @@ All test files are under `packages/services/src/`; run them with `pnpm test`.
 
 ## 6. Roles and approval chains
 
-The user switcher (foot of the sidebar) holds one person per role — `db/seed.ts`. The chains
+The user switcher (in the navbar) holds one person per role — `db/seed.ts`. The chains
 are in `packages/services/src/rules/chains.ts`; `core/approvals.ts` enforces the order.
 
 | Chain | Roles, in order | Used by |

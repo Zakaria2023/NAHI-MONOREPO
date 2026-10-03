@@ -13,10 +13,8 @@ type IssuePermitFormProps = {
 export const IssuePermitForm = ({ action, permitUuid }: IssuePermitFormProps) => {
   const { form, state, isPending, onSubmit } = useIssuePermitForm(action, permitUuid);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark issued" layout="inline" submitVariant="outline">
-      <div className="w-40">
-        <TextField name="issuedAt" label="Issued on" type="date" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Mark issued">
+      <TextField name="issuedAt" label="Issued on" type="date" />
     </ActionForm>
   );
 };

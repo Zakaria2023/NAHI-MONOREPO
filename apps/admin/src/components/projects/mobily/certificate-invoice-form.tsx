@@ -15,13 +15,9 @@ type CertificateInvoiceFormProps = {
 export const CertificateInvoiceForm = ({ action, kind, suggestedAmount }: CertificateInvoiceFormProps) => {
   const { form, state, isPending, onSubmit } = useCertificateInvoiceForm(action, kind, suggestedAmount);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Submit on I-Supplier" layout="inline">
-      <div className="w-40">
-        <TextField name="amount" label="Amount excl. VAT" type="number" />
-      </div>
-      <div className="w-40">
-        <TextField name="submittedAt" label="Submitted on" type="date" />
-      </div>
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Submit on I-Supplier">
+      <TextField name="amount" label="Amount excl. VAT" type="number" />
+      <TextField name="submittedAt" label="Submitted on" type="date" />
     </ActionForm>
   );
 };

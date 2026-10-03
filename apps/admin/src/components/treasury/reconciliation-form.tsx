@@ -1,6 +1,6 @@
 "use client";
 
-import { useReconciliationForm } from "@/app/(dashboard)/finance/bank/use-bank-forms";
+import { useReconciliationForm } from "@/app/(dashboard)/finance/bank/use-reconciliation-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { TextField } from "@/components/forms/text-field";
 import { FormAction } from "@/lib/action-result";

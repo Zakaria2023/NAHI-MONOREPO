@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownOption } from "ui";
-import { useContractForm } from "@/app/(dashboard)/procurement/contracts/use-contract-form";
+import { useContractForm } from "@/app/(dashboard)/procurement/contracts/new/use-contract-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { LinesField } from "@/components/forms/lines-field";

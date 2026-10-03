@@ -2,7 +2,7 @@
 
 import { COST_CENTER_KIND_LABELS } from "@/db/label";
 import { costCenterKinds } from "@/db/enum";
-import { useCostCenterForm } from "@/app/(dashboard)/finance/expenses/use-expense-forms";
+import { useCostCenterForm } from "@/app/(dashboard)/finance/expenses/use-cost-center-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

@@ -2,11 +2,11 @@ import { listProjectOptions, listSubcontractors } from "services";
 import { Card } from "ui";
 import { SubcontractForm } from "./subcontract-form";
 
-export const SubcontractFormSection = async () => {
+export const NewSubcontract = async () => {
   const [subcontractors, projectOptions] = await Promise.all([listSubcontractors(), listProjectOptions()]);
   return (
     <Card
-      title="New subcontract"
+      title="Subcontract"
       description="The value caps what extracts may certify; the retention % and the advance are deducted from every extract."
     >
       <SubcontractForm

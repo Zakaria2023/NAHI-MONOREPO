@@ -12,7 +12,7 @@ type CommentFormProps = {
 export const CommentForm = ({ action }: CommentFormProps) => {
   const { form, state, isPending, onSubmit } = useCommentForm(action);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Post comment" submitVariant="outline">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Post comment">
       <TextareaField name="text" label="Comment" placeholder="Ask, answer, or note progress" />
     </ActionForm>
   );

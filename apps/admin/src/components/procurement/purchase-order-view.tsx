@@ -41,12 +41,12 @@ export const PurchaseOrderView = async ({ uuid }: PurchaseOrderViewProps) => {
       />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="flex flex-col gap-6 xl:col-span-2">
-          <OrderStageCard detail={detail} actorRole={actor.role} warehouses={warehouses} />
+          <OrderStageCard detail={detail} actorRole={actor.role} />
           <PurchaseOrderDocument detail={detail} />
           {receiving && <ReceiptProgressCard detail={detail} />}
           {receiving && <ReceiptsCard detail={detail} warehouses={warehouses} />}
           {returnable && (
-            <OrderReturnsCard detail={detail} warehouses={warehouses.map((w) => ({ value: w.uuid, label: `${w.code} — ${w.name}` }))} />
+            <OrderReturnsCard detail={detail} />
           )}
           {amendable && <OrderChangesCard detail={detail} />}
           <AdvanceCard detail={detail} />

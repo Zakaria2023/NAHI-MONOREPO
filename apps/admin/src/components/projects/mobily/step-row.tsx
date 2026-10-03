@@ -2,6 +2,7 @@ import { MobilyStep } from "@/db/enum";
 import { MOBILY_STEP_LABELS } from "@/db/label";
 import { StepRecord } from "services";
 import { FormAction } from "@/lib/action-result";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { DoneMark } from "../done-mark";
 import { LockedMark } from "../locked-mark";
 import { StepRecordForm } from "./step-record-form";
@@ -23,7 +24,9 @@ export const StepRow = ({ step, record, blocker, action }: StepRowProps) => (
       ) : blocker ? (
         <LockedMark reason={blocker} />
       ) : (
-        <StepRecordForm action={action} step={step} />
+        <FormDialog label="Record" title={MOBILY_STEP_LABELS[step]} description="The date it happened, and its reference" size="sm">
+          <StepRecordForm action={action} step={step} />
+        </FormDialog>
       )}
     </div>
   </div>

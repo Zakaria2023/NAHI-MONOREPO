@@ -1,10 +1,11 @@
+import { Plus, Send } from "lucide-react";
 import Link from "next/link";
 import { PurchaseRequestDetail, Supplier } from "services";
 import { formatMoney } from "utils";
-import { addQuotationAction, submitQuotationAction } from "@/app/(dashboard)/procurement/requests/[uuid]/actions";
+import { submitQuotationAction } from "@/app/(dashboard)/procurement/requests/[uuid]/actions";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { BlockedNote } from "./blocked-note";
 import { QuotationComparisonTable } from "./quotation-comparison-table";
-import { QuotationForm } from "./quotation-form";
 import { SelectQuotationForm } from "./select-quotation-form";
 
 type QuotationsPanelProps = {
@@ -30,19 +31,19 @@ export const QuotationsPanel = ({ detail, suppliers }: QuotationsPanelProps) => 
         {open.length === 0 ? (
           <BlockedNote>
             Every registered supplier has already quoted on this request.{" "}
-            <Link href="/procurement/suppliers" className="text-primary hover:underline">
+            <Link href="/procurement/suppliers/new" className="text-primary hover:underline">
               Register another supplier
             </Link>{" "}
             to ask for a further offer.
           </BlockedNote>
         ) : (
-          <QuotationForm
-            key={quotations.length}
-            action={addQuotationAction.bind(null, pr.uuid)}
-            supplierOptions={open.map((s) => ({ value: s.uuid, label: s.name, hint: `VAT ${s.vatNumber} · ${s.email}` }))}
-            itemOptions={detail.lines.map((l) => ({ value: l.itemUuid, label: `${l.item.code} — ${l.item.name}`, hint: `Unit: ${l.item.unit}` }))}
-            lines={pr.lines.map((l) => ({ itemUuid: l.itemUuid, qty: l.qty, unitPrice: l.estUnitPrice }))}
-          />
+          <Link
+            href={`/procurement/requests/${pr.uuid}/quotations/new`}
+            className="flex h-9 w-fit items-center gap-2 rounded-full border border-hairline px-4 text-sm font-medium text-ink hover:bg-hover"
+          >
+            <Plus size={16} />
+            Record a quotation
+          </Link>
         )}
       </section>
 
@@ -53,9 +54,14 @@ export const QuotationsPanel = ({ detail, suppliers }: QuotationsPanelProps) => 
             The chosen offer goes to the region PM, procurement, the projects manager, the CFO, the COO and the deputy GM.
           </p>
         </div>
-        {detail.rfqBlocker ? (
-          <BlockedNote>{detail.rfqBlocker}</BlockedNote>
-        ) : (
+        <FormDialog
+          label="Submit for approval"
+          title="Submit for approval"
+          description="The winning offer goes to the six approvers"
+          variant="primary"
+          icon={<Send size={16} />}
+          blocker={detail.rfqBlocker}
+        >
           <SelectQuotationForm
             action={submitQuotationAction.bind(null, pr.uuid)}
             defaultUuid={comparison[0]?.quotationUuid ?? ""}
@@ -65,7 +71,7 @@ export const QuotationsPanel = ({ detail, suppliers }: QuotationsPanelProps) => 
               hint: `${c.deliveryDays} days delivery · ${c.paymentTermsDays} days terms · quality ${c.qualityScore} / 5`,
             }))}
           />
-        )}
+        </FormDialog>
       </section>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useItemForm } from "@/app/(dashboard)/warehouse/stock/use-item-form";
+import { useItemForm } from "@/app/(dashboard)/warehouse/items/new/use-item-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";

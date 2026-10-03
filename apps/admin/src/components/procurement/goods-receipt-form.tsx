@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownOption } from "ui";
-import { useGoodsReceiptForm } from "@/app/(dashboard)/procurement/orders/[uuid]/use-order-forms";
+import { useGoodsReceiptForm } from "@/app/(dashboard)/procurement/orders/[uuid]/receive/use-goods-receipt-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { LinesField } from "@/components/forms/lines-field";

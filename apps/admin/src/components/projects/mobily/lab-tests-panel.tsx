@@ -2,6 +2,7 @@ import { LabTest } from "services";
 import { StatusPill, Table } from "ui";
 import { formatDate } from "utils";
 import { LABORATORY_LABELS, LAB_TEST_STATUS_LABELS, LAB_TEST_SUBJECT_LABELS } from "@/db/label";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { FormAction } from "@/lib/action-result";
 import { LAB_TONES } from "@/lib/status-tones";
 import { LabResultForm } from "./lab-result-form";
@@ -37,10 +38,19 @@ export const LabTestsPanel = ({ tests, addAction, resultAction }: LabTestsPanelP
         {
           key: "result",
           header: "Result",
-          render: (t) => (t.status === "passed" ? <span className="text-muted">—</span> : <LabResultForm action={resultAction} testUuid={t.uuid} />),
+          render: (t) =>
+            t.status === "passed" ? (
+              <span className="text-muted">—</span>
+            ) : (
+              <FormDialog label="Record result" title="Lab test result" description={`${LABORATORY_LABELS[t.lab]} · ${LAB_TEST_SUBJECT_LABELS[t.subject]}`} size="sm">
+                <LabResultForm action={resultAction} testUuid={t.uuid} />
+              </FormDialog>
+            ),
         },
       ]}
     />
-    <LabTestForm action={addAction} />
+    <FormDialog label="Add lab test" title="Add lab test" description="PAT waits for a passed test from both laboratories">
+      <LabTestForm action={addAction} />
+    </FormDialog>
   </div>
 );

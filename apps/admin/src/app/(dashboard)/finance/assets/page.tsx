@@ -20,6 +20,7 @@ const AssetsPage = async ({ searchParams }: Props) => {
       <PageHeader
         title="Fixed assets"
         description="The asset register: each asset's card, where it is or who holds it, its depreciation to date and book value, the annual count and disposals."
+        action={{ href: "/finance/assets/new", label: "Register asset" }}
       />
       <FilterTabs tabs={FILTERS.map((f) => ({ label: f.label, href: `/finance/assets?status=${f.key}`, active: f.key === status }))} />
       <AsyncSection reloadKey={status}>

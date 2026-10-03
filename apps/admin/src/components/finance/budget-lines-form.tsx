@@ -1,6 +1,6 @@
 "use client";
 
-import { EMPTY_BUDGET_LINE, useBudgetLinesForm } from "@/app/(dashboard)/finance/budgets/[projectUuid]/use-budget-lines-form";
+import { EMPTY_BUDGET_LINE, useBudgetLinesForm } from "@/app/(dashboard)/finance/budgets/[projectUuid]/lines/use-budget-lines-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { LinesField } from "@/components/forms/lines-field";
 import { TextareaField } from "@/components/forms/textarea-field";

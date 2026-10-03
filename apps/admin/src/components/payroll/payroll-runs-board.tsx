@@ -1,7 +1,8 @@
-import { Landmark, ShieldCheck, Wallet } from "lucide-react";
+import { Calculator, Landmark, ShieldCheck, Wallet } from "lucide-react";
 import { listPayrollRuns } from "services";
-import { Card, StatStrip, StatTile } from "ui";
+import { StatStrip, StatTile } from "ui";
 import { formatMoney, formatPeriod, recentPeriods } from "utils";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { PayrollRunForm } from "./payroll-run-form";
 import { PayrollRunsTable } from "./payroll-runs-table";
 
@@ -34,14 +35,17 @@ export const PayrollRunsBoard = async () => {
           icon={<ShieldCheck size={18} />}
         />
       </StatStrip>
+      <FormDialog
+        label="Run payroll"
+        title="Run payroll"
+        description="Calculates every active employee's payslip for the month; a draft can be recalculated until it is approved"
+        variant="primary"
+        icon={<Calculator size={16} />}
+        blocker={open.length > 0 ? null : "Payroll has been run for every recent month."}
+      >
+        <PayrollRunForm periods={open.map((p) => ({ value: p, label: formatPeriod(p) }))} />
+      </FormDialog>
       <PayrollRunsTable runs={runs} />
-      <Card title="Run payroll" description="Calculates every active employee's payslip for the month; a draft can be recalculated until it is approved">
-        {open.length > 0 ? (
-          <PayrollRunForm key={runs.length} periods={open.map((p) => ({ value: p, label: formatPeriod(p) }))} />
-        ) : (
-          <p className="text-sm text-muted">Payroll has been run for every recent month.</p>
-        )}
-      </Card>
     </>
   );
 };

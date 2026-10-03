@@ -1,9 +1,7 @@
-import { Card } from "ui";
 import { AsyncSection } from "@/components/shared/async-section";
 import { FilterTabs } from "@/components/shared/filter-tabs";
 import { ListSearch } from "@/components/shared/list-search";
 import { PageHeader } from "@/components/shared/page-header";
-import { ItemForm } from "@/components/warehouse/item-form";
 import { StockStats } from "@/components/warehouse/stock-stats";
 import { StockTable } from "@/components/warehouse/stock-table";
 
@@ -19,6 +17,7 @@ const StockPage = async ({ searchParams }: Props) => {
       <PageHeader
         title="Stock balance"
         description="What every warehouse holds, at average cost, and the items that have fallen under their reorder level."
+        action={{ href: "/warehouse/items/new", label: "New item" }}
       />
       <AsyncSection reloadKey="stock-stats">
         <StockStats />
@@ -35,11 +34,6 @@ const StockPage = async ({ searchParams }: Props) => {
       <AsyncSection reloadKey={`stock-${filter ?? ""}-${search ?? ""}`}>
         <StockTable belowOnly={belowOnly} search={search} />
       </AsyncSection>
-      <div id="add-item" className="scroll-mt-20">
-        <Card title="Add item" description="A new code in the item master. Fixed assets are issued as custody and counted with the employee.">
-          <ItemForm />
-        </Card>
-      </div>
     </>
   );
 };

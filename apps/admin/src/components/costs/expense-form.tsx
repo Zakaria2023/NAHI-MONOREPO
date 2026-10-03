@@ -3,7 +3,7 @@
 import { DropdownOption } from "ui";
 import { BUDGET_CATEGORY_LABELS, EXPENSE_CATEGORY_LABELS } from "@/db/label";
 import { budgetCategories, expenseCategories } from "@/db/enum";
-import { useExpenseForm } from "@/app/(dashboard)/finance/expenses/use-expense-forms";
+import { useExpenseForm } from "@/app/(dashboard)/finance/expenses/new/use-expense-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { LinesField } from "@/components/forms/lines-field";

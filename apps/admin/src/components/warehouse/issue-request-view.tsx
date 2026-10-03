@@ -12,6 +12,7 @@ import { ApprovalCard } from "./approval-card";
 import { BlockedNote } from "./blocked-note";
 import { IssueSignatures } from "./issue-signatures";
 import { IssueStockForm } from "./issue-stock-form";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { StockLinesTable } from "./stock-lines-table";
 
 type IssueRequestViewProps = {
@@ -79,7 +80,9 @@ export const IssueRequestView = async ({ uuid }: IssueRequestViewProps) => {
                 {blocker ? (
                   <BlockedNote reason={blocker} />
                 ) : (
-                  <IssueStockForm action={issueStockAction.bind(null, request.uuid)} recipientName={request.recipient.name} />
+                  <FormDialog label="Issue stock" title="Issue stock" description={`${request.recipient.name} signs the issue note`} variant="success">
+                    <IssueStockForm action={issueStockAction.bind(null, request.uuid)} recipientName={request.recipient.name} />
+                  </FormDialog>
                 )}
               </Card>
             )

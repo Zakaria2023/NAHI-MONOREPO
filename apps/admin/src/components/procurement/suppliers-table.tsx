@@ -9,7 +9,7 @@ export const SuppliersTable = ({ suppliers }: SuppliersTableProps) => (
   <Table
     data={suppliers}
     rowKey={(s) => s.uuid}
-    emptyMessage="No supplier registered yet. Register one with the form — quotations can only be recorded from registered suppliers."
+    emptyMessage="No supplier registered yet. Register one with Register supplier — quotations can only be recorded from registered suppliers."
     columns={[
       {
         key: "name",

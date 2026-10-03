@@ -7,6 +7,7 @@ import { STAFF_ROLE_LABELS } from "@/db/label";
 import { decideRunAction, payRunAction, recalculateRunAction } from "@/app/(dashboard)/payroll/runs/[uuid]/actions";
 import { ActionButton } from "@/components/shared/action-button";
 import { DecisionForm } from "@/components/shared/decision-form";
+import { FormDialog } from "@/components/shared/form-dialog";
 import { PayRunForm } from "./pay-run-form";
 
 type PayrollStageCardProps = {
@@ -37,7 +38,11 @@ export const PayrollStageCard = ({ run, chain, actorRole }: PayrollStageCardProp
         />
       </div>
     )}
-    {run.status === "approved" && <PayRunForm action={payRunAction.bind(null, run.uuid)} />}
+    {run.status === "approved" && (
+      <FormDialog label="Mark paid" title={`Pay ${run.number}`} description="The bank's reference for the salary transfer" variant="success">
+        <PayRunForm action={payRunAction.bind(null, run.uuid)} />
+      </FormDialog>
+    )}
     {run.status === "paid" && (
       <p className="flex items-start gap-2 text-sm text-secondary">
         <CircleCheck size={16} className="mt-0.5 shrink-0 text-success" />

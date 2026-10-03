@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownOption } from "ui";
-import { useQuotationForm } from "@/app/(dashboard)/procurement/requests/[uuid]/use-request-forms";
+import { useQuotationForm } from "@/app/(dashboard)/procurement/requests/[uuid]/quotations/new/use-quotation-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { CheckboxField } from "@/components/forms/checkbox-field";
 import { DropdownField } from "@/components/forms/dropdown-field";
@@ -21,7 +21,7 @@ type QuotationFormProps = {
 export const QuotationForm = ({ action, supplierOptions, itemOptions, lines }: QuotationFormProps) => {
   const { form, state, isPending, onSubmit } = useQuotationForm(action, lines);
   return (
-    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record quotation" columns={2} submitVariant="outline">
+    <ActionForm form={form} onSubmit={onSubmit} state={state} isPending={isPending} submitLabel="Record quotation" columns={2}>
       <DropdownField name="supplierUuid" label="Supplier" required options={supplierOptions} placeholder="Pick a supplier" />
       <ScoreField name="qualityScore" label="Quality (procurement's view)" />
       <TextField name="deliveryDays" label="Delivery (days)" type="number" required />
