@@ -21,13 +21,11 @@ pnpm db:reset    # rebuild the demo data
 - **No database.** All data is in `.data/store.json` (created from `db/seed.ts` on first
   run). `db/types.ts` is the schema; `db/index.ts` is the only code that touches the
   file, and it is what MySQL + Drizzle will replace.
-- **No auth provider.** Staff sign in on `/sign-in` with an e-mail and a password (stored
-  hashed). Every demo account uses the password `nahi1234`; the sign-in page lists them.
-  HR can give any employee on the payroll a sign-in with the plain **Employee** role, who
-  then sees only their dashboard and their tasks. For the demo, the sidebar's "Simulate
-  as" list switches between the admin and the employees in one click, and the menu below
-  it reaches anyone — approval chains check the role, so walking a request through its
-  chain still means switching user. `apps/admin/src/lib/server/auth.ts` is where Clerk will go.
+- **No auth provider, no sign-in.** The user menu in the navbar switches between the
+  admin and the employees (the other roles fold away under it, to walk approval chains).
+  The admin sees the whole company; an employee sees only their own dashboard and tasks.
+  Every employee added on the New employee page gets an account and joins the menu.
+  `apps/admin/src/lib/server/auth.ts` is where Clerk will go.
 - **No file storage.** Uploading a document records its file name.
 
 ## Modules
@@ -67,7 +65,7 @@ pnpm db:reset    # rebuild the demo data
 Everything in the four documents is built; what stands in for real infrastructure is:
 
 - **Database** — the JSON store in `.data/store.json` (MySQL + Drizzle replace `db/index.ts`).
-- **Sign-in** — e-mail and password checked against the demo store, plus the sidebar's user switcher (Clerk replaces `lib/server/auth.ts`, `services/src/auth.ts` and `core/password.ts`).
+- **Sign-in** — the navbar's user menu (Clerk replaces `lib/server/auth.ts`).
 - **E-mail** — RFQs, POs and payment notices are recorded as sent, not sent.
 - **Files** — an uploaded document keeps its file name only.
 - **The attendance app** — daily workers' attendance is recorded in the admin, where the

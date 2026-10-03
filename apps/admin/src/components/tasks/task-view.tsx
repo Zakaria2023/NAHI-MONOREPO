@@ -30,7 +30,7 @@ export const TaskView = async ({ uuid }: TaskViewProps) => {
       <PageHeader
         title={task.title}
         description={`${task.number} · given by ${row.assignedByName} to ${row.assigneeName} on ${formatDate(task.assignedAt)}`}
-        back={{ href: task.assigneeUuid === actor.uuid ? "/tasks/my" : "/tasks", label: task.assigneeUuid === actor.uuid ? "My tasks" : "All tasks" }}
+        back={actor.role === "employee" || task.assigneeUuid === actor.uuid ? { href: "/tasks/my", label: "My tasks" } : { href: "/tasks", label: "All tasks" }}
         meta={
           <>
             <StatusPill tone={TASK_TONES[task.status]}>{TASK_STATUS_LABELS[task.status]}</StatusPill>
@@ -52,9 +52,13 @@ export const TaskView = async ({ uuid }: TaskViewProps) => {
                   {
                     label: "Project",
                     value: project ? (
-                      <Link href={`/projects/${project.uuid}`} className="hover:text-primary" dir="ltr">
-                        {project.code}
-                      </Link>
+                      actor.role === "employee" ? (
+                        <span dir="ltr">{project.code}</span>
+                      ) : (
+                        <Link href={`/projects/${project.uuid}`} className="hover:text-primary" dir="ltr">
+                          {project.code}
+                        </Link>
+                      )
                     ) : (
                       "—"
                     ),

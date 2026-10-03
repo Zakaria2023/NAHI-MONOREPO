@@ -48,16 +48,16 @@ export const EmployeesTable = ({ employees }: EmployeesTableProps) => (
       { key: "bank", header: "Bank", render: (e) => <span className="text-secondary">{e.bankName}</span> },
       { key: "joined", header: "Joined", render: (e) => formatDate(e.joinedAt) },
       {
-        key: "login",
-        header: "Sign-in",
+        key: "account",
+        header: "Account",
         render: (e) =>
-          e.loginEmail ? (
+          e.accountEmail ? (
             <div className="flex flex-col gap-0.5">
-              <span className="text-sm">{e.loginEmail}</span>
-              {e.loginRole && <span className="text-xs text-muted">{STAFF_ROLE_LABELS[e.loginRole]}</span>}
+              <span className="text-sm">{e.accountEmail}</span>
+              {e.accountRole && <span className="text-xs text-muted">{STAFF_ROLE_LABELS[e.accountRole]}</span>}
             </div>
           ) : (
-            <span className="text-faint">No sign-in</span>
+            <span className="text-faint">No account</span>
           ),
       },
     ]}

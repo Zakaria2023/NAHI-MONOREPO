@@ -17,7 +17,7 @@ export const staffRoles = [
   "region_accountant",
   "project_engineer",
   "accountant",
-  /** A plain employee with a sign-in: works on their own tasks, in no approval chain. */
+  /** A plain employee with an account: works on their own tasks, in no approval chain. */
   "employee",
 ] as const satisfies readonly string[];
 

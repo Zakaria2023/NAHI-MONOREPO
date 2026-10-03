@@ -12,7 +12,7 @@ export const StaffDirectory = async () => {
         { key: "name", header: "Name", render: (u) => <span className="font-medium">{u.name}</span> },
         { key: "role", header: "Role", render: (u) => STAFF_ROLE_LABELS[u.role] },
         { key: "region", header: "Region", render: (u) => REGION_LABELS[u.region] },
-        { key: "email", header: "Signs in with", render: (u) => <span className="text-muted">{u.email}</span> },
+        { key: "email", header: "E-mail", render: (u) => <span className="text-muted">{u.email}</span> },
         { key: "payroll", header: "On the payroll", render: (u) => (u.employeeUuid ? "Yes" : <span className="text-faint">No</span>) },
       ]}
     />

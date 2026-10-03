@@ -6,7 +6,7 @@ import { Input } from "ui";
 type TextFieldProps = {
   name: string;
   label: string;
-  type?: "text" | "number" | "date" | "email" | "password" | "datetime-local";
+  type?: "text" | "number" | "date" | "email" | "datetime-local";
   placeholder?: string;
   required?: boolean;
   step?: string;

@@ -3,7 +3,7 @@
 import { DropdownOption } from "ui";
 import { EMPLOYMENT_TYPE_LABELS, NATIONALITY_LABELS } from "@/db/label";
 import { employmentTypes, nationalities } from "@/db/enum";
-import { useEmployeeForm } from "@/app/(dashboard)/payroll/employees/use-employee-form";
+import { useEmployeeForm } from "@/app/(dashboard)/payroll/employees/new/use-employee-form";
 import { ActionForm } from "@/components/forms/action-form";
 import { DropdownField } from "@/components/forms/dropdown-field";
 import { TextField } from "@/components/forms/text-field";
@@ -42,11 +42,10 @@ export const EmployeeForm = ({ projects }: EmployeeFormProps) => {
       <TextField name="iban" label="IBAN" placeholder="SA00 0000 0000 0000 0000 0000" required />
       <TextField name="bankName" label="Bank" required />
       <div className="flex flex-col gap-0.5 border-t border-hairline-soft pt-4 md:col-span-3">
-        <span className="text-sm font-medium text-ink">Sign-in (optional)</span>
-        <span className="text-xs text-muted">Give an e-mail and a password and the employee can sign in to see and work on their tasks.</span>
+        <span className="text-sm font-medium text-ink">Account</span>
+        <span className="text-xs text-muted">Every employee gets an account: switch to them from the navbar to see their own dashboard and tasks.</span>
       </div>
-      <TextField name="loginEmail" label="E-mail" type="email" placeholder="name@example.sa" />
-      <TextField name="loginPassword" label="Password" type="password" placeholder="At least 8 characters" />
+      <TextField name="accountEmail" label="E-mail" type="email" placeholder="name@example.sa" required />
     </ActionForm>
   );
 };

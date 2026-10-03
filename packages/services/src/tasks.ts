@@ -21,6 +21,7 @@ import {
   TaskMove,
   checklistProgress,
   isAssignee,
+  isReviewer,
   isTaskOpen,
   isTaskOverdue,
   taskClock,
@@ -96,7 +97,7 @@ export type TaskWorkload = Pick<StaffUser, "uuid" | "name" | "role"> & {
 export type TaskCounts = {
   /** Open tasks given to me that I have not opened yet. */
   unseen: number;
-  /** Tasks I gave that are handed in and wait for me. */
+  /** Handed in and waiting for me: the ones I gave — and, for the admin, every one. */
   toReview: number;
   /** All my open tasks. */
   open: number;
@@ -186,7 +187,8 @@ export const getTask = async (uuid: string): Promise<TaskDetail> => {
 export const listTaskAssignees = async (): Promise<{ value: string; label: string }[]> =>
   readStore().StaffUsers.map((u) => ({ value: u.uuid, label: u.name }));
 
-export const taskCountsFor = async (staffUuid: string): Promise<TaskCounts> => {
+export const taskCountsFor = async (actor: Pick<Actor, "uuid" | "role">): Promise<TaskCounts> => {
+  const staffUuid = actor.uuid;
   const store = readStore();
   const now = nowIso();
   const name = staffName(store, staffUuid);
@@ -194,7 +196,7 @@ export const taskCountsFor = async (staffUuid: string): Promise<TaskCounts> => {
   const recent = store.Tasks.flatMap((t) => t.workLogs).filter((l) => l.by === name && calendarDaysBetween(l.date, now) < WORK_WEEK_DAYS);
   return {
     unseen: mine.filter((t) => !t.seenAt).length,
-    toReview: store.Tasks.filter((t) => t.assignedByUuid === staffUuid && t.status === "in_review").length,
+    toReview: store.Tasks.filter((t) => t.status === "in_review" && isReviewer(t, actor)).length,
     open: mine.length,
     weekHours: round2(sumBy(recent, (l) => l.hours)),
   };

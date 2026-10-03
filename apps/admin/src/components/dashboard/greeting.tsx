@@ -9,7 +9,7 @@ import { getCurrentStaff } from "@/lib/server/auth";
 export const Greeting = async () => {
   const actor = await getCurrentStaff();
   const employee = actor.role === "employee";
-  const [pending, alerts, tasks] = await Promise.all([listPendingApprovals(actor.role), listAlerts(), taskCountsFor(actor.uuid)]);
+  const [pending, alerts, tasks] = await Promise.all([listPendingApprovals(actor.role), listAlerts(), taskCountsFor(actor)]);
   const urgent = alerts.filter((a) => a.severity === "danger").length;
   return (
     <div className="flex flex-wrap items-end justify-between gap-4 border-b border-hairline pb-7">

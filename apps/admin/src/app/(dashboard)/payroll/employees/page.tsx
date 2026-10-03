@@ -6,7 +6,8 @@ const EmployeesPage = () => (
   <>
     <PageHeader
       title="Employees"
-      description="Everyone on the payroll — monthly staff with their salary and allowances, and daily workers paid by the days the attendance app records."
+      description="Everyone on the payroll — monthly staff with their salary and allowances, and daily workers paid by the days the attendance app records. Each has an account to switch to from the navbar."
+      action={{ href: "/payroll/employees/new", label: "New employee" }}
     />
     <AsyncSection reloadKey="employees">
       <EmployeesBoard />

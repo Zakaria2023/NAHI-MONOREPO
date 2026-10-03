@@ -3,7 +3,6 @@ import { DashboardSidebar, NavGroup } from "ui";
 import { StaffRole } from "@/db/enum";
 import { BRAND_ICON } from "@/lib/nav";
 import { Navbar } from "./navbar";
-import { UserSwitcher } from "./user-switcher";
 
 type ShellProps = {
   groups: NavGroup[];
@@ -21,13 +20,14 @@ export const Shell = ({ groups, current, users, urgentAlerts, children }: ShellP
       tagline="Mobily · STC operations"
       brandIcon={BRAND_ICON}
       groups={groups}
-      footer={<UserSwitcher current={current} users={users} />}
     />
     <div className="flex min-h-screen flex-col py-2 pe-2 ps-64 print:p-0">
       <div className="flex flex-1 flex-col rounded-2xl border border-hairline bg-surface print:rounded-none print:border-0">
         <Navbar
           crumbs={groups.flatMap((g) => g.links.map((l) => ({ group: g.title, label: l.label, href: l.href })))}
           urgentAlerts={urgentAlerts}
+          current={current}
+          users={users}
         />
         <main className="flex w-full flex-1 flex-col gap-8 px-10 pt-8 pb-12 print:gap-5 print:p-0">{children}</main>
       </div>

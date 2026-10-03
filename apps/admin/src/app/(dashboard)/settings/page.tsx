@@ -14,7 +14,7 @@ const SettingsPage = () => (
     >
       <ActionButton action={resetDemoDataAction} label="Reset demo data" variant="danger" />
     </Card>
-    <Card title="Staff" description="Everyone who can sign in: one person per role, so every approval chain can be walked, and the employees given a sign-in.">
+    <Card title="Staff" description="Everyone the app can act as: one person per role, so every approval chain can be walked, and the employees given an account.">
       <AsyncSection reloadKey="staff">
         <StaffDirectory />
       </AsyncSection>

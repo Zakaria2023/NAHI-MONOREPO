@@ -1,42 +1,29 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { cache } from "react";
-import { Actor, getStaff } from "services";
+import { Actor, getStaff, listStaff } from "services";
 
-// THE MVP'S STAND-IN FOR CLERK. Staff sign in with an e-mail and password on
-// /sign-in (or, for the demo, switch user from the sidebar); who is signed in
-// is kept in a cookie. This is the one file the real identity provider
-// replaces — everything else asks it who is acting and passes that Actor into
-// the services, which check the role.
+// THE MVP'S STAND-IN FOR CLERK. There is no sign-in: the acting user is
+// whoever the navbar's user switcher last chose, kept in a cookie. This is the
+// one file the real identity provider replaces — everything else asks it who
+// is acting and passes that Actor into the services, which check the role.
 
 export const STAFF_COOKIE = "erp_user";
 
-const COOKIE_OPTIONS = { path: "/", sameSite: "lax", httpOnly: true } as const;
-
-/** The signed-in staff member, or null when nobody is. */
-export const getSignedInStaff = cache(async (): Promise<Actor | null> => {
-  const uuid = (await cookies()).get(STAFF_COOKIE)?.value;
-  const user = uuid ? await getStaff(uuid) : null;
-  return user ? { uuid: user.uuid, name: user.name, role: user.role } : null;
-});
-
-/** The signed-in staff member; anyone else is sent to sign in. */
+/** The acting user; the system admin until someone is chosen. */
 export const getCurrentStaff = cache(async (): Promise<Actor> => {
-  const actor = await getSignedInStaff();
-  if (!actor) {
-    redirect("/sign-in");
+  const uuid = (await cookies()).get(STAFF_COOKIE)?.value;
+  const chosen = uuid ? await getStaff(uuid) : null;
+  const user = chosen ?? (await listStaff()).find((u) => u.role === "system_admin");
+  if (!user) {
+    throw new Error("No staff users in the store — run pnpm db:reset");
   }
-  return actor;
+  return { uuid: user.uuid, name: user.name, role: user.role };
 });
 
-/** What a Server Action calls first. */
+/** What a Server Action calls first. Same as above today; Clerk will make it refuse. */
 export const requireStaff = (): Promise<Actor> => getCurrentStaff();
 
-export const startSession = async (uuid: string): Promise<void> => {
-  (await cookies()).set(STAFF_COOKIE, uuid, COOKIE_OPTIONS);
-};
-
-export const endSession = async (): Promise<void> => {
-  (await cookies()).delete(STAFF_COOKIE);
+export const actAs = async (uuid: string): Promise<void> => {
+  (await cookies()).set(STAFF_COOKIE, uuid, { path: "/", sameSite: "lax", httpOnly: true });
 };

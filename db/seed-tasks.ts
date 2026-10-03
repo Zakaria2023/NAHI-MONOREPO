@@ -6,7 +6,7 @@ import { Store, Task, TaskChecklistItem, TaskComment, TaskWorkLog } from "./type
 // started, in progress, overdue, on hold, handed in, sent back, done on time,
 // done late, cancelled — spread over the staff so the team workload has figures.
 
-/** A staff role, or the name of an employee who signs in with the Employee role. */
+/** A staff role, or the name of an employee with an Employee account. */
 type Who = StaffRole | (string & {});
 
 type TaskDraft = {
@@ -253,7 +253,7 @@ export const addTaskDemoData = (store: Store, now: string): void => {
       completed: 20,
       logs: [[24, 4], [22, 5]],
     },
-    // The employee sign-ins' own work: what an employee sees in My tasks.
+    // The employee accounts' own work: what an employee sees in My tasks.
     {
       title: "Supervise the cabinet installation at the Hittin site",
       description: "Be on site for the cabinet delivery and installation; check the plinth and the earthing before sign-off.",

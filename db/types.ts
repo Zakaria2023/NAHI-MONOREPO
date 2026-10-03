@@ -94,16 +94,14 @@ export type PricedLine = QuantityLine & {
 
 // ─── People ────────────────────────────────────────────────────────────────
 
-/** Everyone who signs in. A plain employee's sign-in points at their payroll record. */
+/** Everyone the app can act as. A plain employee's account points at their payroll record. */
 export type StaffUser = {
   uuid: string;
   name: string;
   email: string;
   role: StaffRole;
   region: Region;
-  /** "salt:hash" (scrypt) — never the password itself. */
-  passwordHash: string;
-  /** The payroll employee this sign-in belongs to, when there is one. */
+  /** The payroll employee this account belongs to, when there is one. */
   employeeUuid?: string;
 };
 

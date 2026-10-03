@@ -7,8 +7,13 @@ import { KpiRow } from "./kpi-row";
 import { MyTasksPanel } from "./my-tasks-panel";
 import { ProjectPipeline } from "./project-pipeline";
 
-/** Staff and managers' home: the headline figures, every area of the company, then their own queue. */
-export const CompanyDashboard = () => (
+type CompanyDashboardProps = {
+  /** False for the admin, who is given no tasks of their own. */
+  ownTasks: boolean;
+};
+
+/** The admin's and staff's home: the headline figures, every area of the company, then their own queue. */
+export const CompanyDashboard = ({ ownTasks }: CompanyDashboardProps) => (
   <>
     <AsyncSection reloadKey="greeting">
       <Greeting />
@@ -26,9 +31,11 @@ export const CompanyDashboard = () => (
         </AsyncSection>
       </div>
       <div className="flex flex-col gap-6">
-        <AsyncSection reloadKey="my-tasks">
-          <MyTasksPanel />
-        </AsyncSection>
+        {ownTasks && (
+          <AsyncSection reloadKey="my-tasks">
+            <MyTasksPanel />
+          </AsyncSection>
+        )}
         <AsyncSection reloadKey="approvals">
           <ApprovalsPanel />
         </AsyncSection>

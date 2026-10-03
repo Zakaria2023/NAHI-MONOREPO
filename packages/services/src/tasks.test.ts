@@ -99,11 +99,11 @@ describe("seen", () => {
 
   it("is counted in the assignee's badge until opened", async () => {
     const engineer = as("project_engineer");
-    const before = (await taskCountsFor(engineer.uuid)).unseen;
+    const before = (await taskCountsFor(engineer)).unseen;
     const task = await giveTask();
-    expect((await taskCountsFor(engineer.uuid)).unseen).toBe(before + 1);
+    expect((await taskCountsFor(engineer)).unseen).toBe(before + 1);
     await markTaskSeen(engineer, task.uuid);
-    expect((await taskCountsFor(engineer.uuid)).unseen).toBe(before);
+    expect((await taskCountsFor(engineer)).unseen).toBe(before);
   });
 });
 

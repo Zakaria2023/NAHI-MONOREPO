@@ -1,3 +1,4 @@
+export * from "./accounts";
 export * from "./assets";
 export * from "./banking";
 export * from "./common";
@@ -7,4 +8,3 @@ export * from "./payroll";
 export * from "./procurement";
 export * from "./projects";
 export * from "./tasks";
-export * from "./auth";

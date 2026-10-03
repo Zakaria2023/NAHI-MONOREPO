@@ -9,7 +9,7 @@ import {
 } from "validators";
 import { readStore, transact } from "../../../db";
 import { AttendanceEntry, Employee, PayrollRun, Payslip, Project, StaffUser, Store, Timesheet } from "../../../db/types";
-import { addEmployeeLogin } from "./auth";
+import { addEmployeeAccount } from "./accounts";
 import { Actor } from "./core/actor";
 import { logActivity } from "./core/activity";
 import { ChainState, chainState, decide } from "./core/approvals";
@@ -31,9 +31,9 @@ export type EmployeeRow = Employee & {
   defaultProjectCode?: Project["code"];
   /** What a full month costs the company, employer GOSI included. */
   monthlyCost: number;
-  /** The e-mail they sign in with; absent when they have no sign-in. */
-  loginEmail?: StaffUser["email"];
-  loginRole?: StaffUser["role"];
+  /** Their account's e-mail; absent when they have no account. */
+  accountEmail?: StaffUser["email"];
+  accountRole?: StaffUser["role"];
 };
 
 export type TimesheetRow = {
@@ -149,8 +149,8 @@ export const listEmployees = async (): Promise<EmployeeRow[]> => {
   const store = readStore();
   return store.Employees.map((e) => ({
     ...e,
-    loginEmail: store.StaffUsers.find((u) => u.employeeUuid === e.uuid)?.email,
-    loginRole: store.StaffUsers.find((u) => u.employeeUuid === e.uuid)?.role,
+    accountEmail: store.StaffUsers.find((u) => u.employeeUuid === e.uuid)?.email,
+    accountRole: store.StaffUsers.find((u) => u.employeeUuid === e.uuid)?.role,
     defaultProjectCode: e.defaultProjectUuid ? store.Projects.find((p) => p.uuid === e.defaultProjectUuid)?.code : undefined,
     monthlyCost:
       e.employmentType === "daily"
@@ -188,9 +188,7 @@ export const createEmployee = async (actor: Actor, input: EmployeeInput): Promis
     };
     store.Employees.push(employee);
     log(store, actor, "employee", employee.uuid, employee.code, "Employee added", `${employee.name} — ${employee.jobTitle}`);
-    if (input.loginEmail) {
-      addEmployeeLogin(store, actor, employee, input.loginEmail, input.loginPassword);
-    }
+    addEmployeeAccount(store, actor, employee, input.accountEmail);
     return employee;
   });
 };
