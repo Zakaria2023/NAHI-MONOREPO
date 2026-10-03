@@ -20,7 +20,7 @@ const VALUE_TONES = {
 
 /** One area of the company: its state in a line, and its figures, each opening its screen. */
 export const OverviewCard = ({ section, icon, chip }: OverviewCardProps) => (
-  <section className="flex flex-col rounded-card border border-hairline bg-surface">
+  <section className="flex flex-col overflow-hidden rounded-card border border-hairline bg-surface">
     <header className="group relative flex items-start gap-3 border-b border-hairline-soft px-5 py-4">
       <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-control ${chip}`}>{icon}</span>
       <div className="flex flex-1 flex-col gap-0.5">
